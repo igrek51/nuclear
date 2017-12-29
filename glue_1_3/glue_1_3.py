@@ -16,16 +16,16 @@ from builtins import bytes
 
 # ----- Output
 def debug(message):
-    print('\033[32m\033[1m[debug]\033[0m ' + message)
+    print('\033[32m\033[1m[debug]\033[0m ' + str(message))
 
 def info(message):
-    print('\033[34m\033[1m[info]\033[0m  ' + message)
+    print('\033[34m\033[1m[info]\033[0m  ' + str(message))
 
 def warn(message):
-    print('\033[33m\033[1m[warn]\033[0m  ' + message)
+    print('\033[33m\033[1m[warn]\033[0m  ' + str(message))
 
 def error(message):
-    print('\033[31m\033[1m[ERROR]\033[0m ' + message)
+    print('\033[31m\033[1m[ERROR]\033[0m ' + str(message))
 
 def fatal(message):
     error(message)
@@ -161,26 +161,26 @@ def mapList(mapper, lst):
     # mapper example: lambda l: l + l
     return list(map(mapper, lst))
 
-# ----- CLI arguments
+# ----- CLI arguments rule
 class CommandArgRule:
-    def __init__(self, isOption, action, name, description, syntaxSuffix):
+    def __init__(self, isOption, action, syntax, description, syntaxSuffix):
         self.isOption = isOption
         self.action = action
-        # store names list
-        if not name:
-            self.names = None
-        elif isinstance(name, list):
-            self.names = name
+        # store syntaxes list
+        if not syntax:
+            self.syntaxs = None
+        elif isinstance(syntax, list):
+            self.syntaxs = syntax
         else:
-            self.names = [name]
+            self.syntaxs = [syntax]
         self.description = description
         self.syntaxSuffix = syntaxSuffix
 
-    def displayNames(self):
-        return ', '.join(self.names) if self.names else ''
+    def _displaySyntaxPrefix(self):
+        return ', '.join(self.syntaxs) if self.syntaxs else ''
 
     def displaySyntax(self):
-        syntax = self.displayNames()
+        syntax = self._displaySyntaxPrefix()
         if self.syntaxSuffix:
             syntax += self.syntaxSuffix if self.syntaxSuffix[0] == ' ' else ' ' + self.syntaxSuffix
         return syntax
@@ -192,46 +192,56 @@ class CommandArgRule:
         return dispHelp
 
 # ----- CLI arguments parser
-class ArgumentsProcessor:
+class ArgsProcessor:
     def __init__(self, appName, version):
         self._appName = appName
         self._version = version
+        self._defaultAction = None
         self._argRules = []
+        self._params = {}
+        self._flags = []
         self._argsQue = sys.argv[1:] # CLI arguments list
         self._argsOffset = 0
-        self._emptyAction = None
-        self._defaultAction = None
-        self._params = {}
-
-    def bindOption(self, action, name, description=None, syntaxSuffix=None):
-        self._argRules.append(CommandArgRule(True, action, name, description, syntaxSuffix))
-        return self
-
-    def bindCommand(self, action, name, description=None, syntaxSuffix=None):
-        self._argRules.append(CommandArgRule(False, action, name, description, syntaxSuffix))
-        return self
-
-    def bindEmpty(self, action):
-        """bind action on empty arguments list"""
-        self._emptyAction = action
-        return self
-
-    def bindDefaultAction(self, action, description=None, syntaxSuffix=None):
-        """bind action on no command nor option recognized"""
-        self._defaultAction = CommandArgRule(False, action, None, description, syntaxSuffix)
-        return self
-
-    def bindParam(self, paramName, name, description=None):
-        return self.bindOption(lambda: self.pollParam(paramName), name, description, '<%s>' % paramName)
-
-    def bindDefaults(self):
         # bind default options: help, version
         self.bindOption(printHelp, ['-h', '--help'], description='display this help and exit')
         self.bindOption(printVersion, ['-v', '--version'], description='print version')
+
+    def bindDefaultAction(self, action, description=None, syntaxSuffix=None):
+        """bind action when no command nor option is recognized or argments list is empty"""
+        self._defaultAction = CommandArgRule(False, action, None, description, syntaxSuffix)
+        return self
+
+    def bindCommand(self, action, syntax, description=None, syntaxSuffix=None):
+        """bind action to a command. Command is processed after all the options."""
+        self._argRules.append(CommandArgRule(False, action, syntax, description, syntaxSuffix))
+        return self
+
+    def bindOption(self, action, syntax, description=None, syntaxSuffix=None):
+        """bind action to an option. Options are processed first (before commands)."""
+        self._argRules.append(CommandArgRule(True, action, syntax, description, syntaxSuffix))
+        return self
+
+    def bindParam(self, paramName, syntax, description=None):
+        return self.bindOption(lambda: self.pollParam(paramName), syntax, description, '<%s>' % paramName)
+
+    def bindFlag(self, flagName, syntax=None, description=None):
+        if not syntax:
+            if len(flagName) == 1:
+                syntax = '-%s' % flagName
+            else:
+                syntax = '--%s' % flagName
+        return self.bindOption(lambda: self.setFlag(flagName), syntax, description)
+
+    def clear(self):
+        self._defaultAction = None
+        self._argRules = []
+        self._params = {}
+        self._flags = []
         return self
 
     # Getting args
     def pollNext(self):
+        """return next arg and remove"""
         if not self.hasNext():
             return None
         nextArg = self._argsQue[self._argsOffset]
@@ -239,6 +249,7 @@ class ArgumentsProcessor:
         return nextArg
 
     def peekNext(self):
+        """return next arg"""
         if not self.hasNext():
             return None
         return self._argsQue[self._argsOffset]
@@ -263,69 +274,65 @@ class ArgumentsProcessor:
 
     # Processing args
     def processAll(self):
-        # empty arguments list
+        # process the options first
+        self.processOptions()
+        # if left arguments list is empty
         if not self._argsQue:
-            if self._emptyAction:
-                self._invokeAction(self._emptyAction)
-            elif self._defaultAction:
+            if self._defaultAction: # run default action
                 self._invokeDefaultAction()
-            else:
+            else: # help by default
                 self.printHelp()
         else:
-            # process all options first
-            self.processOptions()
-            # then process commands
-            self._argsOffset = 0
-            if self.hasNext():
-                while self.hasNext():
-                    self._processArgument(self.pollNext())
-            # if no commands - run default action
-            elif self._defaultAction:
-                self._invokeDefaultAction()
+            self._processCommands()
+
+    def _processCommands(self):
+        self._argsOffset = 0
+        # recognize first arg as command
+        nextArg = self.peekNext()
+        rule = self._findCommandArgRule(nextArg)
+        if rule:
+            self.pollNext()
+            self._invokeAction(rule.action)
+        # if not recognized - run default action
+        elif self._defaultAction:
+            # run default action without removing arg
+            self._invokeDefaultAction()
+        else:
+            fatal('unknown argument: %s' % nextArg)
+        # if some args left
+        if self.hasNext():
+            warn('too many arguments: %s' % self.pollRemaining())
 
     def processOptions(self):
         self._argsOffset = 0
         while self.hasNext():
             nextArg = self.peekNext()
-            if self._isArgOption(nextArg):
-                self._processArgument(self.pollNext())
+            rule = self._findCommandArgRule(nextArg)
+            if rule and rule.isOption:
+                # remove arg from list
+                self.pollNext()
+                # process option action
+                self._invokeAction(rule.action)
             else:
+                # skip it - it's not the option
                 self._argsOffset += 1
 
-    def _isArgOption(self, arg):
-        rule = self._findCommandArgRule(arg)
-        if rule:
-            return rule.isOption
-        return False
-
     def _invokeAction(self, action):
-        # execute action(self) or action()
-        (args, _, _, _) = inspect.getargspec(action)
-        if args:
-            action(self)
-        else:
-            action()
+        if action is not None:
+            # execute action(self) or action()
+            (args, _, _, _) = inspect.getargspec(action)
+            if args:
+                action(self)
+            else:
+                action()
 
     def _invokeDefaultAction(self):
         rule = self._defaultAction
         self._invokeAction(rule.action)
 
-    def _processArgument(self, arg):
-        rule = self._findCommandArgRule(arg)
-        if rule:
-            self._invokeAction(rule.action)
-        elif self._defaultAction:
-            # retrieve polled arg
-            self._argsQue = [arg] + self._argsQue
-            self._invokeDefaultAction()
-            # clear args que
-            self._argsQue = []
-        else:
-            fatal('unknown argument: %s' % arg)
-
     def _findCommandArgRule(self, arg):
         for rule in self._argRules:
-            if arg in rule.names:
+            if arg in rule.syntaxs:
                 return rule
 
     # setting / getting params
@@ -338,6 +345,14 @@ class ArgumentsProcessor:
 
     def getParam(self, name):
         return self._params.get(name, None)
+
+    # setting / getting flags
+    def setFlag(self, name):
+        if name not in self._flags:
+            self._flags.append(name)
+
+    def isFlag(self, name):
+        return name in self._flags
 
     # autogenerating help output
     def _optionRulesCount(self):
@@ -357,7 +372,7 @@ class ArgumentsProcessor:
     def printHelp(self):
         # autogenerate help
         self.printVersion()
-        print('\nUsage:')
+        # print main usage
         usageSyntax = sys.argv[0]
         optionsCount = self._optionRulesCount()
         commandsCount = self._commandRulesCount()
@@ -367,9 +382,11 @@ class ArgumentsProcessor:
             usageSyntax += ' <command>'
         if commandsCount == 0 and self._defaultAction and self._defaultAction.syntaxSuffix: # only default rule
             usageSyntax += self._defaultAction.displaySyntax()
-        print('  %s' % usageSyntax)
-        if commandsCount == 0 and self._defaultAction and self._defaultAction.description: # only default rule
+        print('\nUsage:\n  %s' % usageSyntax)
+        # description for default action
+        if self._defaultAction and self._defaultAction.description: # only default rule
             print('\n%s' % self._defaultAction.description)
+        # command and options help
         syntaxPadding = self._calcMinSyntaxPadding()
         if commandsCount > 0:
             print('\nCommands:')
@@ -392,3 +409,4 @@ def printHelp(argsProcessor):
 
 def printVersion(argsProcessor):
     argsProcessor.printVersion()
+    sys.exit(0)
