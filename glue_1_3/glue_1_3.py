@@ -14,7 +14,7 @@ import inspect
 import time
 from builtins import bytes
 
-# ----- Output
+# ----- Coloured output
 def debug(message):
     print('\033[32m\033[1m[debug]\033[0m ' + str(message))
 
@@ -225,7 +225,7 @@ class ArgsProcessor:
         return self.bindOption(lambda: self.pollParam(paramName), syntax, description, '<%s>' % paramName)
 
     def bindFlag(self, flagName, syntax=None, description=None):
-        if not syntax:
+        if flagName and not syntax:
             if len(flagName) == 1:
                 syntax = '-%s' % flagName
             else:
@@ -265,12 +265,13 @@ class ArgsProcessor:
             fatal('no %s parameter given' % paramName)
         return param
 
-    def pollRemaining(self, joiner=' '):
-        beginning = self._argsQue[:self._argsOffset]
+    def pollRemaining(self):
         ending = self._argsQue[self._argsOffset:]
-        remainingArgs = joiner.join(ending)
-        self._argsQue = beginning
-        return remainingArgs
+        self._argsQue = self._argsQue[:self._argsOffset]
+        return ending
+
+    def pollRemainingJoined(self, joiner=' '):
+    	return joiner.join(self.pollRemaining())
 
     # Processing args
     def processAll(self):
@@ -403,7 +404,7 @@ class ArgsProcessor:
     def printVersion(self):
         print('%s v%s' % (self._appName, self._version))
 
-# commands available to invoke, workaround for invoking by function reference
+# commands available to invoke (workaround for invoking by function reference)
 def printHelp(argsProcessor):
     argsProcessor.printHelp()
 
