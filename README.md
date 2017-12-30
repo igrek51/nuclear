@@ -2,16 +2,16 @@
 Common Utilities Toolkit for command line Python applications compatible with Python 2.7 and 3
 
 ## Features:
-* Command Line Arguments processor: binding flags, params, commands, options
+* Command Line Arguments processor: binding commands, options, flags, params
 * Autogenerating help output
-* Tools to keep compatibility with Python 2.7 and 3
-* Logger helpers (coloured loglevels)
+* Tools for keeping compatibility with Python 2.7 and 3
+* Terminal logger helpers (coloured loglevel messages)
 * Shell commands executing
 * Easy string operations: splitting, splitting to tuples
 * RegEx helpers: matching, filtering, replacing, extracting data
-* File operations helpers
-* Time to string (and vice-versa) convertions
-* Collections streaming helpers: filtering, mapping
+* Basic file operations helpers
+* Datetime to string (and vice-versa) convertions
+* Collections stream helpers: filtering, mapping
 
 ## Sample application using glue
 #### sampleApp.py:
@@ -64,23 +64,23 @@ May the Force be with you!
 ## Installation
 Copy ```glue.py``` to your project folder.
 You will need also some packages used by glue:
-### installing Python 2.7 packages
+### install Python 2.7 packages
 ```shell
-\# pip2 install future
+# pip2 install future
 ```
 for testing (optional but it's useful):
 ```shell
-\# pip2 install pytest
-\# pip2 install coverage
-\# pip2 install mock
+# pip2 install pytest
+# pip2 install coverage
+# pip2 install mock
 ```
-### installing Python 3 packages
+### install Python 3 packages
 ```shell
-\# pip3 install future
+# pip3 install future
 ```
 for testing (optional but it's useful):
 ```shell
-\# pip3 install pytest
-\# pip3 install coverage
-\# pip3 install mock
+# pip3 install pytest
+# pip3 install coverage
+# pip3 install mock
 ```
