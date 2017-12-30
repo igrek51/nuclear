@@ -302,7 +302,7 @@ class ArgsProcessor:
             fatal('unknown argument: %s' % nextArg)
         # if some args left
         if self.hasNext():
-            warn('too many arguments: %s' % self.pollRemaining())
+            warn('too many arguments: %s' % self.pollRemainingJoined())
 
     def processOptions(self):
         self._argsOffset = 0

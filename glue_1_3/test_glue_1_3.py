@@ -184,6 +184,9 @@ def command3(argsProcessor):
     print(param)
 
 def command4Remaining(argsProcessor):
+    print(argsProcessor.pollRemainingJoined())
+
+def commandpollRemaining(argsProcessor):
     print(argsProcessor.pollRemaining())
 
 def command5Poll(argsProcessor):
@@ -274,8 +277,8 @@ def test_ArgsProcessor_binding():
         sampleProcessor1().processAll()
         assert out.getvalue() == 'None\n'
 
-def test_ArgsProcessor_pollRemaining():
-    # test pollRemaining():
+def test_ArgsProcessor_pollRemainingJoined():
+    # test pollRemainingJoined():
     with mockArgs(['remain']), mockOutput() as out:
         sampleProcessor1().processAll()
         assert out.getvalue() == '\n'
@@ -285,6 +288,11 @@ def test_ArgsProcessor_pollRemaining():
     with mockArgs(['remain', '1', 'abc', 'd']), mockOutput() as out:
         sampleProcessor1().processAll()
         assert out.getvalue() == '1 abc d\n'
+
+def test_ArgsProcessor_pollRemaining():
+    with mockArgs(['remaining', 'jasna', 'dupa']), mockOutput() as out:
+        sampleProcessor1().bindDefaultAction(commandpollRemaining).processAll()
+        assert out.getvalue() == "['remaining', 'jasna', 'dupa']\n"
 
 def test_ArgsProcessor_optionsPrecedence():
     # test options precedence
