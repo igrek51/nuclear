@@ -6,7 +6,7 @@ def commandSample(argsProcessor):
 	print(argsProcessor.pollNextRequired('param'))
 
 # ----- Main
-def start():
+def main():
 	argsProcessor = ArgsProcessor('SampleApp', '1.0.1')
 
 	argsProcessor.bindCommand(commandSample, 'sample', description='description', syntaxSuffix='<param>')
@@ -14,4 +14,4 @@ def start():
 	argsProcessor.processAll()
 
 if __name__ == '__main__': # for testing purposes
-	start()
+	main() # this will not be invoked when importing this file
