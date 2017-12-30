@@ -12,6 +12,26 @@ Common Utilities Toolkit compatible with Python 2.7 and 3
 * Time to string (and vice-versa) convertions
 * Collections streaming helpers: filtering, mapping
 
+## Sample application using glue
+```
+#!/usr/bin/python
+from glue import *
+
+# ----- Commands and options
+def commandSample(argsProcessor):
+	print(argsProcessor.pollNextRequired('param'))
+
+# ----- Main
+def main():
+	argsProcessor = ArgsProcessor('SampleApp', '1.0.1')
+
+	argsProcessor.bindCommand(commandSample, 'sample', description='description', syntaxSuffix='<param>')
+	
+	argsProcessor.processAll()
+
+if __name__ == '__main__': # for testing purposes
+	main() # this will not be invoked when importing this file
+```
 
 ## Installation
 Copy ```glue.py``` to your project folder
