@@ -196,15 +196,21 @@ class ArgsProcessor:
     def __init__(self, appName, version):
         self._appName = appName
         self._version = version
-        self._defaultAction = None
-        self._argRules = []
-        self._params = {}
-        self._flags = []
+        self.clear()
         self._argsQue = sys.argv[1:] # CLI arguments list
         self._argsOffset = 0
         # bind default options: help, version
         self.bindOption(printHelp, ['-h', '--help'], description='display this help and exit')
         self.bindOption(printVersion, ['-v', '--version'], description='print version')
+
+    def clear(self):
+        # default action invoked when no command nor option is recognized or when arguments list is empty
+        self._defaultAction = None
+        self._argRules = []
+        self._params = {}
+        self._objectParams = {}
+        self._flags = []
+        return self
 
     def bindDefaultAction(self, action, description=None, syntaxSuffix=None):
         """bind action when no command nor option is recognized or argments list is empty"""
@@ -231,13 +237,6 @@ class ArgsProcessor:
             else:
                 syntax = '--%s' % flagName
         return self.bindOption(lambda: self.setFlag(flagName), syntax, description)
-
-    def clear(self):
-        self._defaultAction = None
-        self._argRules = []
-        self._params = {}
-        self._flags = []
-        return self
 
     # Getting args
     def pollNext(self):
@@ -346,6 +345,12 @@ class ArgsProcessor:
 
     def getParam(self, name):
         return self._params.get(name, None)
+
+    def setObjectParam(self, name, value):
+        self._objectParams[name] = value
+
+    def getObjectParam(self, name):
+        return self._objectParams.get(name, None)
 
     # setting / getting flags
     def setFlag(self, name):

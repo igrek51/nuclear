@@ -7,10 +7,9 @@ def commandSample(argsProcessor):
 
 # ----- Main
 def start():
-	argsProcessor = ArgumentsProcessor('SampleApp', '1.0.1')
+	argsProcessor = ArgsProcessor('SampleApp', '1.0.1')
 
 	argsProcessor.bindCommand(commandSample, 'sample', description='description', syntaxSuffix='<param>')
-	argsProcessor.bindDefaults()
 	
 	argsProcessor.processAll()
 

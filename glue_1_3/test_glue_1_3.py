@@ -379,6 +379,16 @@ def test_ArgsProcessor_settingParams():
         argsProcessor.processAll()
         assert argsProcessor.getParam('para') == 'dup'
 
+def actionSetObjectParam(argsProcessor):
+    argsProcessor.setObjectParam('liczba', int(7))
+
+def test_ArgsProcessor_objectParams():
+    with mockArgs(None), mockOutput() as out:
+        argsProcessor = sampleProcessor1().bindDefaultAction(actionSetObjectParam)
+        argsProcessor.processAll()
+        assert argsProcessor.getObjectParam('dupa') is None
+        assert argsProcessor.getObjectParam('liczba') is 7
+
 def test_ArgsProcessor_optionsAndDefaultAcction():
     with mockArgs(['-v2', '-v2']), mockOutput() as out:
         argsProcessor = sampleProcessor1()
