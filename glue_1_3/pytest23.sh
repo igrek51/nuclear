@@ -1,5 +1,5 @@
 #!/bin/bash
-MODULE_NAME=glue_1_3
+MODULE_NAME=glue
 
 echo 'pytest + coverage: Python 2...'
 python2 -m coverage run --source ${MODULE_NAME} -m pytest -v

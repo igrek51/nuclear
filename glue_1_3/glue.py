@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-glue v1.3.1
+glue v1.3.2
 Common Utilities Toolkit compatible with Python 2.7 and 3
 
 Author: igrek51

@@ -1,4 +1,4 @@
-from glue_1_2 import *
+from glue import *
 from mock import patch
 # import StringIO (Python 2 and 3 compatible)
 try:
