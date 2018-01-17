@@ -14,7 +14,7 @@ import inspect
 import time
 from builtins import bytes
 
-# ----- Output
+# ----- Coloured output
 def debug(message):
     print('\033[32m\033[1m[debug]\033[0m ' + str(message))
 
@@ -196,15 +196,21 @@ class ArgsProcessor:
     def __init__(self, appName, version):
         self._appName = appName
         self._version = version
-        self._defaultAction = None
-        self._argRules = []
-        self._params = {}
-        self._flags = []
+        self.clear()
         self._argsQue = sys.argv[1:] # CLI arguments list
         self._argsOffset = 0
         # bind default options: help, version
         self.bindOption(printHelp, ['-h', '--help'], description='display this help and exit')
         self.bindOption(printVersion, ['-v', '--version'], description='print version')
+
+    def clear(self):
+        # default action invoked when no command nor option is recognized or when arguments list is empty
+        self._defaultAction = None
+        self._argRules = []
+        self._params = {}
+        self._objectParams = {}
+        self._flags = []
+        return self
 
     def bindDefaultAction(self, action, description=None, syntaxSuffix=None):
         """bind action when no command nor option is recognized or argments list is empty"""
@@ -225,19 +231,12 @@ class ArgsProcessor:
         return self.bindOption(lambda: self.pollParam(paramName), syntax, description, '<%s>' % paramName)
 
     def bindFlag(self, flagName, syntax=None, description=None):
-        if not syntax:
+        if flagName and not syntax:
             if len(flagName) == 1:
                 syntax = '-%s' % flagName
             else:
                 syntax = '--%s' % flagName
         return self.bindOption(lambda: self.setFlag(flagName), syntax, description)
-
-    def clear(self):
-        self._defaultAction = None
-        self._argRules = []
-        self._params = {}
-        self._flags = []
-        return self
 
     # Getting args
     def pollNext(self):
@@ -265,12 +264,13 @@ class ArgsProcessor:
             fatal('no %s parameter given' % paramName)
         return param
 
-    def pollRemaining(self, joiner=' '):
-        beginning = self._argsQue[:self._argsOffset]
+    def pollRemaining(self):
         ending = self._argsQue[self._argsOffset:]
-        remainingArgs = joiner.join(ending)
-        self._argsQue = beginning
-        return remainingArgs
+        self._argsQue = self._argsQue[:self._argsOffset]
+        return ending
+
+    def pollRemainingJoined(self, joiner=' '):
+    	return joiner.join(self.pollRemaining())
 
     # Processing args
     def processAll(self):
@@ -301,7 +301,7 @@ class ArgsProcessor:
             fatal('unknown argument: %s' % nextArg)
         # if some args left
         if self.hasNext():
-            warn('too many arguments: %s' % self.pollRemaining())
+            warn('too many arguments: %s' % self.pollRemainingJoined())
 
     def processOptions(self):
         self._argsOffset = 0
@@ -345,6 +345,12 @@ class ArgsProcessor:
 
     def getParam(self, name):
         return self._params.get(name, None)
+
+    def setObjectParam(self, name, value):
+        self._objectParams[name] = value
+
+    def getObjectParam(self, name):
+        return self._objectParams.get(name, None)
 
     # setting / getting flags
     def setFlag(self, name):
@@ -403,7 +409,7 @@ class ArgsProcessor:
     def printVersion(self):
         print('%s v%s' % (self._appName, self._version))
 
-# commands available to invoke, workaround for invoking by function reference
+# commands available to invoke (workaround for invoking by function reference)
 def printHelp(argsProcessor):
     argsProcessor.printHelp()
 
