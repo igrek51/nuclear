@@ -16,4 +16,4 @@ def main():
 	argsProcessor.processAll() # do the magic
 
 if __name__ == '__main__': # for testing purposes
-	main() # this will not be invoked when importing this file
+	main() # will not be invoked when importing this file

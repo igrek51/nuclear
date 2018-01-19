@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-glue v1.3.2
+glue v1.3.3
 Common Utilities Toolkit compatible with Python 2.7 and 3
 
 Author: igrek51
@@ -196,9 +196,9 @@ class ArgsProcessor:
     def __init__(self, appName, version):
         self._appName = appName
         self._version = version
-        self.clear()
         self._argsQue = sys.argv[1:] # CLI arguments list
         self._argsOffset = 0
+        self.clear()
         # bind default options: help, version
         self.bindOption(printHelp, ['-h', '--help'], description='display this help and exit')
         self.bindOption(printVersion, ['-v', '--version'], description='print version')
