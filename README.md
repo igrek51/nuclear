@@ -1,5 +1,6 @@
 # glue.py
-Common Utilities Toolkit for command line Python applications compatible with Python 2.7 and 3
+Common Utilities Toolkit for command line Python applications compatible with Python 2.7 and 3.
+glue is a library for quick developing simple command-line Python applications.
 
 ## Features:
 * Command Line Arguments processor: binding commands, options, flags, params
