@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-glue v1.3.3
+glue v1.3.4
 Common Utilities Toolkit compatible with Python 2.7 and 3
 
 Author: igrek51
@@ -137,6 +137,9 @@ def setWorkdir(workdir):
 
 def getWorkdir():
     return os.getcwd()
+
+def getScriptRealDir():
+    return os.path.dirname(os.path.realpath(__file__))
 
 # ----- Time format operations
 def str2time(timeRaw, pattern):

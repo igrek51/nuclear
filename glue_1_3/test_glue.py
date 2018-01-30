@@ -131,6 +131,13 @@ def test_workdir():
     assert getWorkdir() == '/home'
     setWorkdir(workdir)
 
+def test_getScriptRealDir():
+    realDirExpected = getWorkdir()
+    assert getScriptRealDir() == realDirExpected
+    setWorkdir('/')
+    assert getScriptRealDir() == realDirExpected
+    setWorkdir(realDirExpected)
+
 def test_fileExists():
     assert fileExists('test/res/readme')
     assert not fileExists('test/res/dupadupa')
