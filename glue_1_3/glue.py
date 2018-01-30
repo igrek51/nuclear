@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-glue v1.3.4
+glue v1.3.5
 Common Utilities Toolkit compatible with Python 2.7 and 3
 
 Author: igrek51
@@ -211,7 +211,6 @@ class ArgsProcessor:
         self._defaultAction = None
         self._argRules = []
         self._params = {}
-        self._objectParams = {}
         self._flags = []
         return self
 
@@ -348,12 +347,6 @@ class ArgsProcessor:
 
     def getParam(self, name):
         return self._params.get(name, None)
-
-    def setObjectParam(self, name, value):
-        self._objectParams[name] = value
-
-    def getObjectParam(self, name):
-        return self._objectParams.get(name, None)
 
     # setting / getting flags
     def setFlag(self, name):
