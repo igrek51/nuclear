@@ -441,3 +441,15 @@ def test_ArgsProcessor_bindFlag():
     with mockArgs(['-f']), mockOutput() as out:
         sampleProcessor1().bindFlag('force', ['-f', '--force']).bindDefaultAction(actionIsForce).processAll()
         assert out.getvalue() == 'force is: True\n'
+
+def actionPrintFromTo(argsProcessor):
+    print('range: ' + argsProcessor.getParam('fromDate') + ' - ' + argsProcessor.getParam('toDate'))
+
+def test_ArgsProcessor_2params():
+    with mockArgs(['print', '--from', 'today', '--to', 'tomorrow']), mockOutput() as out:
+        argsProcessor = ArgsProcessor('appName', '1.0.1')
+        argsProcessor.bindParam('fromDate', syntax='--from')
+        argsProcessor.bindParam('toDate', syntax='--to')
+        argsProcessor.bindCommand(actionPrintFromTo, 'print')
+        argsProcessor.processAll()
+        assert 'range: today - tomorrow' in out.getvalue()
