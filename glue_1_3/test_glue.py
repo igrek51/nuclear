@@ -48,6 +48,8 @@ def test_output():
 def test_fatal():
     assertError(lambda: fatal('fatality'))
     assertError(lambda: fatal('fatality'), 'fatality')
+    assertSystemExit(lambda: exit('farewell'))
+    assertSystemExit(lambda: exit())
 
 def test_shellExec():
     shellExec('echo test')

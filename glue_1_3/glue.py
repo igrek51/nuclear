@@ -1,6 +1,6 @@
 #!/usr/bin/python
 """
-glue v1.3.6
+glue v1.3.7
 Common Utilities Toolkit compatible with Python 2.7 and 3
 
 Author: igrek51
@@ -30,6 +30,11 @@ def error(message):
 def fatal(message):
     error(message)
     raise RuntimeError(message)
+
+def exit(message=None):
+    if message:
+        error(message)
+    sys.exit(0)
 
 # ----- Input
 def rawInput(prompt=None):
