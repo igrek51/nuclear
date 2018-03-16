@@ -42,10 +42,14 @@ def test_output():
         assert 'warn' in out.getvalue()
         error('message')
         assert 'ERROR' in out.getvalue()
+        info(7)
+        assert '7' in out.getvalue()
 
 def test_fatal():
     assertError(lambda: fatal('fatality'))
     assertError(lambda: fatal('fatality'), 'fatality')
+    assertSystemExit(lambda: exit('farewell'))
+    assertSystemExit(lambda: exit())
 
 def test_shellExec():
     shellExec('echo test')
@@ -129,6 +133,10 @@ def test_workdir():
     assert getWorkdir() == '/home'
     setWorkdir(workdir)
 
+def test_getScriptRealDir():
+    realDirExpected = getWorkdir()
+    assert getScriptRealDir() == realDirExpected
+
 def test_fileExists():
     assert fileExists('test/res/readme')
     assert not fileExists('test/res/dupadupa')
@@ -149,10 +157,10 @@ def test_timeConversions():
     assert str2time(badDate, pattern) is None
     assert time2str(None, pattern) is None
 
-# CommandArgRule
+# _CommandArgRule
 def test_CommandArgRule():
-    assert CommandArgRule(True, None, 'name', 'description', 'syntaxSuffix').displayNames() == 'name'
-    assert CommandArgRule(True, None, ['name1', 'name2'], 'description', 'syntaxSuffix').displayNames() == 'name1, name2'
+    assert CommandArgRule(True, None, 'name', 'description', 'syntaxSuffix')._displaySyntaxPrefix() == 'name'
+    assert CommandArgRule(True, None, ['name1', 'name2'], 'description', 'syntaxSuffix')._displaySyntaxPrefix() == 'name1, name2'
     assert CommandArgRule(True, None, ['name1', 'name2'], 'description', None).displaySyntax() == 'name1, name2'
     assert CommandArgRule(True, None, ['name1', 'name2'], 'description', '<suffix>').displaySyntax() == 'name1, name2 <suffix>'
     assert CommandArgRule(True, None, ['name1', 'name2'], 'description', ' <suffix>').displaySyntax() == 'name1, name2 <suffix>'
@@ -161,9 +169,9 @@ def test_CommandArgRule():
     assert CommandArgRule(True, None, ['name'], 'description', '<suffix>').displayHelp(3) == 'name <suffix> - description'
     assert CommandArgRule(True, None, ['name'], 'description', '<s>').displayHelp(10) == 'name <s>   - description'
 
-# ArgumentsProcessor
+# ArgsProcessor
 def command1():
-    print(None)
+    print('None')
 
 def commandDupa():
     print('dupa')
@@ -182,6 +190,9 @@ def command3(argsProcessor):
     print(param)
 
 def command4Remaining(argsProcessor):
+    print(argsProcessor.pollRemainingJoined())
+
+def commandpollRemaining(argsProcessor):
     print(argsProcessor.pollRemaining())
 
 def command5Poll(argsProcessor):
@@ -192,56 +203,64 @@ def command6SetPara(argsProcessor):
     para = argsProcessor.pollNextRequired('para')
     argsProcessor.setParam('para', para)
 
+def commandPrintVersionOnly(argsProcessor):
+    argsProcessor.printVersion()
+
+def actionIsForce(argsProcessor):
+    print('force is: ' + str(argsProcessor.isFlag('force')))
+
+def actionIsF(argsProcessor):
+    print('force is: ' + str(argsProcessor.isFlag('f')))
+
 def sampleProcessor1():
-    argsProcessor = ArgumentsProcessor('appName', '1.0.1')
+    argsProcessor = ArgsProcessor('appName', '1.0.1')
     argsProcessor.bindCommand(command1, 'command1', description='description1')
     argsProcessor.bindCommand(command2, ['command2', 'command22'], description='description2', syntaxSuffix='<param>')
     argsProcessor.bindCommand(command3, ['command3', 'command33'], description='description2', syntaxSuffix='<param>')
     argsProcessor.bindCommand(command4Remaining, 'remain', description='description4', syntaxSuffix='<param>')
     argsProcessor.bindCommand(command5Poll, 'poll', description='description5')
-    argsProcessor.bindOption(printHelp, ['-h', '--help'], description='display this help and exit')
-    argsProcessor.bindOption(printVersion, ['-v', '--version'], description='print version and exit')
     argsProcessor.bindOption(command4Remaining, '--remain', description='join strings')
+    argsProcessor.bindOption(commandPrintVersionOnly, '-v2')
     argsProcessor.bindCommand(command6SetPara, '--set-para', description='set para')
     argsProcessor.bindParam('para', '--para', 'set para')
     return argsProcessor
 
-def test_ArgumentsProcessor_noArg():
+def test_ArgsProcessor_noArg():
     # basic execution with no args
     with mockArgs(None):
         # prints help and exit
-        assertSystemExit(lambda: ArgumentsProcessor('appName', '1.0.1').processAll())
+        assertSystemExit(lambda: ArgsProcessor('appName', '1.0.1').processAll())
 
-def test_ArgumentsProcessor_bindingsSetup():
+def test_ArgsProcessor_bindingsSetup():
     # test bindings setup
     with mockArgs(None):
         sampleProcessor1()
 
-def test_ArgumentsProcessor_bindEmpty():
+def test_ArgsProcessor_bindDefaultAction():
     # test bindings
     with mockArgs(None), mockOutput() as out:
-        sampleProcessor1().bindEmpty(command1).processAll()
+        sampleProcessor1().bindDefaultAction(command1).processAll()
         assert out.getvalue() == 'None\n'
     with mockArgs(['-h']), mockOutput() as out:
-        assertSystemExit(lambda: sampleProcessor1().bindEmpty(command1).processAll())
+        assertSystemExit(lambda: sampleProcessor1().bindDefaultAction(command1).processAll())
     # rebinding
     with mockArgs(None), mockOutput() as out:
-        sampleProcessor1().bindEmpty(command1).bindEmpty(commandDupa).processAll()
+        sampleProcessor1().bindDefaultAction(command1).bindDefaultAction(commandDupa).processAll()
         assert out.getvalue() == 'dupa\n'
 
-def test_ArgumentsProcessor_bindEmpty():
+def test_ArgsProcessor_bindDefaultAction():
     # test bindings
     with mockArgs(None), mockOutput() as out:
-        sampleProcessor1().bindEmpty(command1).processAll()
+        sampleProcessor1().bindDefaultAction(command1).processAll()
         assert out.getvalue() == 'None\n'
 
-def test_ArgumentsProcessor_optionsFirst():
+def test_ArgsProcessor_optionsFirst():
     # test processing options first
     with mockArgs(['-h', 'dupa']):
         # prints help and exit
         assertSystemExit(lambda: sampleProcessor1().processAll())
 
-def test_ArgumentsProcessor_noNextArg():
+def test_ArgsProcessor_noNextArg():
     # test lack of next argument
     with mockArgs(['command2']):
         assertError(lambda: sampleProcessor1().processAll(), 'no param parameter given')
@@ -249,7 +268,7 @@ def test_ArgumentsProcessor_noNextArg():
         sampleProcessor1().processAll()
         assert out.getvalue() == 'None\n'
 
-def test_ArgumentsProcessor_givenParam():
+def test_ArgsProcessor_givenParam():
     # test given param
     with mockArgs(['command3', 'dupa']), mockOutput() as out:
         sampleProcessor1().processAll()
@@ -258,14 +277,14 @@ def test_ArgumentsProcessor_givenParam():
         sampleProcessor1().processAll()
         assert out.getvalue() == 'dupa\n'
 
-def test_ArgumentsProcessor_binding():
+def test_ArgsProcessor_binding():
     # test binding with no argProcessor
     with mockArgs(['command1']), mockOutput() as out:
         sampleProcessor1().processAll()
         assert out.getvalue() == 'None\n'
 
-def test_ArgumentsProcessor_pollRemaining():
-    # test pollRemaining():
+def test_ArgsProcessor_pollRemainingJoined():
+    # test pollRemainingJoined():
     with mockArgs(['remain']), mockOutput() as out:
         sampleProcessor1().processAll()
         assert out.getvalue() == '\n'
@@ -276,13 +295,18 @@ def test_ArgumentsProcessor_pollRemaining():
         sampleProcessor1().processAll()
         assert out.getvalue() == '1 abc d\n'
 
-def test_ArgumentsProcessor_optionsPrecedence():
+def test_ArgsProcessor_pollRemaining():
+    with mockArgs(['remaining', 'jasna', 'dupa']), mockOutput() as out:
+        sampleProcessor1().bindDefaultAction(commandpollRemaining).processAll()
+        assert out.getvalue() == "['remaining', 'jasna', 'dupa']\n"
+
+def test_ArgsProcessor_optionsPrecedence():
     # test options precedence
-    with mockArgs(['-v', 'command1']), mockOutput() as out:
+    with mockArgs(['-v2', 'command1']), mockOutput() as out:
         sampleProcessor1().processAll()
         assert out.getvalue() == 'appName v1.0.1\nNone\n'
     with mockArgs(['--remain', '1', 'abc']), mockOutput() as out:
-        sampleProcessor1().processAll()
+        sampleProcessor1().bindDefaultAction(None).processAll()
         assert out.getvalue() == '1 abc\n'
     with mockArgs(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mockOutput() as out:
         sampleProcessor1().processAll()
@@ -291,13 +315,13 @@ def test_ArgumentsProcessor_optionsPrecedence():
         sampleProcessor1().processOptions()
         assert out.getvalue() == '1 abc\n'
 
-def test_ArgumentsProcessor_poll():
+def test_ArgsProcessor_poll():
     # test polling
     with mockArgs(['poll', '123', '456', '789']), mockOutput() as out:
         sampleProcessor1().processAll()
         assert out.getvalue() == '123\n456\n789\n'
 
-def test_ArgumentsProcessor_removingArgs():
+def test_ArgsProcessor_removingArgs():
     # test removing parameters
     with mockArgs(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mockOutput() as out:
         argsProcessor = sampleProcessor1()
@@ -311,50 +335,49 @@ def test_ArgumentsProcessor_removingArgs():
         argsProcessor.processAll()
         assert out.getvalue() == '1 abc\njasna dupa\n'
 
-def test_ArgumentsProcessor_unknownArg():
+def test_ArgsProcessor_unknownArg():
     # test unknown argument
     with mockArgs(['dupa']):
         assertError(lambda: sampleProcessor1().processAll(), 'unknown argument: dupa')
 
-def test_ArgumentsProcessor_defaultAction():
+def test_ArgsProcessor_defaultAction():
     with mockArgs(['dupa']), mockOutput() as out:
         argsProcessor = sampleProcessor1()
-        argsProcessor.bindDefaultAction(command1, description='defaultAction', syntaxSuffix='<param>')
+        argsProcessor.bindDefaultAction(command2, description='defaultAction', syntaxSuffix='<param>')
         argsProcessor.processAll()
-        assert out.getvalue() == 'None\n'
+        assert out.getvalue() == 'dupa\n'
     with mockArgs(None), mockOutput() as out:
         argsProcessor = sampleProcessor1()
         argsProcessor.bindDefaultAction(command1, description='defaultAction', syntaxSuffix='<param>')
         argsProcessor.processAll()
         assert out.getvalue() == 'None\n'
     with mockArgs(None), mockOutput() as out:
-        argsProcessor = ArgumentsProcessor('appName', '1.0.1')
-        argsProcessor.bindDefaultAction(command1, description='defaultAction', syntaxSuffix='<param>')
-        argsProcessor.bindEmpty(printHelp)
+        argsProcessor = ArgsProcessor('appName', '1.0.1')
+        argsProcessor.bindDefaultAction(printHelp, description='defaultAction', syntaxSuffix='<param>')
         assertSystemExit(lambda: argsProcessor.processAll())
         assert '<param>' in out.getvalue()
         assert 'defaultAction' in out.getvalue()
     # test getting params
     with mockArgs(['dupa2']), mockOutput() as out:
-        argsProcessor = ArgumentsProcessor('appName', '1.0.1')
+        argsProcessor = ArgsProcessor('appName', '1.0.1')
         argsProcessor.bindDefaultAction(command2, description='defaultAction', syntaxSuffix='<param>')
         argsProcessor.processAll()
         assert out.getvalue() == 'dupa2\n'
 
-def test_ArgumentsProcessor_bindDefaults():
+def test_ArgsProcessor_bindDefaultOptions():
     with mockArgs(['-v']), mockOutput() as out:
-        ArgumentsProcessor('appName', '1.0.1').bindDefaults().processAll()
+        assertSystemExit(lambda: ArgsProcessor('appName', '1.0.1').processAll())
         assert out.getvalue() == 'appName v1.0.1\n'
-    with mockArgs(['-v', '--version']), mockOutput() as out:
-        ArgumentsProcessor('appName', '1.0.1').bindDefaults().processAll()
-        assert out.getvalue() == 'appName v1.0.1\nappName v1.0.1\n'
+    with mockArgs(['-v', '-v']), mockOutput() as out:
+        assertSystemExit(lambda: ArgsProcessor('appName', '1.0.1').processAll())
+        assert out.getvalue() == 'appName v1.0.1\n'
     with mockArgs(['-h']), mockOutput() as out:
-        argsProcessor = ArgumentsProcessor('appName', '1.0.1').bindDefaults()
+        argsProcessor = ArgsProcessor('appName', '1.0.1')
         assertSystemExit(lambda: argsProcessor.processAll())
 
-def test_ArgumentsProcessor_settingParams():
+def test_ArgsProcessor_settingParams():
     with mockArgs(['--para', 'dup']), mockOutput() as out:
-        argsProcessor = sampleProcessor1()
+        argsProcessor = sampleProcessor1().bindDefaultAction(None)
         argsProcessor.processAll()
         assert argsProcessor.getParam('para') == 'dup'
     with mockArgs(['--set-para', 'dup']), mockOutput() as out:
@@ -362,9 +385,70 @@ def test_ArgumentsProcessor_settingParams():
         argsProcessor.processAll()
         assert argsProcessor.getParam('para') == 'dup'
 
-def test_ArgumentsProcessor_optionsAndDefaultAcction():
-    with mockArgs(['-v', '--version']), mockOutput() as out:
+def actionSetObjectParam(argsProcessor):
+    argsProcessor.setParam('liczba', int(7))
+
+def test_ArgsProcessor_objectParams():
+    with mockArgs(None), mockOutput() as out:
+        argsProcessor = sampleProcessor1().bindDefaultAction(actionSetObjectParam)
+        argsProcessor.processAll()
+        assert argsProcessor.getParam('dupa') is None
+        assert argsProcessor.getParam('liczba') is 7
+
+def test_ArgsProcessor_optionsAndDefaultAcction():
+    with mockArgs(['-v2', '-v2']), mockOutput() as out:
         argsProcessor = sampleProcessor1()
+        argsProcessor.bindOption(commandPrintVersionOnly, '-v2')
         argsProcessor.bindDefaultAction(command1, description='defaultAction', syntaxSuffix='<param>')
         argsProcessor.processAll()
         assert out.getvalue() == 'appName v1.0.1\nappName v1.0.1\nNone\n'
+
+def test_ArgsProcessor_toomanyargs():
+    with mockArgs(['command1', 'two', 'much']), mockOutput() as out:
+        sampleProcessor1().processAll()
+        output = out.getvalue()
+        assert 'None' in output
+        assert 'too many arguments: two much' in output
+
+def test_ArgsProcessor_defaultActionNone():
+    with mockArgs(None), mockOutput() as out:
+        sampleProcessor1().clear().bindDefaultAction(None).processAll()
+        assert out.getvalue() == ''
+    with mockArgs(None), mockOutput() as out:
+        assertSystemExit(lambda: sampleProcessor1().clear().processAll())
+
+def test_ArgsProcessor_bindFlag():
+    with mockArgs(None), mockOutput() as out:
+        sampleProcessor1().bindFlag('force').bindDefaultAction(actionIsForce).processAll()
+        assert out.getvalue() == 'force is: False\n'
+    with mockArgs(['--force']), mockOutput() as out:
+        sampleProcessor1().bindFlag('force').bindDefaultAction(actionIsForce).processAll()
+        assert out.getvalue() == 'force is: True\n'
+    with mockArgs(None), mockOutput() as out:
+        sampleProcessor1().bindFlag('force', '--for').bindDefaultAction(actionIsForce).processAll()
+        assert out.getvalue() == 'force is: False\n'
+    with mockArgs(['--for']), mockOutput() as out:
+        sampleProcessor1().bindFlag('force', '--for').bindDefaultAction(actionIsForce).processAll()
+        assert out.getvalue() == 'force is: True\n'
+    # single letter
+    with mockArgs(None), mockOutput() as out:
+        sampleProcessor1().bindFlag('f').bindDefaultAction(actionIsForce).processAll()
+        assert out.getvalue() == 'force is: False\n'
+    with mockArgs(['-f']), mockOutput() as out:
+        sampleProcessor1().bindFlag('f').bindDefaultAction(actionIsF).processAll()
+        assert out.getvalue() == 'force is: True\n'
+    with mockArgs(['-f']), mockOutput() as out:
+        sampleProcessor1().bindFlag('force', ['-f', '--force']).bindDefaultAction(actionIsForce).processAll()
+        assert out.getvalue() == 'force is: True\n'
+
+def actionPrintFromTo(argsProcessor):
+    print('range: ' + argsProcessor.getParam('fromDate') + ' - ' + argsProcessor.getParam('toDate'))
+
+def test_ArgsProcessor_2params():
+    with mockArgs(['print', '--from', 'today', '--to', 'tomorrow']), mockOutput() as out:
+        argsProcessor = ArgsProcessor('appName', '1.0.1')
+        argsProcessor.bindParam('fromDate', syntax='--from')
+        argsProcessor.bindParam('toDate', syntax='--to')
+        argsProcessor.bindCommand(actionPrintFromTo, 'print')
+        argsProcessor.processAll()
+        assert 'range: today - tomorrow' in out.getvalue()
