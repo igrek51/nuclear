@@ -1,6 +1,5 @@
-#!/usr/bin/python
 """
-glue v1.3.7
+glue v1.4.1
 Common Utilities Toolkit compatible with Python 2.7 and 3
 
 Author: igrek51
@@ -14,7 +13,7 @@ import inspect
 import time
 from builtins import bytes
 
-# ----- Coloured output
+# ----- Pretty output
 def debug(message):
     print('\033[32m\033[1m[debug]\033[0m ' + str(message))
 
@@ -72,46 +71,37 @@ def splitLines(inputString):
     allLines = inputString.splitlines()
     return list(filter(lambda l: len(l) > 0, allLines)) # filter nonempty
 
-def split(inputString, delimiter):
-    return inputString.split(delimiter)
-
-def splitToTuple(line, attributesCount, splitter='\t'):
+def splitToTuple(line, attrsCount=None, splitter='\t'):
     parts = line.split(splitter)
-    if len(parts) != attributesCount:
-        fatal('invalid split parts count (found: %d, expected: %d) in line: %s' % (len(parts), attributesCount, line))
+    # attrsCount validation
+    if attrsCount and len(parts) != attrsCount:
+        fatal('invalid split parts count (found: %d, expected: %d) in line: %s' % (len(parts), attrsCount, line))
     return tuple(parts)
 
-def splitToTuples(linesRaw, attributesCount, splitter='\t'):
-    lines = splitLines(linesRaw)
-    tuples = []
-    for line in lines:
-        tuples.append(splitToTuple(line, attributesCount, splitter))
-    return tuples
+def splitToTuples(lines, attrsCount=None, splitter='\t'):
+    # lines as list or raw string
+    if not isinstance(lines, list):
+        lines = splitLines(lines)
+    mapper = lambda line: splitToTuple(line, attrsCount, splitter)
+    return list(map(mapper, lines))
 
 # ----- RegEx
-def regexReplace(inputString, regexMatch, regexReplace):
-    regexMatcher = re.compile(regexMatch)
-    return regexMatcher.sub(regexReplace, inputString)
-
 def regexMatch(inputString, regexMatch):
     regexMatcher = re.compile(regexMatch)
     return bool(regexMatcher.match(inputString))
 
-def regexReplaceLines(lines, regexMatch, regexReplace):
+def regexReplace(inputString, regexMatch, regexReplace):
     regexMatcher = re.compile(regexMatch)
-    filtered = []
-    for line in lines:
-        line = regexMatcher.sub(regexReplace, line)
-        filtered.append(line)
-    return filtered
+    return regexMatcher.sub(regexReplace, inputString)
 
-def regexFilterLines(lines, regexMatch):
+def regexFilterList(lines, regexMatch):
     regexMatcher = re.compile(regexMatch)
-    filtered = []
-    for line in lines:
-        if regexMatcher.match(line):
-            filtered.append(line)
-    return filtered
+    return list(filter(lambda line: regexMatcher.match(line), lines))
+
+def regexReplaceList(lines, regexMatch, regexReplace):
+    regexMatcher = re.compile(regexMatch)
+    mapper = lambda line: regexMatcher.sub(regexReplace, line)
+    return list(map(mapper, lines))
 
 def regexSearchFile(filePath, regexMatch, groupNumber):
     regexMatcher = re.compile(regexMatch)
@@ -121,7 +111,13 @@ def regexSearchFile(filePath, regexMatch, groupNumber):
             if match:
                 return match.group(groupNumber)
 
-# ----- File operations
+def regexReplaceFile(filePath, regexMatch, regexReplace):
+    fileContent = readFile(filePath)
+    lines = splitLines(fileContent)
+    lines = regexReplaceList(lines, regexMatch, regexReplace)
+    return '\n'.join(lines)
+
+# ----- File, directories operations
 def readFile(filePath):
     with open(filePath, 'rb') as f:
         return f.read().decode('utf-8')
@@ -146,7 +142,7 @@ def getWorkdir():
 def getScriptRealDir():
     return os.path.dirname(os.path.realpath(__file__))
 
-# ----- Time format operations
+# ----- Time format converters
 def str2time(timeRaw, pattern):
     """pattern: %H:%M:%S, %d.%m.%Y"""
     try:
@@ -169,9 +165,10 @@ def mapList(mapper, lst):
     # mapper example: lambda l: l + l
     return list(map(mapper, lst))
 
+
 # ----- CLI arguments rule
 class CommandArgRule:
-    def __init__(self, isOption, action, syntax, description, syntaxSuffix):
+    def __init__(self, isOption, action, syntax, help, syntaxSuffix):
         self.isOption = isOption
         self.action = action
         # store syntaxes list
@@ -181,7 +178,7 @@ class CommandArgRule:
             self.syntaxs = syntax
         else:
             self.syntaxs = [syntax]
-        self.description = description
+        self.help = help
         self.syntaxSuffix = syntaxSuffix
 
     def _displaySyntaxPrefix(self):
@@ -195,8 +192,8 @@ class CommandArgRule:
 
     def displayHelp(self, syntaxPadding):
         dispHelp = self.displaySyntax()
-        if self.description:
-            dispHelp = dispHelp.ljust(syntaxPadding) + ' - ' + self.description
+        if self.help:
+            dispHelp = dispHelp.ljust(syntaxPadding) + ' - ' + self.help
         return dispHelp
 
 # ----- CLI arguments parser
@@ -208,8 +205,8 @@ class ArgsProcessor:
         self._argsOffset = 0
         self.clear()
         # bind default options: help, version
-        self.bindOption(printHelp, ['-h', '--help'], description='display this help and exit')
-        self.bindOption(printVersion, ['-v', '--version'], description='print version')
+        self.bindOption(printHelp, ['-h', '--help'], help='display this help and exit')
+        self.bindOption(printVersion, ['-v', '--version'], help='print version')
 
     def clear(self):
         # default action invoked when no command nor option is recognized or when arguments list is empty
@@ -219,31 +216,31 @@ class ArgsProcessor:
         self._flags = []
         return self
 
-    def bindDefaultAction(self, action, description=None, syntaxSuffix=None):
+    def bindDefaultAction(self, action, help=None, syntaxSuffix=None):
         """bind action when no command nor option is recognized or argments list is empty"""
-        self._defaultAction = CommandArgRule(False, action, None, description, syntaxSuffix)
+        self._defaultAction = CommandArgRule(False, action, None, help, syntaxSuffix)
         return self
 
-    def bindCommand(self, action, syntax, description=None, syntaxSuffix=None):
+    def bindCommand(self, action, syntax, help=None, syntaxSuffix=None):
         """bind action to a command. Command is processed after all the options."""
-        self._argRules.append(CommandArgRule(False, action, syntax, description, syntaxSuffix))
+        self._argRules.append(CommandArgRule(False, action, syntax, help, syntaxSuffix))
         return self
 
-    def bindOption(self, action, syntax, description=None, syntaxSuffix=None):
+    def bindOption(self, action, syntax, help=None, syntaxSuffix=None):
         """bind action to an option. Options are processed first (before commands)."""
-        self._argRules.append(CommandArgRule(True, action, syntax, description, syntaxSuffix))
+        self._argRules.append(CommandArgRule(True, action, syntax, help, syntaxSuffix))
         return self
 
-    def bindParam(self, paramName, syntax, description=None):
-        return self.bindOption(lambda: self.pollParam(paramName), syntax, description, '<%s>' % paramName)
+    def bindParam(self, paramName, syntax, help=None):
+        return self.bindOption(lambda: self.pollParam(paramName), syntax, help, '<%s>' % paramName)
 
-    def bindFlag(self, flagName, syntax=None, description=None):
+    def bindFlag(self, flagName, syntax=None, help=None):
         if flagName and not syntax:
             if len(flagName) == 1:
                 syntax = '-%s' % flagName
             else:
                 syntax = '--%s' % flagName
-        return self.bindOption(lambda: self.setFlag(flagName), syntax, description)
+        return self.bindOption(lambda: self.setFlag(flagName), syntax, help)
 
     # Getting args
     def pollNext(self):
@@ -277,7 +274,7 @@ class ArgsProcessor:
         return ending
 
     def pollRemainingJoined(self, joiner=' '):
-    	return joiner.join(self.pollRemaining())
+        return joiner.join(self.pollRemaining())
 
     # Processing args
     def processAll(self):
@@ -391,8 +388,8 @@ class ArgsProcessor:
             usageSyntax += self._defaultAction.displaySyntax()
         print('\nUsage:\n  %s' % usageSyntax)
         # description for default action
-        if self._defaultAction and self._defaultAction.description: # only default rule
-            print('\n%s' % self._defaultAction.description)
+        if self._defaultAction and self._defaultAction.help: # only default rule
+            print('\n%s' % self._defaultAction.help)
         # command and options help
         syntaxPadding = self._calcMinSyntaxPadding()
         if commandsCount > 0:
