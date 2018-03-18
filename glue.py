@@ -168,16 +168,16 @@ def mapList(mapper, lst):
 
 # ----- CLI arguments rule
 class CommandArgRule:
-    def __init__(self, isOption, action, keyword, help, suffix):
+    def __init__(self, isOption, action, keywords, help, suffix):
         self.isOption = isOption # should it be processed first
         self.action = action
         # store keywords list
-        if not keyword:
+        if not keywords:
             self.keywords = None
-        elif isinstance(keyword, list):
-            self.keywords = keyword
-        else:
-            self.keywords = [keyword]
+        elif isinstance(keywords, list):
+            self.keywords = keywords
+        else: # keyword as single string
+            self.keywords = [keywords]
         self.help = help
         self.suffix = suffix
 
@@ -221,27 +221,27 @@ class ArgsProcessor:
         self._defaultAction = CommandArgRule(False, action, None, help, suffix)
         return self
 
-    def bindCommand(self, action, keyword, help=None, suffix=None):
+    def bindCommand(self, action, keywords, help=None, suffix=None):
         """bind action to a command. Command is processed after all the options."""
-        self._argRules.append(CommandArgRule(False, action, keyword, help, suffix))
+        self._argRules.append(CommandArgRule(False, action, keywords, help, suffix))
         return self
 
-    def bindOption(self, action, keyword, help=None, suffix=None):
+    def bindOption(self, action, keywords, help=None, suffix=None):
         """bind action to an option. Options are processed first (before commands)."""
-        self._argRules.append(CommandArgRule(True, action, keyword, help, suffix))
+        self._argRules.append(CommandArgRule(True, action, keywords, help, suffix))
         return self
 
-    def bindParam(self, paramName, keyword=None, help=None):
-        if paramName and not keyword: # complete keyword if not given
-            keyword = self._getKeywordFromName(paramName)
-        action = lambda: self.pollParam(paramName)
-        return self.bindOption(action, keyword, help, suffix='<%s>' % paramName)
+    def bindParam(self, paramName, keywords=None, help=None):
+        if paramName and not keywords: # complete keyword if not given
+            keywords = self._getKeywordFromName(paramName)
+        action = lambda: self.setParam(paramName, self.pollNextRequired(paramName))
+        return self.bindOption(action, keywords, help, suffix='<%s>' % paramName)
 
-    def bindFlag(self, flagName, keyword=None, help=None):
-        if flagName and not keyword: # complete keyword if not given
-            keyword = self._getKeywordFromName(flagName)
+    def bindFlag(self, flagName, keywords=None, help=None):
+        if flagName and not keywords: # complete keyword if not given
+            keywords = self._getKeywordFromName(flagName)
         action = lambda: self.setFlag(flagName)
-        return self.bindOption(action, keyword, help)
+        return self.bindOption(action, keywords, help)
 
     def _getKeywordFromName(self, name):
         if len(name) == 1:
@@ -350,12 +350,11 @@ class ArgsProcessor:
     def setParam(self, name, value):
         self._params[name] = value
 
-    def pollParam(self, name):
-        param = self.pollNextRequired(name)
-        self.setParam(name, param)
-
     def getParam(self, name):
         return self._params.get(name, None)
+
+    def isParam(self, name):
+        return self.getParam(name) is not None
 
     # setting / getting flags
     def setFlag(self, name):

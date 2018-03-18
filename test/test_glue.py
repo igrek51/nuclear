@@ -397,7 +397,9 @@ def test_ArgsProcessor_objectParams():
     with mockArgs(None), mockOutput() as out:
         argsProcessor = sampleProcessor1().bindDefaultAction(actionSetObjectParam)
         argsProcessor.processAll()
+        assert not argsProcessor.isParam('dupa')
         assert argsProcessor.getParam('dupa') is None
+        assert argsProcessor.isParam('liczba')
         assert argsProcessor.getParam('liczba') is 7
 
 def test_ArgsProcessor_optionsAndDefaultAcction():
@@ -461,7 +463,7 @@ def test_ArgsProcessor_bindParam():
         assert 'param is: dupa\n' in out.getvalue()
     with mockArgs(['--parameter', 'dupa']), mockOutput() as out:
         ap = ArgsProcessor('appName', '1.0.1')
-        ap.bindParam('param', keyword='--parameter', help='set param').bindDefaultAction(actionPrintParam).processAll()
+        ap.bindParam('param', keywords='--parameter', help='set param').bindDefaultAction(actionPrintParam).processAll()
         assert 'param is: dupa\n' in out.getvalue()
     # single letter
     with mockArgs(None), mockOutput() as out:
@@ -479,8 +481,8 @@ def actionPrintFromTo(argsProcessor):
 def test_ArgsProcessor_2params():
     with mockArgs(['print', '--from', 'today', '--to', 'tomorrow']), mockOutput() as out:
         argsProcessor = ArgsProcessor('appName', '1.0.1')
-        argsProcessor.bindParam('fromDate', keyword='--from')
-        argsProcessor.bindParam('toDate', keyword='--to')
+        argsProcessor.bindParam('fromDate', keywords='--from')
+        argsProcessor.bindParam('toDate', keywords='--to')
         argsProcessor.bindCommand(actionPrintFromTo, 'print')
         argsProcessor.processAll()
         assert 'range: today - tomorrow' in out.getvalue()
