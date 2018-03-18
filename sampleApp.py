@@ -12,9 +12,13 @@ def actionHello(ap):
 def main():
 	ap = ArgsProcessor('SampleApp', '1.0.1') # app name and version
 	# bind actionHello with 'hello' keyword 
-	ap.bindCommand(actionHello, 'hello', syntaxSuffix='<name>', description='display hello message')
-	ap.bindFlag('force', syntax=['-f', '--force'], description='enable force mode')
-	ap.processAll() # do the magic
+	ap.bindCommand(actionHello, 'hello', suffix='<name>', help='display hello message')
+	# bind 'force' flag to keywords '-f' or '--force'
+	ap.bindFlag('force', keyword=['-f', '--force'], help='enable force mode')
+	# bind 'force' flag to keywords '-f' or '--force'
+	ap.bindParam('name', help='set custom name')
+	# do the magic
+	ap.processAll()
 
-if __name__ == '__main__': # for testing purposes
-	main() # will not be invoked when importing this file
+if __name__ == '__main__':
+	main() # will not be invoked when importing this module for testing purposes

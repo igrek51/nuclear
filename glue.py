@@ -168,26 +168,26 @@ def mapList(mapper, lst):
 
 # ----- CLI arguments rule
 class CommandArgRule:
-    def __init__(self, isOption, action, syntax, help, syntaxSuffix):
-        self.isOption = isOption
+    def __init__(self, isOption, action, keyword, help, suffix):
+        self.isOption = isOption # should it be processed first
         self.action = action
-        # store syntaxes list
-        if not syntax:
-            self.syntaxs = None
-        elif isinstance(syntax, list):
-            self.syntaxs = syntax
+        # store keywords list
+        if not keyword:
+            self.keywords = None
+        elif isinstance(keyword, list):
+            self.keywords = keyword
         else:
-            self.syntaxs = [syntax]
+            self.keywords = [keyword]
         self.help = help
-        self.syntaxSuffix = syntaxSuffix
+        self.suffix = suffix
 
     def _displaySyntaxPrefix(self):
-        return ', '.join(self.syntaxs) if self.syntaxs else ''
+        return ', '.join(self.keywords) if self.keywords else ''
 
     def displaySyntax(self):
         syntax = self._displaySyntaxPrefix()
-        if self.syntaxSuffix:
-            syntax += self.syntaxSuffix if self.syntaxSuffix[0] == ' ' else ' ' + self.syntaxSuffix
+        if self.suffix:
+            syntax += self.suffix if self.suffix[0] == ' ' else ' ' + self.suffix
         return syntax
 
     def displayHelp(self, syntaxPadding):
@@ -216,31 +216,38 @@ class ArgsProcessor:
         self._flags = []
         return self
 
-    def bindDefaultAction(self, action, help=None, syntaxSuffix=None):
+    def bindDefaultAction(self, action, help=None, suffix=None):
         """bind action when no command nor option is recognized or argments list is empty"""
-        self._defaultAction = CommandArgRule(False, action, None, help, syntaxSuffix)
+        self._defaultAction = CommandArgRule(False, action, None, help, suffix)
         return self
 
-    def bindCommand(self, action, syntax, help=None, syntaxSuffix=None):
+    def bindCommand(self, action, keyword, help=None, suffix=None):
         """bind action to a command. Command is processed after all the options."""
-        self._argRules.append(CommandArgRule(False, action, syntax, help, syntaxSuffix))
+        self._argRules.append(CommandArgRule(False, action, keyword, help, suffix))
         return self
 
-    def bindOption(self, action, syntax, help=None, syntaxSuffix=None):
+    def bindOption(self, action, keyword, help=None, suffix=None):
         """bind action to an option. Options are processed first (before commands)."""
-        self._argRules.append(CommandArgRule(True, action, syntax, help, syntaxSuffix))
+        self._argRules.append(CommandArgRule(True, action, keyword, help, suffix))
         return self
 
-    def bindParam(self, paramName, syntax, help=None):
-        return self.bindOption(lambda: self.pollParam(paramName), syntax, help, '<%s>' % paramName)
+    def bindParam(self, paramName, keyword=None, help=None):
+        if paramName and not keyword: # complete keyword if not given
+            keyword = self._getKeywordFromName(paramName)
+        action = lambda: self.pollParam(paramName)
+        return self.bindOption(action, keyword, help, suffix='<%s>' % paramName)
 
-    def bindFlag(self, flagName, syntax=None, help=None):
-        if flagName and not syntax:
-            if len(flagName) == 1:
-                syntax = '-%s' % flagName
-            else:
-                syntax = '--%s' % flagName
-        return self.bindOption(lambda: self.setFlag(flagName), syntax, help)
+    def bindFlag(self, flagName, keyword=None, help=None):
+        if flagName and not keyword: # complete keyword if not given
+            keyword = self._getKeywordFromName(flagName)
+        action = lambda: self.setFlag(flagName)
+        return self.bindOption(action, keyword, help)
+
+    def _getKeywordFromName(self, name):
+        if len(name) == 1:
+            return '-%s' % name
+        else:
+            return '--%s' % name
 
     # Getting args
     def pollNext(self):
@@ -336,7 +343,7 @@ class ArgsProcessor:
 
     def _findCommandArgRule(self, arg):
         for rule in self._argRules:
-            if arg in rule.syntaxs:
+            if arg in rule.keywords:
                 return rule
 
     # setting / getting params
@@ -384,7 +391,7 @@ class ArgsProcessor:
             usageSyntax += ' [options]'
         if commandsCount > 0:
             usageSyntax += ' <command>'
-        if commandsCount == 0 and self._defaultAction and self._defaultAction.syntaxSuffix: # only default rule
+        if commandsCount == 0 and self._defaultAction and self._defaultAction.suffix: # only default rule
             usageSyntax += self._defaultAction.displaySyntax()
         print('\nUsage:\n  %s' % usageSyntax)
         # description for default action
