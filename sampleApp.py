@@ -1,6 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
-from glue import *
+import glue
 
 # ----- Actions
 def actionHello(ap):
@@ -14,7 +14,7 @@ def actionHello(ap):
 
 # ----- Main
 def main():
-	ap = ArgsProcessor('SampleApp', '1.0.1') # app name and version
+	ap = glue.ArgsProcessor('SampleApp', '1.0.1') # app name and version
 	# bind actionHello with 'hello' keyword 
 	ap.bindCommand(actionHello, 'hello', suffix='<name>', help='display hello message')
 	# bind 'force' flag to keywords '-f' or '--force'
