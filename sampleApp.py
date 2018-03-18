@@ -4,7 +4,10 @@ from glue import *
 
 # ----- Actions
 def actionHello(ap):
-	print('Hello %s' % ap.pollNextRequired('name'))
+	name = ap.pollNext('name')
+	if ap.isParam('surname'):
+		name += ' ' + ap.getParam('surname')
+	print('Hello %s' % name)
 	if ap.isFlag('force'):
 		print('May the Force be with you!')
 

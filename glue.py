@@ -1,5 +1,5 @@
 """
-glue v1.4.1
+glue v1.4.2
 Common Utilities Toolkit compatible with Python 2.7 and 3
 
 Author: igrek51
@@ -234,7 +234,7 @@ class ArgsProcessor:
     def bindParam(self, paramName, keywords=None, help=None):
         if paramName and not keywords: # complete keyword if not given
             keywords = self._getKeywordFromName(paramName)
-        action = lambda: self.setParam(paramName, self.pollNextRequired(paramName))
+        action = lambda: self.setParam(paramName, self.pollNext(paramName))
         return self.bindOption(action, keywords, help, suffix='<%s>' % paramName)
 
     def bindFlag(self, flagName, keywords=None, help=None):
@@ -250,9 +250,11 @@ class ArgsProcessor:
             return '--%s' % name
 
     # Getting args
-    def pollNext(self):
+    def pollNext(self, requiredName=None):
         """return next arg and remove"""
         if not self.hasNext():
+            if requiredName:
+                fatal('no %s given' % requiredName)
             return None
         nextArg = self._argsQue[self._argsOffset]
         del self._argsQue[self._argsOffset]
@@ -268,12 +270,6 @@ class ArgsProcessor:
         if not self._argsQue:
             return False
         return len(self._argsQue) > self._argsOffset
-
-    def pollNextRequired(self, paramName):
-        param = self.pollNext()
-        if not param:
-            fatal('no %s parameter given' % paramName)
-        return param
 
     def pollRemaining(self):
         ending = self._argsQue[self._argsOffset:]

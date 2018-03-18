@@ -182,7 +182,7 @@ def commandDupa():
     print('dupa')
 
 def command2(argsProcessor):
-    param = argsProcessor.pollNextRequired('param')
+    param = argsProcessor.pollNext('param')
     print(param)
     return param
 
@@ -205,7 +205,7 @@ def command5Poll(argsProcessor):
         print(argsProcessor.pollNext())
 
 def command6SetPara(argsProcessor):
-    para = argsProcessor.pollNextRequired('para')
+    para = argsProcessor.pollNext('para')
     argsProcessor.setParam('para', para)
 
 def commandPrintVersionOnly(argsProcessor):
@@ -268,7 +268,7 @@ def test_ArgsProcessor_optionsFirst():
 def test_ArgsProcessor_noNextArg():
     # test lack of next argument
     with mockArgs(['command2']):
-        assertError(lambda: sampleProcessor1().processAll(), 'no param parameter given')
+        assertError(lambda: sampleProcessor1().processAll(), 'no param given')
     with mockArgs(['command33']), mockOutput() as out:
         sampleProcessor1().processAll()
         assert out.getvalue() == 'None\n'
