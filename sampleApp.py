@@ -4,10 +4,11 @@ from glue import *
 
 # ----- Actions
 def actionHello(ap):
-	name = ap.pollNext('name')
-	if ap.isParam('surname'):
+	name = ap.pollNext('name') # get next arg
+	if ap.isParam('surname'): # optional param 'surname'
 		name += ' ' + ap.getParam('surname')
 	print('Hello %s' % name)
+
 	if ap.isFlag('force'):
 		print('May the Force be with you!')
 
@@ -18,7 +19,7 @@ def main():
 	ap.bindCommand(actionHello, 'hello', suffix='<name>', help='display hello message')
 	# bind 'force' flag to keywords '-f' or '--force'
 	ap.bindFlag('force', keywords=['-f', '--force'], help='enable force mode')
-	# add param 'surname' (bind to '--surname <surname>' syntax by default)
+	# enable param 'surname' (bind to '--surname <surname>' syntax by default)
 	ap.bindParam('surname', help='set custom surname')
 	# do the magic
 	ap.processAll()
