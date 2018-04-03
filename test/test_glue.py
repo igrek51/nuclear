@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from glue import *
 from mock import patch
 # import StringIO (Python 2 and 3 compatible)
@@ -56,6 +57,10 @@ def test_shellExec():
     assertError(lambda: shellExec('dupafatality'))
     assert shellExecErrorCode('echo test') == 0
     assert shellOutput('echo test') == 'test\n'
+    assert shellOutput('echo żółć') == u'żółć\n'
+    assert shellOutput('echo test', asBytes=True) == b'test\n'
+    assert shellOutput('echo test', asBytes=True) == 'test\n'.encode('utf-8')
+    assert shellOutput('echo test', asBytes=True).decode('utf-8') == 'test\n'
 
 def test_splitLines():
     assert splitLines('a\nb\nc') == ['a', 'b', 'c']

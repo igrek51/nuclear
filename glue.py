@@ -62,10 +62,13 @@ def shellExec(cmd):
 def shellExecErrorCode(cmd):
     return subprocess.call(cmd, shell=True)
 
-def shellOutput(cmd):
+def shellOutput(cmd, asBytes=False):
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
     output, err = process.communicate()
-    return output.decode('utf-8')
+    if asBytes:
+        return output
+    else:
+        return output.decode('utf-8')
 
 # ----- String Splitting
 def splitLines(inputString):
