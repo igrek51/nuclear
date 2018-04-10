@@ -17,25 +17,34 @@ glue is a library for quick developing simple command-line Python applications.
 ## Sample application using glue
 #### sampleApp.py:
 ```python
-#!/usr/bin/python
-from glue import *
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
+import glue
 
-# ----- Commands and options
-def commandHello(argsProcessor):
-	print('Hello %s' % argsProcessor.pollNextRequired('name'))
-	if argsProcessor.isFlag('force'):
+# ----- Actions
+def actionHello(ap):
+	name = ap.pollNext('name') # get next arg
+	if ap.isParam('surname'): # optional param 'surname'
+		name += ' ' + ap.getParam('surname')
+	print('Hello %s' % name)
+
+	if ap.isFlag('force'):
 		print('May the Force be with you!')
 
 # ----- Main
 def main():
-	argsProcessor = ArgsProcessor('SampleApp', '1.0.1') # app name and version
-	# bind commandHello with 'hello' keyword 
-	argsProcessor.bindCommand(commandHello, 'hello', syntaxSuffix='<name>', description='display hello message')
-	argsProcessor.bindFlag('force', syntax=['-f', '--force'], description='enable force mode')
-	argsProcessor.processAll() # do the magic
+	ap = glue.ArgsProcessor('SampleApp', '1.0.1') # app name and version
+	# bind actionHello with 'hello' command keyword 
+	ap.bindCommand(actionHello, 'hello', suffix='<name>', help='display hello message')
+	# bind 'force' flag to keywords '-f' or '--force'
+	ap.bindFlag('force', keywords=['-f', '--force'], help='enable force mode')
+	# enable param 'surname' (bind to '--surname <surname>' syntax by default)
+	ap.bindParam('surname', help='set custom surname')
+	# do the magic
+	ap.processAll()
 
-if __name__ == '__main__': # for testing purposes
-	main() # this will not be invoked when importing this file
+if __name__ == '__main__':
+	main() # will not be invoked when importing this module for testing purposes
 ```
 #### autogenerating help output:
 ```./sampleApp.py```, ```./sampleApp.py -h``` or ```./sampleApp.py --help``` will output:
@@ -60,28 +69,32 @@ Hello dupa
 $ ./sampleApp.py hello dupa --force
 Hello dupa
 May the Force be with you!
+$ python sampleApp.py hello dupa --surname myOldFriend
+Hello dupa myOldFriend
 ```
 
 ## Installation
-Copy ```glue.py``` to your project folder.
+Copy ```glue.py``` to your project folder and add it to imports (just like in the example shown above).
 You will need also some packages used by glue:
 ### install Python 2.7 packages
 ```shell
+# apt install python-pip # (for Debian)
 # pip2 install future
 ```
-for testing (optional but it's useful):
+testing modules (optional but it's useful):
 ```shell
-# pip2 install pytest
-# pip2 install coverage
-# pip2 install mock
+# pip2 install pytest coverage mock
 ```
 ### install Python 3 packages
 ```shell
+# apt install python3-pip # (for Debian)
 # pip3 install future
 ```
-for testing (optional but it's useful):
+testing modules (optional but it's useful):
 ```shell
-# pip3 install pytest
-# pip3 install coverage
-# pip3 install mock
+# pip3 install pytest coverage mock
 ```
+
+## ToDo
+* auto generating bash completion for declared commands and options
+* multilevel commands - git style alike (git push origin master)

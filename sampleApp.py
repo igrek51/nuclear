@@ -15,7 +15,7 @@ def actionHello(ap):
 # ----- Main
 def main():
 	ap = glue.ArgsProcessor('SampleApp', '1.0.1') # app name and version
-	# bind actionHello with 'hello' keyword 
+	# bind actionHello with 'hello' command keyword 
 	ap.bindCommand(actionHello, 'hello', suffix='<name>', help='display hello message')
 	# bind 'force' flag to keywords '-f' or '--force'
 	ap.bindFlag('force', keywords=['-f', '--force'], help='enable force mode')
