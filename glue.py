@@ -1,5 +1,5 @@
 """
-glue v1.4.2
+glue v1.4.3
 Common Utilities Toolkit compatible with Python 2.7 and 3
 
 Author: igrek51
@@ -10,7 +10,7 @@ import re
 import subprocess
 import glob
 import inspect
-import time
+import datetime
 from builtins import bytes
 
 # ----- Pretty output
@@ -149,15 +149,15 @@ def getScriptRealDir():
 def str2time(timeRaw, pattern):
     """pattern: %H:%M:%S, %d.%m.%Y"""
     try:
-        return time.strptime(timeRaw, pattern)
+        return datetime.datetime.strptime(timeRaw, pattern)
     except ValueError as e:
         return None
 
-def time2str(datetime, pattern):
+def time2str(datetim, pattern):
     """pattern: %H:%M:%S, %d.%m.%Y"""
-    if not datetime:
+    if not datetim:
         return None
-    return time.strftime(pattern, datetime)
+    return datetim.strftime(pattern)
 
 # ----- Collections helpers - syntax reminders
 def filterList(condition, lst):
