@@ -1,6 +1,6 @@
 """
-glue v1.4.3
-Common Utilities Toolkit compatible with Python 2.7 and 3
+glue v1.4.4
+One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
 """
