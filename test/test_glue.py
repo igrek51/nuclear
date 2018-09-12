@@ -272,8 +272,10 @@ def test_ArgsProcessor_optionsFirst():
 
 def test_ArgsProcessor_noNextArg():
     # test lack of next argument
-    with mockArgs(['command2']):
-        assertError(lambda: sampleProcessor1().processAll(), 'no param given')
+    with mockArgs(['command2']), mockOutput() as out:
+        sampleProcessor1().processAll()
+        assert 'ERROR' in out.getvalue()
+        assert 'no param given' in out.getvalue()
     with mockArgs(['command33']), mockOutput() as out:
         sampleProcessor1().processAll()
         assert out.getvalue() == 'None\n'
@@ -347,8 +349,9 @@ def test_ArgsProcessor_removingArgs():
 
 def test_ArgsProcessor_unknownArg():
     # test unknown argument
-    with mockArgs(['dupa']):
-        assertError(lambda: sampleProcessor1().processAll(), 'unknown argument: dupa')
+    with mockArgs(['dupa']), mockOutput() as out:
+        sampleProcessor1().processAll()
+        assert 'unknown argument: dupa' in out.getvalue()
 
 def test_ArgsProcessor_defaultAction():
     with mockArgs(['dupa']), mockOutput() as out:
@@ -491,3 +494,14 @@ def test_ArgsProcessor_2params():
         argsProcessor.bindCommand(actionPrintFromTo, 'print')
         argsProcessor.processAll()
         assert 'range: today - tomorrow' in out.getvalue()
+
+def actionGetParam(ap):
+    print(ap.getParam('musthave', required=True))
+
+def test_getMissingRequiredParam():
+    with mockArgs([]), mockOutput() as out:
+        argsProcessor = ArgsProcessor('appName', '1.0.1')
+        argsProcessor.bindParam('musthave')
+        argsProcessor.bindDefaultAction(actionGetParam)
+        argsProcessor.processAll()
+        assert 'no required param given: musthave' in out.getvalue()

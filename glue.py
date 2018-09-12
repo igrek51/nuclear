@@ -1,5 +1,5 @@
 """
-glue v1.4.4
+glue v1.5.1
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -200,8 +200,11 @@ class CommandArgRule:
         return dispHelp
 
 # ----- CLI arguments parser
+class CliSyntaxError(RuntimeError):
+    pass
+
 class ArgsProcessor:
-    def __init__(self, appName, version):
+    def __init__(self, appName='Command Line Application', version='0.0.1'):
         self._appName = appName
         self._version = version
         self._argsQue = sys.argv[1:] # CLI arguments list
@@ -257,7 +260,7 @@ class ArgsProcessor:
         """return next arg and remove"""
         if not self.hasNext():
             if requiredName:
-                fatal('no %s given' % requiredName)
+                raise CliSyntaxError('no %s given' % requiredName)
             return None
         nextArg = self._argsQue[self._argsOffset]
         del self._argsQue[self._argsOffset]
@@ -284,16 +287,19 @@ class ArgsProcessor:
 
     # Processing args
     def processAll(self):
-        # process the options first
-        self.processOptions()
-        # if left arguments list is empty
-        if not self._argsQue:
-            if self._defaultAction: # run default action
-                self._invokeDefaultAction()
-            else: # help by default
-                self.printHelp()
-        else:
-            self._processCommands()
+        try:
+            # process the options first
+            self.processOptions()
+            # if left arguments list is empty
+            if not self._argsQue:
+                if self._defaultAction: # run default action
+                    self._invokeDefaultAction()
+                else: # help by default
+                    self.printHelp()
+            else:
+                self._processCommands()
+        except CliSyntaxError as e:
+            error('Wrong command line syntax: %s' % str(e))
 
     def _processCommands(self):
         self._argsOffset = 0
@@ -308,7 +314,7 @@ class ArgsProcessor:
             # run default action without removing arg
             self._invokeDefaultAction()
         else:
-            fatal('unknown argument: %s' % nextArg)
+            raise CliSyntaxError('unknown argument: %s' % nextArg)
         # if some args left
         if self.hasNext():
             warn('too many arguments: %s' % self.pollRemainingJoined())
@@ -349,7 +355,9 @@ class ArgsProcessor:
     def setParam(self, name, value):
         self._params[name] = value
 
-    def getParam(self, name):
+    def getParam(self, name, required=False):
+        if required and name not in self._params:
+            raise CliSyntaxError('no required param given: %s' % name)
         return self._params.get(name, None)
 
     def isParam(self, name):
