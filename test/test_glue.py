@@ -255,17 +255,17 @@ def action_dupa():
     print('dupa')
 
 
-def command2(argsProcessor):
-    param = argsProcessor.poll_next('param')
+def command2(ap):
+    param = ap.poll_next('param')
     print(param)
     return param
 
 
-def command3(argsProcessor):
-    param = argsProcessor.peek_next()
+def command3(ap):
+    param = ap.peek_next()
     if not param:
-        assert not argsProcessor.has_next()
-    param2 = argsProcessor.poll_next()
+        assert not ap.has_next()
+    param2 = ap.poll_next()
     assert param == param2
     print(param)
 
@@ -302,15 +302,12 @@ def actionIsF(argsProcessor):
 
 def sampleProcessor1():
     ap = ArgsProcessor('appName', '1.0.1')
-    ap.bind_command(command1, 'command1', description='description1')
-    ap.bind_command(command2, ['command2', 'command22'], description='description2', suffix='<param>')
-    ap.bind_command(command3, ['command3', 'command33'], description='description2', suffix='<param>')
-    ap.bind_command(command4Remaining, 'remain', description='description4', suffix='<param>')
-    ap.bind_command(command5Poll, 'poll', description='description5')
-    ap.bind_option(command4Remaining, '--remain', description='join strings')
-    ap.bind_option(commandPrintVersionOnly, '-v2')
-    ap.bind_command(command6SetPara, '--set-para', description='set para')
-    ap.add_param('para', '--para', 'set para')
+    ap.add_subcommand('command1', action=command1, description='description1')
+    ap.add_subcommand(['command2', 'command22'], action=command2, description='description2', syntax='<param>')
+    ap.add_subcommand(['command3', 'command33'], action=command3, description='description2', syntax='<param>')
+    ap.add_subcommand('remain', action=command4Remaining, description='description4', syntax='<param>')
+    ap.add_subcommand('poll', action=command5Poll, description='description5')
+    ap.add_subcommand('--set-para', action=command6SetPara, description='set para')
     return ap
 
 
@@ -355,21 +352,52 @@ def test_ArgsProcessor_bindDefaultAction():
         assert_ap_exit(ap)
 
 
-def test_ArgsProcessor_bindDefaultAction():
-    # test bindings
-    with MockIO([]) as mockio:
-        sampleProcessor1().bind_default_action(command1).process()
-        assert mockio.output() == 'None\n'
+def action_print_param(ap):
+    print(ap.get_param('param'))
 
 
-def test_ArgsProcessor_optionsFirst():
-    # test processing options first
-    with MockIO(['-h', 'dupa']) as mockio:
-        # prints help and exit
-        assert_system_exit(lambda: sampleProcessor1().process())
+def test_args_params_first():
+    # test processing params first
+    with MockIO(['print-param', '--param=dupa']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('print-param', action_print_param)
+        ap.add_param('param')
+        ap.process()
+        assert mockio.output_contains('dupa')
+    with MockIO(['print-param', '--param', 'dupa']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('print-param', action_print_param)
+        ap.add_param('param')
+        ap.process()
+        assert mockio.output_contains('dupa')
+    with MockIO(['--param', 'dupa']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('print-param', action_print_param)
+        ap.add_param('param')
+        assert_ap_exit(ap)
 
 
-def test_ArgsProcessor_noNextArg():
+def action_print_flag(ap):
+    print(ap.is_flag_set('dupcia'))
+
+
+def test_args_print_flag():
+    # test processing params first
+    with MockIO(['print-flag', '--dupcia']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('print-flag', action_print_flag)
+        ap.add_flag('dupcia')
+        ap.process()
+        assert mockio.output_contains('True')
+    with MockIO(['print-flag', '--dup']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('print-flag', action_print_flag)
+        ap.add_flag('dupcia')
+        ap.process()
+        assert mockio.output_contains('False')
+
+
+def test_args_no_next_arg():
     # test lack of next argument
     with MockIO(['command2']) as mockio:
         sampleProcessor1().process()
@@ -417,42 +445,44 @@ def test_ArgsProcessor_pollRemaining():
         assert mockio.output_strip() == "['remaining', 'jasna', 'dupa']"
 
 
-def test_ArgsProcessor_optionsPrecedence():
-    # test options precedence
-    with MockIO(['-v2', 'command1']) as mockio:
-        sampleProcessor1().process()
-        assert mockio.output() == 'appName v1.0.1\nNone\n'
-    with MockIO(['--remain', '1', 'abc']) as mockio:
-        sampleProcessor1().bind_default_action(None).process()
-        assert mockio.output() == '1 abc\n'
-    with MockIO(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']) as mockio:
-        sampleProcessor1().process()
-        assert mockio.output() == '1 abc\njasna dupa\n'
-    with MockIO(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']) as mockio:
-        sampleProcessor1().process_options()
-        assert mockio.output() == '1 abc\n'
-
-
-def test_ArgsProcessor_poll():
+def test_args_poll():
     # test polling
     with MockIO(['poll', '123', '456', '789']) as mockio:
         sampleProcessor1().process()
         assert mockio.output() == '123\n456\n789\n'
 
 
-def test_ArgsProcessor_removingArgs():
+def action_test_args_params_with_hyphens(ap):
+    print(ap.get_param('--param-one'))
+    print(ap.get_param('param-one'))
+    print(ap.get_param('param2'))
+    print(ap.get_param('--param2'))
+    print(ap.get_param('p'))
+
+
+def test_args_params_with_hyphens():
+    with MockIO(['--param-one', 'value-one', '--param2', 'p2', '-p', 'p3']) as mockio:
+        ap = ArgsProcessor(default_action=action_test_args_params_with_hyphens)
+        ap.add_param('--param-one')
+        ap.add_param('param2')
+        ap.add_param('p')
+        ap.process()
+        assert mockio.output() == 'value-one\nvalue-one\np2\np2\np3\n'
+
+
+def action_print_remaining(ap):
+    print(ap.poll_remaining_joined())
+
+
+def test_args_removing_args():
     # test removing parameters
-    with MockIO(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']) as mockio:
-        argsProcessor = sampleProcessor1()
-        argsProcessor.process_options()
-        argsProcessor.process_options()
-        argsProcessor.process_options()
-        assert mockio.output() == '1 abc\n'
-    with MockIO(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']) as mockio:
-        argsProcessor = sampleProcessor1()
-        argsProcessor.process_options()
-        argsProcessor.process()
-        assert mockio.output() == '1 abc\njasna dupa\n'
+    with MockIO(['remain', 'jasna', '--to-remove', 'dupa', 'dupaa', '--flagg', 'abc', '1']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_param('--to-remove')
+        ap.add_flag('--flagg')
+        ap.add_subcommand('remain', action_print_remaining)
+        ap.process()
+        assert mockio.output() == 'jasna dupaa abc 1\n'
 
 
 def test_ArgsProcessor_unknownArg():

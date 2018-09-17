@@ -327,10 +327,11 @@ class SubArgsProcessor(object):
         :param required: is param required
         :return: this parser
         """
-        if name and not keywords:  # complete keyword if not given
+        name = self._get_keyword_from_name(name)
+        # complete keyword if not given
+        if not keywords:
             keywords = self._get_keyword_from_name(name)
-        if name:
-            syntax = '[%s]' % name
+        syntax = '[%s]' % name
         self._rules_params.append(
             ParamArgRule(name=name, required=required, keywords=keywords, description=description, completer=completer,
                          completer_choices=completer_choices, syntax=syntax))
@@ -352,6 +353,8 @@ class SubArgsProcessor(object):
 
     @staticmethod
     def _get_keyword_from_name(name):
+        if name.startswith('-'):
+            return name
         if len(name) == 1:
             return '-%s' % name
         else:
@@ -401,13 +404,12 @@ class SubArgsProcessor(object):
         # process the flags and params first
         self._process_flags()
         self._process_params()
-        # if there's no arguments left
-        if not self._args_que:
-            # no command to invoke - run default action
+        if self._args_que:
+            self._process_commands()
+        else:
+            # if there's no arguments left - run default action
             if self._default_action:
                 self._invoke_action(self._default_action)
-        else:
-            self._process_commands()
 
     def _process_flags(self):
         self._argsOffset = 0
@@ -500,9 +502,15 @@ class SubArgsProcessor(object):
         self._params[name] = value
 
     def get_param(self, name, required=False):
-        if required and name not in self._params:
+        name2 = self._get_keyword_from_name(name)
+        val1 = self._params.get(name, None)
+        if val1:
+            return val1
+        val2 = self._params.get(name2, None)
+        if val2:
+            return val2
+        if required and not val1 and not val2:
             raise CliSyntaxError('no required param given: %s' % name)
-        return self._params.get(name, None)
 
     def is_param(self, name):
         return self.get_param(name) is not None
