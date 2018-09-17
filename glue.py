@@ -1,5 +1,5 @@
 """
-glue v1.5.1
+glue v1.6.0
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -17,32 +17,39 @@ from builtins import bytes
 def debug(message):
     print('\033[32m\033[1m[debug]\033[0m ' + str(message))
 
+
 def info(message):
     print('\033[34m\033[1m[info]\033[0m  ' + str(message))
+
 
 def warn(message):
     print('\033[33m\033[1m[warn]\033[0m  ' + str(message))
 
+
 def error(message):
     print('\033[31m\033[1m[ERROR]\033[0m ' + str(message))
+
 
 def fatal(message):
     error(message)
     raise RuntimeError(message)
+
 
 def exit(message=None):
     if message:
         error(message)
     sys.exit(0)
 
+
 # ----- Input
 def rawInput(prompt=None):
     """raw input compatible with python 2 and 3"""
     try:
-       return raw_input(prompt) # python2
+        return raw_input(prompt)  # python2
     except NameError:
-       pass
-    return input(prompt) # python3
+        pass
+    return input(prompt)  # python3
+
 
 def inputRequired(prompt):
     while True:
@@ -52,14 +59,17 @@ def inputRequired(prompt):
         print
         return inputted
 
+
 # ----- Shell
 def shellExec(cmd):
     errCode = shellExecErrorCode(cmd)
     if errCode != 0:
         fatal('failed executing: %s' % cmd)
 
+
 def shellExecErrorCode(cmd):
     return subprocess.call(cmd, shell=True)
+
 
 def shellOutput(cmd, asBytes=False):
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
@@ -69,10 +79,12 @@ def shellOutput(cmd, asBytes=False):
     else:
         return output.decode('utf-8')
 
+
 # ----- String Splitting
 def splitLines(inputString):
     allLines = inputString.splitlines()
-    return list(filter(lambda l: len(l) > 0, allLines)) # filter nonempty
+    return list(filter(lambda l: len(l) > 0, allLines))  # filter nonempty
+
 
 def splitToTuple(line, attrsCount=None, splitter='\t'):
     parts = line.split(splitter)
@@ -81,6 +93,7 @@ def splitToTuple(line, attrsCount=None, splitter='\t'):
         fatal('invalid split parts count (found: %d, expected: %d) in line: %s' % (len(parts), attrsCount, line))
     return tuple(parts)
 
+
 def splitToTuples(lines, attrsCount=None, splitter='\t'):
     # lines as list or raw string
     if not isinstance(lines, list):
@@ -88,23 +101,28 @@ def splitToTuples(lines, attrsCount=None, splitter='\t'):
     mapper = lambda line: splitToTuple(line, attrsCount, splitter)
     return list(map(mapper, lines))
 
+
 # ----- RegEx
 def regexMatch(inputString, regexMatch):
     regexMatcher = re.compile(regexMatch)
     return bool(regexMatcher.match(inputString))
 
+
 def regexReplace(inputString, regexMatch, regexReplace):
     regexMatcher = re.compile(regexMatch)
     return regexMatcher.sub(regexReplace, inputString)
+
 
 def regexFilterList(lines, regexMatch):
     regexMatcher = re.compile(regexMatch)
     return list(filter(lambda line: regexMatcher.match(line), lines))
 
+
 def regexReplaceList(lines, regexMatch, regexReplace):
     regexMatcher = re.compile(regexMatch)
     mapper = lambda line: regexMatcher.sub(regexReplace, line)
     return list(map(mapper, lines))
+
 
 def regexSearchFile(filePath, regexMatch, groupNumber):
     regexMatcher = re.compile(regexMatch)
@@ -114,36 +132,45 @@ def regexSearchFile(filePath, regexMatch, groupNumber):
             if match:
                 return match.group(groupNumber)
 
+
 def regexReplaceFile(filePath, regexMatch, regexReplace):
     fileContent = readFile(filePath)
     lines = splitLines(fileContent)
     lines = regexReplaceList(lines, regexMatch, regexReplace)
     return '\n'.join(lines)
 
+
 # ----- File, directories operations
 def readFile(filePath):
     with open(filePath, 'rb') as f:
         return f.read().decode('utf-8')
+
 
 def saveFile(filePath, content):
     f = open(filePath, 'wb')
     f.write(bytes(content, 'utf-8'))
     f.close()
 
+
 def fileExists(path):
     return os.path.isfile(path)
+
 
 def listDir(path):
     return sorted(os.listdir(path))
 
+
 def setWorkdir(workdir):
     os.chdir(workdir)
+
 
 def getWorkdir():
     return os.getcwd()
 
+
 def getScriptRealDir():
     return os.path.dirname(os.path.realpath(__file__))
+
 
 # ----- Time format converters
 def str2time(timeRaw, pattern):
@@ -153,16 +180,19 @@ def str2time(timeRaw, pattern):
     except ValueError as e:
         return None
 
+
 def time2str(datetim, pattern):
     """pattern: %Y-%m-%d, %H:%M:%S"""
     if not datetim:
         return None
     return datetim.strftime(pattern)
 
+
 # ----- Collections helpers - syntax reminders
 def filterList(condition, lst):
     # condition example: lambda l: len(l) > 0
     return list(filter(condition, lst))
+
 
 def mapList(mapper, lst):
     # mapper example: lambda l: l + l
@@ -172,14 +202,14 @@ def mapList(mapper, lst):
 # ----- CLI arguments rule
 class CommandArgRule:
     def __init__(self, isOption, action, keywords, help, suffix):
-        self.isOption = isOption # should it be processed first
+        self.isOption = isOption  # should it be processed first
         self.action = action
         # store keywords list
         if not keywords:
             self.keywords = None
         elif isinstance(keywords, list):
             self.keywords = keywords
-        else: # keyword as single string
+        else:  # keyword as single string
             self.keywords = [keywords]
         self.help = help
         self.suffix = suffix
@@ -199,15 +229,17 @@ class CommandArgRule:
             dispHelp = dispHelp.ljust(syntaxPadding) + ' - ' + self.help
         return dispHelp
 
+
 # ----- CLI arguments parser
 class CliSyntaxError(RuntimeError):
     pass
+
 
 class ArgsProcessor:
     def __init__(self, appName='Command Line Application', version='0.0.1'):
         self._appName = appName
         self._version = version
-        self._argsQue = sys.argv[1:] # CLI arguments list
+        self._argsQue = sys.argv[1:]  # CLI arguments list
         self._argsOffset = 0
         self.clear()
         # bind default options: help, version
@@ -238,13 +270,13 @@ class ArgsProcessor:
         return self
 
     def bindParam(self, paramName, keywords=None, help=None):
-        if paramName and not keywords: # complete keyword if not given
+        if paramName and not keywords:  # complete keyword if not given
             keywords = self._getKeywordFromName(paramName)
         action = lambda: self.setParam(paramName, self.pollNext(paramName))
         return self.bindOption(action, keywords, help, suffix='<%s>' % paramName)
 
     def bindFlag(self, flagName, keywords=None, help=None):
-        if flagName and not keywords: # complete keyword if not given
+        if flagName and not keywords:  # complete keyword if not given
             keywords = self._getKeywordFromName(flagName)
         action = lambda: self.setFlag(flagName)
         return self.bindOption(action, keywords, help)
@@ -292,9 +324,9 @@ class ArgsProcessor:
             self.processOptions()
             # if left arguments list is empty
             if not self._argsQue:
-                if self._defaultAction: # run default action
+                if self._defaultAction:  # run default action
                     self._invokeDefaultAction()
-                else: # help by default
+                else:  # help by default
                     self.printHelp()
             else:
                 self._processCommands()
@@ -382,7 +414,7 @@ class ArgsProcessor:
         minSyntaxPadding = 0
         for rule in self._argRules:
             syntax = rule.displaySyntax()
-            if len(syntax) > minSyntaxPadding: # min padding = max from len(syntax)
+            if len(syntax) > minSyntaxPadding:  # min padding = max from len(syntax)
                 minSyntaxPadding = len(syntax)
         return minSyntaxPadding
 
@@ -397,11 +429,11 @@ class ArgsProcessor:
             usageSyntax += ' [options]'
         if commandsCount > 0:
             usageSyntax += ' <command>'
-        if commandsCount == 0 and self._defaultAction and self._defaultAction.suffix: # only default rule
+        if commandsCount == 0 and self._defaultAction and self._defaultAction.suffix:  # only default rule
             usageSyntax += self._defaultAction.displaySyntax()
         print('\nUsage:\n  %s' % usageSyntax)
         # description for default action
-        if self._defaultAction and self._defaultAction.help: # only default rule
+        if self._defaultAction and self._defaultAction.help:  # only default rule
             print('\n%s' % self._defaultAction.help)
         # command and options help
         syntaxPadding = self._calcMinSyntaxPadding()
@@ -420,9 +452,11 @@ class ArgsProcessor:
     def printVersion(self):
         print('%s v%s' % (self._appName, self._version))
 
+
 # commands available to invoke (workaround for invoking by function reference)
 def printHelp(argsProcessor):
     argsProcessor.printHelp()
+
 
 def printVersion(argsProcessor):
     argsProcessor.printVersion()
