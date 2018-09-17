@@ -214,9 +214,7 @@ class CliArgRule(object):
         self.completer = completer
         self.completer_choices = completer_choices
         # store keywords list
-        if not keywords:
-            self.keywords = None
-        elif isinstance(keywords, list):
+        if isinstance(keywords, list):
             self.keywords = keywords
         else:  # keyword as single string
             self.keywords = [keywords]
@@ -256,10 +254,11 @@ class CommandArgRule(CliArgRule):
         self.action = action
 
     def display_syntax_max_length(self):
+        this_length = super(CommandArgRule, self).display_syntax_max_length()
+        max_length = this_length
         subrules = self.subparser._rules_params + self.subparser._rules_flags + self.subparser._rules_commands
-        max_length = super(CommandArgRule, self).display_syntax_max_length()
         for rule in subrules:
-            length = rule.display_syntax_max_length()
+            length = rule.display_syntax_max_length() + this_length + 1
             if length > max_length:
                 max_length = length
         return max_length
@@ -331,7 +330,7 @@ class SubArgsProcessor(object):
         # complete keyword if not given
         if not keywords:
             keywords = name
-        syntax = '[%s]' % name
+        syntax = '<%s>' % self._trim_hyphens(name)
         self._rules_params.append(
             ParamArgRule(name=name, required=required, keywords=keywords, description=description, completer=completer,
                          completer_choices=completer_choices, syntax=syntax))
@@ -361,6 +360,14 @@ class SubArgsProcessor(object):
             return '-%s' % name
         else:
             return '--%s' % name
+
+    @staticmethod
+    def _trim_hyphens(strin):
+        while strin.startswith('-'):
+            strin = strin[1:]
+        while strin.endswith('-'):
+            strin = strin[:-1]
+        return strin
 
     # Getting args
     def poll_next(self, required_name=None):
@@ -526,17 +533,19 @@ class SubArgsProcessor(object):
         name2 = self._get_keyword_from_name(name)
         return name in self._flags or name2 in self._flags
 
-    def print_commands(self, command_rule, syntax_padding):
+    def print_commands(self, command_rule, syntax_padding, prefix=''):
         # command help
-        print('  %s' % command_rule.display_help(syntax_padding))
+        print('  %s%s' % (prefix, command_rule.display_help(syntax_padding)))
         # and all its children
-        subrules = self._rules_commands + self._rules_flags + self._rules_params
-        display_help_prefix = command_rule.display_syntax()
-        for subrule in subrules:
-            display_help_out = display_help_prefix + subrule.display_syntax()
+        prefix += command_rule._display_syntax_prefix() + ' '
+        for subrule in self._rules_flags + self._rules_params:
+            display_help_out = subrule.display_syntax()
             if subrule.help:
                 display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + subrule.help
-            print('  %s' % display_help_out)
+            print('  %s%s' % (prefix, display_help_out))
+        # next level sub commands
+        for subcommand in self._rules_commands:
+            subcommand.subparser.print_commands(subcommand, syntax_padding, prefix)
 
 
 class ArgsProcessor(SubArgsProcessor):

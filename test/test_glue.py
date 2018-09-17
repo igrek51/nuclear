@@ -774,3 +774,26 @@ def test_args_python3_command():
         ap = ArgsProcessor(default_action=action_print_param)
         ap.process()
         assert mockio.output() == 'None\n'
+
+
+def test_args_multilevel_commands_help():
+    with MockIO(['--help']) as mockio:
+        ap = ArgsProcessor('cmdline', '1.2.3')
+        ap.add_param('global-param')
+        ap.add_param('--global-param2', description='another parameter')
+        ap.add_flag('--flag', description='a flag')
+        ap_test = ap.add_subcommand('test')
+        ap_test.add_param('test-param')
+        ap_test_dupy = ap_test.add_subcommand('dupy', action=action_print_1)
+        ap_test_dupy.add_param('z-parametrem')
+        ap_test.add_subcommand('audio', action=action_print_1)
+        ap_test_dupy.add_subcommand('2', action=action_print_2)
+        assert_ap_exit(ap)
+        assert mockio.output_contains('cmdline')
+        assert mockio.output_contains('v1.2.3')
+        assert mockio.output_contains('glue [options] <command>')
+        assert mockio.output_contains('test --test-param <test-param>')
+        assert mockio.output_contains('test dupy --z-parametrem <z-parametrem>')
+        assert mockio.output_contains('test dupy 2')
+        assert mockio.output_contains('test audio')
+        assert mockio.output_contains('--global-param <global-param>')
