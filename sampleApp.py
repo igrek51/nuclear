@@ -17,12 +17,11 @@ def action_hello(ap):
 # ----- Args definitions -----
 def main():
     ap = glue.ArgsProcessor('SampleApp', '1.0.1')  # app name and version
-    # bind actionHello with 'hello' command keyword
-
-    ap.bind_command(action_hello, 'hello', suffix='<name>', description='display hello message')
+    # bind 'hello' keyword with action_hello command
+    ap.add_subcommand('hello', action=action_hello, syntax='<name>', description='display hello message')
     # bind 'force' flag to keywords '-f' or '--force'
     ap.add_flag('force', keywords=['-f', '--force'], description='enable force mode')
-    # enable param 'surname' (bind to '--surname <surname>' syntax by default)
+    # enable param 'surname' (bind to '--surname <surname>' or '--surname=<surname>' syntax by default)
     ap.add_param('surname', description='set custom surname')
     # do the magic
     ap.process()

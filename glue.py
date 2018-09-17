@@ -256,9 +256,9 @@ class CommandArgRule(CliArgRule):
         self.action = action
 
     def display_syntax_max_length(self):
-        rules = [self.subparser._rules_params + self.subparser._rules_flags + self.subparser._rules_commands]
+        subrules = self.subparser._rules_params + self.subparser._rules_flags + self.subparser._rules_commands
         max_length = super(CommandArgRule, self).display_syntax_max_length()
-        for rule in rules:
+        for rule in subrules:
             length = rule.display_syntax_max_length()
             if length > max_length:
                 max_length = length
@@ -284,8 +284,9 @@ class CliSyntaxError(RuntimeError):
 
 
 class SubArgsProcessor(object):
-    def __init__(self, default_action=None):
+    def __init__(self, default_action=None, parent=None):
         self._default_action = default_action
+        self.parent = parent
         self._rules_params = []
         self._rules_flags = []
         self._rules_commands = []
@@ -308,11 +309,10 @@ class SubArgsProcessor(object):
         :return: next level subparser (with command context)
         """
         # create subparser
-        subparser = SubArgsProcessor(default_action=action)
+        subparser = SubArgsProcessor(default_action=action, parent=self)
         self._rules_commands.append(
             CommandArgRule(action=action, subparser=subparser, keywords=keywords, description=description,
-                           syntax=syntax,
-                           completer=completer, completer_choices=completer_choices))
+                           syntax=syntax, completer=completer, completer_choices=completer_choices))
         return subparser
 
     def add_param(self, name=None, keywords=None, description=None, completer=None, completer_choices=None,
@@ -448,6 +448,9 @@ class SubArgsProcessor(object):
         rule = self._find_rule_by_keyword(self._rules_commands, next_arg)
         if rule:  # if found a command
             self.poll_next()
+            # pass all retrieved params and flags
+            rule.subparser._params = self._params
+            rule.subparser._flags = self._flags
             # pass all remaining args to subparser
             remaining_args = self.poll_remaining()
             rule.subparser.process_args(remaining_args)
@@ -512,6 +515,18 @@ class SubArgsProcessor(object):
     def is_flag_set(self, name):
         return name in self._flags
 
+    def print_commands(self, command_rule, syntax_padding):
+        # command help
+        print('  %s' % command_rule.display_help(syntax_padding))
+        # and all its children
+        subrules = self._rules_commands + self._rules_flags + self._rules_params
+        display_help_prefix = command_rule.display_syntax()
+        for subrule in subrules:
+            display_help_out = display_help_prefix + subrule.display_syntax()
+            if subrule.help:
+                display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + subrule.help
+            print('  %s' % display_help_out)
+
 
 class ArgsProcessor(SubArgsProcessor):
     def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None):
@@ -540,8 +555,8 @@ class ArgsProcessor(SubArgsProcessor):
         self.print_version()
         # print main usage
         usage_syntax = sys.argv[0]
-        commands_count = sum(1 for rule in self._rules_commands)
-        options_count = sum(1 for rule in self._rules_flags + self._rules_params)
+        commands_count = sum(1 for _ in self._rules_commands)
+        options_count = sum(1 for _ in self._rules_flags + self._rules_params)
         if options_count > 0:
             usage_syntax += ' [options]'
         if commands_count > 0:
@@ -558,32 +573,23 @@ class ArgsProcessor(SubArgsProcessor):
         # options
         if options_count > 0:
             print('\nOptions:')
-            for rule in [self._rules_flags + self._rules_params]:
-                if rule.isOption:
-                    print('  %s' % rule.display_help(syntax_padding))
+            for rule in self._rules_flags + self._rules_params:
+                print('  %s' % rule.display_help(syntax_padding))
         sys.exit(0)
 
     def print_version(self):
         print('%s v%s' % (self._appName, self._version))
 
-    def print_commands(self, command_rule, syntax_padding):
-        # command help
-        print('  %s' % command_rule.display_help(syntax_padding))
-        # and all its children
-        subrules = [self._rules_commands + self._rules_flags + self._rules_params]
-        display_help_prefix = command_rule.display_syntax()
-        for subrule in subrules:
-            display_help_out = display_help_prefix + subrule.display_syntax()
-            if subrule.help:
-                display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + subrule.help
-            print('  %s' % display_help_out)
-
 
 # commands available to invoke (workaround for invoking by function reference)
 def print_help(ap):
+    if ap.parent:
+        ap = ap.parent
     ap.print_help()
 
 
 def print_version(ap):
+    if ap.parent:
+        ap = ap.parent
     ap.print_version()
     sys.exit(0)

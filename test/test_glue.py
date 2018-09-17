@@ -322,6 +322,15 @@ def test_args_simple_command():
         mockio.output_contains('dupa')
 
 
+def test_args_test_help():
+    # basic execution with no args
+    with MockIO(['help']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('help', print_help)
+        # prints help and exit
+        assert_ap_exit(ap)
+
+
 def test_ArgsProcessor_noArg():
     # basic execution with no args
     with MockIO([]) as mockio:
