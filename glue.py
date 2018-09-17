@@ -200,7 +200,7 @@ def map_list(mapper, lst):
 
 # ----- CLI arguments rule
 class CommandArgRule:
-    def __init__(self, is_option, action, keywords, help_info, suffix):
+    def __init__(self, is_option, action, keywords, description, suffix):
         self.isOption = is_option  # should it be processed first
         self.action = action
         # store keywords list
@@ -210,7 +210,7 @@ class CommandArgRule:
             self.keywords = keywords
         else:  # keyword as single string
             self.keywords = [keywords]
-        self.help = help_info
+        self.help = description
         self.suffix = suffix
 
     def _display_syntax_prefix(self):
@@ -245,8 +245,8 @@ class ArgsProcessor:
         self._params = {}
         self._flags = []
         # bind default options: help, version
-        self.bind_option(print_help, ['-h', '--help'], help_info='display this help and exit')
-        self.bind_option(print_version, ['-v', '--version'], help_info='print version')
+        self.bind_option(print_help, ['-h', '--help'], description='display this help and exit')
+        self.bind_option(print_version, ['-v', '--version'], description='print version')
 
     def clear(self):
         # default action invoked when no command nor option is recognized or when arguments list is empty
@@ -256,32 +256,32 @@ class ArgsProcessor:
         self._flags = []
         return self
 
-    def bind_default_action(self, action, help_info=None, suffix=None):
+    def bind_default_action(self, action, description=None, suffix=None):
         """bind action when no command nor option is recognized or argments list is empty"""
-        self._default_action = CommandArgRule(False, action, None, help_info, suffix)
+        self._default_action = CommandArgRule(False, action, None, description, suffix)
         return self
 
-    def bind_command(self, action, keywords, help_info=None, suffix=None):
+    def bind_command(self, action, keywords, description=None, suffix=None):
         """bind action to a command. Command is processed after all the options."""
-        self._arg_rules.append(CommandArgRule(False, action, keywords, help_info, suffix))
+        self._arg_rules.append(CommandArgRule(False, action, keywords, description, suffix))
         return self
 
-    def bind_option(self, action, keywords, help_info=None, suffix=None):
+    def bind_option(self, action, keywords, description=None, suffix=None):
         """bind action to an option. Options are processed first (before commands)."""
-        self._arg_rules.append(CommandArgRule(True, action, keywords, help_info, suffix))
+        self._arg_rules.append(CommandArgRule(True, action, keywords, description, suffix))
         return self
 
-    def bind_param(self, param_name, keywords=None, help_info=None):
+    def bind_param(self, param_name, keywords=None, description=None):
         if param_name and not keywords:  # complete keyword if not given
             keywords = self._get_keyword_from_name(param_name)
         action = lambda: self.set_param(param_name, self.poll_next(param_name))
-        return self.bind_option(action, keywords, help_info, suffix='<%s>' % param_name)
+        return self.bind_option(action, keywords, description, suffix='<%s>' % param_name)
 
-    def bind_flag(self, flag_name, keywords=None, help_info=None):
+    def bind_flag(self, flag_name, keywords=None, description=None):
         if flag_name and not keywords:  # complete keyword if not given
             keywords = self._get_keyword_from_name(flag_name)
         action = lambda: self.set_flag(flag_name)
-        return self.bind_option(action, keywords, help_info)
+        return self.bind_option(action, keywords, description)
 
     @staticmethod
     def _get_keyword_from_name(name):

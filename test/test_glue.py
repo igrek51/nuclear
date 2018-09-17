@@ -9,15 +9,17 @@ try:
 except ImportError:
     from io import StringIO
 
-def assertError(action, expectedError=None):
+
+def assert_error(action, expected_error=None):
     try:
         action()
         assert False
     except RuntimeError as e:
-        if expectedError:
-            assert str(e) == expectedError
+        if expected_error:
+            assert str(e) == expected_error
 
-def assertSystemExit(action):
+
+def assert_system_exit(action):
     try:
         action()
         assert False
@@ -25,17 +27,41 @@ def assertSystemExit(action):
         # exit with error code 0
         assert str(e) == '0'
 
-def mockArgs(argsList):
-    if not argsList:
-        argsList = []
-    return patch.object(sys, 'argv', ['glue'] + argsList)
 
-def mockOutput():
+class MockIO:
+    def __init__(self, in_args_list):
+        if not in_args_list:
+            in_args_list = []
+        self.in_args_list = in_args_list
+
+    def __enter__(self):
+        self._mock_args = patch.object(sys, 'argv', ['glue'] + self.in_args_list)
+        self._mock_output = patch('sys.stdout', new=StringIO())
+        return self
+
+    def __exit__(self, type, value, traceback):
+        self._mock_args.exit(type, value, traceback)
+        self._mock_output.exit(type, value, traceback)
+
+    def output(self):
+        return self._mock_output.getvalue()
+
+    def output_contains(self, in_str):
+        return in_str in self._mock_output.getvalue()
+
+
+def mock_args(args_list):
+    if not args_list:
+        args_list = []
+    return patch.object(sys, 'argv', ['glue'] + args_list)
+
+
+def mock_output():
     return patch('sys.stdout', new=StringIO())
 
 
 def test_output():
-    with mockOutput() as out:
+    with mock_output() as out:
         debug('message')
         assert 'message' in out.getvalue()
         assert 'debug' in out.getvalue()
@@ -48,21 +74,24 @@ def test_output():
         info(7)
         assert '7' in out.getvalue()
 
+
 def test_fatal():
-    assertError(lambda: fatal('fatality'))
-    assertError(lambda: fatal('fatality'), 'fatality')
-    assertSystemExit(lambda: exit_now('farewell'))
-    assertSystemExit(lambda: exit_now())
+    assert_error(lambda: fatal('fatality'))
+    assert_error(lambda: fatal('fatality'), 'fatality')
+    assert_system_exit(lambda: exit_now('farewell'))
+    assert_system_exit(lambda: exit_now())
+
 
 def test_shellExec():
     shell('echo test')
-    assertError(lambda: shell('dupafatality'))
+    assert_error(lambda: shell('dupafatality'))
     assert shell_error_code('echo test') == 0
     assert shell_output('echo test') == 'test\n'
     assert shell_output('echo żółć') == u'żółć\n'
     assert shell_output('echo test', as_bytes=True) == b'test\n'
     assert shell_output('echo test', as_bytes=True) == 'test\n'.encode('utf-8')
     assert shell_output('echo test', as_bytes=True).decode('utf-8') == 'test\n'
+
 
 def test_splitLines():
     assert split_lines('a\nb\nc') == ['a', 'b', 'c']
@@ -71,19 +100,21 @@ def test_splitLines():
     assert split_lines('') == []
     assert split_lines('a\n\n\r\nb') == ['a', 'b']
 
+
 def test_splitToTuple():
     assert split_to_tuple('a', 1) == ('a',)
     assert split_to_tuple('', 1) == ('',)
-    assertError(lambda: split_to_tuple('a', 2))
+    assert_error(lambda: split_to_tuple('a', 2))
     assert split_to_tuple('a\tb', 2) == ('a', 'b')
-    assertError(lambda: split_to_tuple('a\tb', 1))
-    assertError(lambda: split_to_tuple('a\tb\t', 2))
+    assert_error(lambda: split_to_tuple('a\tb', 1))
+    assert_error(lambda: split_to_tuple('a\tb\t', 2))
     assert split_to_tuple('a\tb\t', 3) == ('a', 'b', '')
     assert split_to_tuple('a\tb\tc', 3) == ('a', 'b', 'c')
     assert split_to_tuple('a b c', 3, ' ') == ('a', 'b', 'c')
     # no attrsCount verification
     assert split_to_tuple('a b c', splitter=' ') == ('a', 'b', 'c')
     assert split_to_tuple('a') == ('a',)
+
 
 def test_splitToTuples():
     assert split_to_tuples('a\tb\tc\nd\te\tf', 3) == [('a', 'b', 'c'), ('d', 'e', 'f')]
@@ -93,13 +124,16 @@ def test_splitToTuples():
     assert split_to_tuples(['a\tb\tc', 'd\te\tf'], 3) == [('a', 'b', 'c'), ('d', 'e', 'f')]
     assert split_to_tuples(['a\tb\tc'], 3) == [('a', 'b', 'c')]
 
+
 def test_regexReplace():
     assert regex_replace('abca', 'a', 'b') == 'bbcb'
     assert regex_replace('abc123a', r'\d', '5') == 'abc555a'
 
+
 def test_regexMatch():
     assert regex_match('ab 12 def 123', r'.*\d{2}')
     assert not regex_match('ab 1 def 1m2', r'.*\d{2}.*')
+
 
 def test_regex_list():
     # regexReplaceList
@@ -116,17 +150,21 @@ def test_regex_list():
     save_file('test/res/replaceme', 'dupa\n123')
     assert regex_replace_file('test/res/replaceme', r'[a-z]+', 'letters') == 'letters\n123'
 
+
 def test_input():
     sys.stdin = open('test/res/inputs')
     assert input_string() == 'in1'
     assert input_string('prompt') == 'in2'
 
+
 def test_inputRequired():
     sys.stdin = open('test/res/inputRequired')
     assert input_required('required: ') == 'valid'
 
+
 def test_readFile():
     assert read_file('test/res/readme') == 'Readme\n123'
+
 
 def test_saveFile():
     save_file('test/res/saveme', 'dupa\n123')
@@ -134,8 +172,10 @@ def test_saveFile():
     save_file('test/res/saveme', '')
     assert read_file('test/res/saveme') == ''
 
+
 def test_listDir():
     assert list_dir('test/res/listme') == ['afile', 'dir', 'zlast', 'zlastdir']
+
 
 def test_workdir():
     workdir = get_workdir()
@@ -145,19 +185,24 @@ def test_workdir():
     assert get_workdir() == '/home'
     set_workdir(workdir)
 
+
 def test_getScriptRealDir():
     realDirExpected = get_workdir()
     assert script_real_dir() == realDirExpected
+
 
 def test_fileExists():
     assert file_exists('test/res/readme')
     assert not file_exists('test/res/dupadupa')
 
+
 def test_filterList():
     assert filter_list(lambda e: len(e) <= 3, ['a', '123', '12345']) == ['a', '123']
 
+
 def test_mapList():
     assert map_list(lambda e: e + e, ['a', '123', '']) == ['aa', '123123', '']
+
 
 def test_timeConversions():
     pattern = '%H:%M:%S, %d.%m.%Y'
@@ -168,6 +213,7 @@ def test_timeConversions():
     assert time2str(datetime, pattern) == sampleDate
     assert str2time(badDate, pattern) is None
     assert time2str(None, pattern) is None
+
 
 # _CommandArgRule
 def test_CommandArgRule():
@@ -185,17 +231,21 @@ def test_CommandArgRule():
         3) == 'name <suffix> - description'
     assert CommandArgRule(True, None, ['name'], 'description', '<s>').display_help(10) == 'name <s>   - description'
 
+
 # ArgsProcessor
 def command1():
     print('None')
 
+
 def commandDupa():
     print('dupa')
+
 
 def command2(argsProcessor):
     param = argsProcessor.poll_next('param')
     print(param)
     return param
+
 
 def command3(argsProcessor):
     param = argsProcessor.peek_next()
@@ -205,210 +255,237 @@ def command3(argsProcessor):
     assert param == param2
     print(param)
 
+
 def command4Remaining(argsProcessor):
     print(argsProcessor.poll_remaining_joined())
 
+
 def commandpollRemaining(argsProcessor):
     print(argsProcessor.poll_remaining())
+
 
 def command5Poll(argsProcessor):
     while (argsProcessor.has_next()):
         print(argsProcessor.poll_next())
 
+
 def command6SetPara(argsProcessor):
     para = argsProcessor.poll_next('para')
     argsProcessor.set_param('para', para)
 
+
 def commandPrintVersionOnly(argsProcessor):
     argsProcessor.print_version()
+
 
 def actionIsForce(argsProcessor):
     print('force is: ' + str(argsProcessor.is_flag_set('force')))
 
+
 def actionIsF(argsProcessor):
     print('force is: ' + str(argsProcessor.is_flag_set('f')))
 
+
 def sampleProcessor1():
     argsProcessor = ArgsProcessor('appName', '1.0.1')
-    argsProcessor.bind_command(command1, 'command1', help_info='description1')
-    argsProcessor.bind_command(command2, ['command2', 'command22'], help_info='description2', suffix='<param>')
-    argsProcessor.bind_command(command3, ['command3', 'command33'], help_info='description2', suffix='<param>')
-    argsProcessor.bind_command(command4Remaining, 'remain', help_info='description4', suffix='<param>')
-    argsProcessor.bind_command(command5Poll, 'poll', help_info='description5')
-    argsProcessor.bind_option(command4Remaining, '--remain', help_info='join strings')
+    argsProcessor.bind_command(command1, 'command1', description='description1')
+    argsProcessor.bind_command(command2, ['command2', 'command22'], description='description2', suffix='<param>')
+    argsProcessor.bind_command(command3, ['command3', 'command33'], description='description2', suffix='<param>')
+    argsProcessor.bind_command(command4Remaining, 'remain', description='description4', suffix='<param>')
+    argsProcessor.bind_command(command5Poll, 'poll', description='description5')
+    argsProcessor.bind_option(command4Remaining, '--remain', description='join strings')
     argsProcessor.bind_option(commandPrintVersionOnly, '-v2')
-    argsProcessor.bind_command(command6SetPara, '--set-para', help_info='set para')
+    argsProcessor.bind_command(command6SetPara, '--set-para', description='set para')
     argsProcessor.bind_param('para', '--para', 'set para')
     return argsProcessor
 
+
 def test_ArgsProcessor_noArg():
     # basic execution with no args
-    with mockArgs(None):
+    with mock_args(None):
         # prints help and exit
-        assertSystemExit(lambda: ArgsProcessor('appName', '1.0.1').process_all())
+        assert_system_exit(lambda: ArgsProcessor('appName', '1.0.1').process_all())
+
 
 def test_ArgsProcessor_bindingsSetup():
     # test bindings setup
-    with mockArgs(None):
+    with mock_args(None):
         sampleProcessor1()
+
 
 def test_ArgsProcessor_bindDefaultAction():
     # test bindings
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         sampleProcessor1().bind_default_action(command1).process_all()
         assert out.getvalue() == 'None\n'
-    with mockArgs(['-h']), mockOutput() as out:
-        assertSystemExit(lambda: sampleProcessor1().bind_default_action(command1).process_all())
+    with mock_args(['-h']), mock_output() as out:
+        assert_system_exit(lambda: sampleProcessor1().bind_default_action(command1).process_all())
     # rebinding
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         sampleProcessor1().bind_default_action(command1).bind_default_action(commandDupa).process_all()
         assert out.getvalue() == 'dupa\n'
 
+
 def test_ArgsProcessor_bindDefaultAction():
     # test bindings
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         sampleProcessor1().bind_default_action(command1).process_all()
         assert out.getvalue() == 'None\n'
 
+
 def test_ArgsProcessor_optionsFirst():
     # test processing options first
-    with mockArgs(['-h', 'dupa']):
+    with mock_args(['-h', 'dupa']):
         # prints help and exit
-        assertSystemExit(lambda: sampleProcessor1().process_all())
+        assert_system_exit(lambda: sampleProcessor1().process_all())
+
 
 def test_ArgsProcessor_noNextArg():
     # test lack of next argument
-    with mockArgs(['command2']), mockOutput() as out:
+    with mock_args(['command2']), mock_output() as out:
         sampleProcessor1().process_all()
         assert 'ERROR' in out.getvalue()
         assert 'no param given' in out.getvalue()
-    with mockArgs(['command33']), mockOutput() as out:
+    with mock_args(['command33']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == 'None\n'
+
 
 def test_ArgsProcessor_givenParam():
     # test given param
-    with mockArgs(['command3', 'dupa']), mockOutput() as out:
+    with mock_args(['command3', 'dupa']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == 'dupa\n'
-    with mockArgs(['command2', 'dupa']), mockOutput() as out:
+    with mock_args(['command2', 'dupa']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == 'dupa\n'
+
 
 def test_ArgsProcessor_binding():
     # test binding with no argProcessor
-    with mockArgs(['command1']), mockOutput() as out:
+    with mock_args(['command1']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == 'None\n'
+
 
 def test_ArgsProcessor_pollRemainingJoined():
     # test pollRemainingJoined():
-    with mockArgs(['remain']), mockOutput() as out:
+    with mock_args(['remain']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == '\n'
-    with mockArgs(['remain', '1']), mockOutput() as out:
+    with mock_args(['remain', '1']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == '1\n'
-    with mockArgs(['remain', '1', 'abc', 'd']), mockOutput() as out:
+    with mock_args(['remain', '1', 'abc', 'd']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == '1 abc d\n'
 
+
 def test_ArgsProcessor_pollRemaining():
-    with mockArgs(['remaining', 'jasna', 'dupa']), mockOutput() as out:
+    with mock_args(['remaining', 'jasna', 'dupa']), mock_output() as out:
         sampleProcessor1().bind_default_action(commandpollRemaining).process_all()
         assert out.getvalue() == "['remaining', 'jasna', 'dupa']\n"
 
+
 def test_ArgsProcessor_optionsPrecedence():
     # test options precedence
-    with mockArgs(['-v2', 'command1']), mockOutput() as out:
+    with mock_args(['-v2', 'command1']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == 'appName v1.0.1\nNone\n'
-    with mockArgs(['--remain', '1', 'abc']), mockOutput() as out:
+    with mock_args(['--remain', '1', 'abc']), mock_output() as out:
         sampleProcessor1().bind_default_action(None).process_all()
         assert out.getvalue() == '1 abc\n'
-    with mockArgs(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mockOutput() as out:
+    with mock_args(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == '1 abc\njasna dupa\n'
-    with mockArgs(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mockOutput() as out:
+    with mock_args(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mock_output() as out:
         sampleProcessor1().process_options()
         assert out.getvalue() == '1 abc\n'
 
+
 def test_ArgsProcessor_poll():
     # test polling
-    with mockArgs(['poll', '123', '456', '789']), mockOutput() as out:
+    with mock_args(['poll', '123', '456', '789']), mock_output() as out:
         sampleProcessor1().process_all()
         assert out.getvalue() == '123\n456\n789\n'
 
+
 def test_ArgsProcessor_removingArgs():
     # test removing parameters
-    with mockArgs(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mockOutput() as out:
+    with mock_args(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mock_output() as out:
         argsProcessor = sampleProcessor1()
         argsProcessor.process_options()
         argsProcessor.process_options()
         argsProcessor.process_options()
         assert out.getvalue() == '1 abc\n'
-    with mockArgs(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mockOutput() as out:
+    with mock_args(['remain', 'jasna', 'dupa', '--remain', '1', 'abc']), mock_output() as out:
         argsProcessor = sampleProcessor1()
         argsProcessor.process_options()
         argsProcessor.process_all()
         assert out.getvalue() == '1 abc\njasna dupa\n'
 
+
 def test_ArgsProcessor_unknownArg():
     # test unknown argument
-    with mockArgs(['dupa']), mockOutput() as out:
+    with mock_args(['dupa']), mock_output() as out:
         sampleProcessor1().process_all()
         assert 'unknown argument: dupa' in out.getvalue()
 
+
 def test_ArgsProcessor_defaultAction():
-    with mockArgs(['dupa']), mockOutput() as out:
+    with mock_args(['dupa']), mock_output() as out:
         argsProcessor = sampleProcessor1()
-        argsProcessor.bind_default_action(command2, help_info='defaultAction', suffix='<param>')
+        argsProcessor.bind_default_action(command2, description='defaultAction', suffix='<param>')
         argsProcessor.process_all()
         assert out.getvalue() == 'dupa\n'
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         argsProcessor = sampleProcessor1()
-        argsProcessor.bind_default_action(command1, help_info='defaultAction', suffix='<param>')
+        argsProcessor.bind_default_action(command1, description='defaultAction', suffix='<param>')
         argsProcessor.process_all()
         assert out.getvalue() == 'None\n'
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         argsProcessor = ArgsProcessor('appName', '1.0.1')
-        argsProcessor.bind_default_action(print_help, help_info='defaultAction', suffix='<param>')
-        assertSystemExit(lambda: argsProcessor.process_all())
+        argsProcessor.bind_default_action(print_help, description='defaultAction', suffix='<param>')
+        assert_system_exit(lambda: argsProcessor.process_all())
         assert '<param>' in out.getvalue()
         assert 'defaultAction' in out.getvalue()
     # test getting params
-    with mockArgs(['dupa2']), mockOutput() as out:
+    with mock_args(['dupa2']), mock_output() as out:
         argsProcessor = ArgsProcessor('appName', '1.0.1')
-        argsProcessor.bind_default_action(command2, help_info='defaultAction', suffix='<param>')
+        argsProcessor.bind_default_action(command2, description='defaultAction', suffix='<param>')
         argsProcessor.process_all()
         assert out.getvalue() == 'dupa2\n'
 
+
 def test_ArgsProcessor_bindDefaultOptions():
-    with mockArgs(['-v']), mockOutput() as out:
-        assertSystemExit(lambda: ArgsProcessor('appName', '1.0.1').process_all())
+    with mock_args(['-v']), mock_output() as out:
+        assert_system_exit(lambda: ArgsProcessor('appName', '1.0.1').process_all())
         assert out.getvalue() == 'appName v1.0.1\n'
-    with mockArgs(['-v', '-v']), mockOutput() as out:
-        assertSystemExit(lambda: ArgsProcessor('appName', '1.0.1').process_all())
+    with mock_args(['-v', '-v']), mock_output() as out:
+        assert_system_exit(lambda: ArgsProcessor('appName', '1.0.1').process_all())
         assert out.getvalue() == 'appName v1.0.1\n'
-    with mockArgs(['-h']), mockOutput() as out:
+    with mock_args(['-h']), mock_output() as out:
         argsProcessor = ArgsProcessor('appName', '1.0.1')
-        assertSystemExit(lambda: argsProcessor.process_all())
+        assert_system_exit(lambda: argsProcessor.process_all())
+
 
 def test_ArgsProcessor_settingParams():
-    with mockArgs(['--para', 'dup']), mockOutput() as out:
+    with mock_args(['--para', 'dup']), mock_output() as out:
         argsProcessor = sampleProcessor1().bind_default_action(None)
         argsProcessor.process_all()
         assert argsProcessor.get_param('para') == 'dup'
-    with mockArgs(['--set-para', 'dup']), mockOutput() as out:
+    with mock_args(['--set-para', 'dup']), mock_output() as out:
         argsProcessor = sampleProcessor1()
         argsProcessor.process_all()
         assert argsProcessor.get_param('para') == 'dup'
+
 
 def actionSetObjectParam(argsProcessor):
     argsProcessor.set_param('liczba', int(7))
 
+
 def test_ArgsProcessor_objectParams():
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         argsProcessor = sampleProcessor1().bind_default_action(actionSetObjectParam)
         argsProcessor.process_all()
         assert not argsProcessor.is_param('dupa')
@@ -416,85 +493,93 @@ def test_ArgsProcessor_objectParams():
         assert argsProcessor.is_param('liczba')
         assert argsProcessor.get_param('liczba') is 7
 
+
 def test_ArgsProcessor_optionsAndDefaultAcction():
-    with mockArgs(['-v2', '-v2']), mockOutput() as out:
+    with mock_args(['-v2', '-v2']), mock_output() as out:
         argsProcessor = sampleProcessor1()
         argsProcessor.bind_option(commandPrintVersionOnly, '-v2')
-        argsProcessor.bind_default_action(command1, help_info='defaultAction', suffix='<param>')
+        argsProcessor.bind_default_action(command1, description='defaultAction', suffix='<param>')
         argsProcessor.process_all()
         assert out.getvalue() == 'appName v1.0.1\nappName v1.0.1\nNone\n'
 
+
 def test_ArgsProcessor_toomanyargs():
-    with mockArgs(['command1', 'two', 'much']), mockOutput() as out:
+    with mock_args(['command1', 'two', 'much']), mock_output() as out:
         sampleProcessor1().process_all()
         output = out.getvalue()
         assert 'None' in output
         assert 'too many arguments: two much' in output
 
+
 def test_ArgsProcessor_defaultActionNone():
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         sampleProcessor1().clear().bind_default_action(None).process_all()
         assert out.getvalue() == ''
-    with mockArgs(None), mockOutput() as out:
-        assertSystemExit(lambda: sampleProcessor1().clear().process_all())
+    with mock_args(None), mock_output() as out:
+        assert_system_exit(lambda: sampleProcessor1().clear().process_all())
+
 
 def test_ArgsProcessor_bindFlag():
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         sampleProcessor1().bind_flag('force').bind_default_action(actionIsForce).process_all()
         assert out.getvalue() == 'force is: False\n'
-    with mockArgs(['--force']), mockOutput() as out:
+    with mock_args(['--force']), mock_output() as out:
         sampleProcessor1().bind_flag('force').bind_default_action(actionIsForce).process_all()
         assert out.getvalue() == 'force is: True\n'
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         sampleProcessor1().bind_flag('force', '--for').bind_default_action(actionIsForce).process_all()
         assert out.getvalue() == 'force is: False\n'
-    with mockArgs(['--for']), mockOutput() as out:
+    with mock_args(['--for']), mock_output() as out:
         sampleProcessor1().bind_flag('force', '--for').bind_default_action(actionIsForce).process_all()
         assert out.getvalue() == 'force is: True\n'
     # single letter
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         sampleProcessor1().bind_flag('f').bind_default_action(actionIsForce).process_all()
         assert out.getvalue() == 'force is: False\n'
-    with mockArgs(['-f']), mockOutput() as out:
+    with mock_args(['-f']), mock_output() as out:
         sampleProcessor1().bind_flag('f').bind_default_action(actionIsF).process_all()
         assert out.getvalue() == 'force is: True\n'
-    with mockArgs(['-f']), mockOutput() as out:
+    with mock_args(['-f']), mock_output() as out:
         sampleProcessor1().bind_flag('force', ['-f', '--force']).bind_default_action(actionIsForce).process_all()
         assert out.getvalue() == 'force is: True\n'
+
 
 def actionPrintParam(ap):
     print('param is: %s' % ap.get_param('param'))
     print('p is: %s' % ap.get_param('p'))
 
+
 def test_ArgsProcessor_bindParam():
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('param', help_info='set param').bind_default_action(actionPrintParam).process_all()
+        ap.bind_param('param', description='set param').bind_default_action(actionPrintParam).process_all()
         assert 'param is: None\n' in out.getvalue()
-    with mockArgs(['--param', 'dupa']), mockOutput() as out:
+    with mock_args(['--param', 'dupa']), mock_output() as out:
         ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('param', help_info='set param').bind_default_action(actionPrintParam).process_all()
+        ap.bind_param('param', description='set param').bind_default_action(actionPrintParam).process_all()
         assert 'param is: dupa\n' in out.getvalue()
-    with mockArgs(['--parameter', 'dupa']), mockOutput() as out:
+    with mock_args(['--parameter', 'dupa']), mock_output() as out:
         ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('param', keywords='--parameter', help_info='set param').bind_default_action(
+        ap.bind_param('param', keywords='--parameter', description='set param').bind_default_action(
             actionPrintParam).process_all()
         assert 'param is: dupa\n' in out.getvalue()
     # single letter
-    with mockArgs(None), mockOutput() as out:
+    with mock_args(None), mock_output() as out:
         ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('p', help_info='set param').bind_default_action(actionPrintParam).process_all()
+        ap.bind_param('p', description='set param').bind_default_action(actionPrintParam).process_all()
         assert 'p is: None\n' in out.getvalue()
-    with mockArgs(['-p', 'dupa']), mockOutput() as out:
+    with mock_args(['-p', 'dupa']), mock_output() as out:
         ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('p', help_info='set param').bind_default_action(actionPrintParam).process_all()
+        ap.bind_param('p', description='set param').bind_default_action(actionPrintParam).process_all()
         assert 'p is: dupa\n' in out.getvalue()
+
 
 def actionPrintFromTo(argsProcessor):
     print('range: ' + argsProcessor.get_param('fromDate') + ' - ' + argsProcessor.get_param('toDate'))
 
+
 def test_ArgsProcessor_2params():
-    with mockArgs(['print', '--from', 'today', '--to', 'tomorrow']), mockOutput() as out:
+    with mock_args(['print', '--from', 'today', '--to', 'tomorrow']), mock_output() as out:
         argsProcessor = ArgsProcessor('appName', '1.0.1')
         argsProcessor.bind_param('fromDate', keywords='--from')
         argsProcessor.bind_param('toDate', keywords='--to')
@@ -502,11 +587,13 @@ def test_ArgsProcessor_2params():
         argsProcessor.process_all()
         assert 'range: today - tomorrow' in out.getvalue()
 
+
 def actionGetParam(ap):
     print(ap.get_param('musthave', required=True))
 
+
 def test_getMissingRequiredParam():
-    with mockArgs([]), mockOutput() as out:
+    with mock_args([]), mock_output() as out:
         argsProcessor = ArgsProcessor('appName', '1.0.1')
         argsProcessor.bind_param('musthave')
         argsProcessor.bind_default_action(actionGetParam)
