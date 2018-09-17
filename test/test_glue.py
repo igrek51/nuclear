@@ -30,6 +30,14 @@ def assert_system_exit(action):
         assert str(e) == '0'
 
 
+def assert_ap_exit(ap):
+    assert_system_exit(lambda: ap.process_all())
+
+
+def assert_ap_error(ap, expected_error=None):
+    assert_error(lambda: ap.process_all(), expected_error)
+
+
 class MockIO:
     def __init__(self, in_args_list=None):
         # mock cli input
@@ -53,18 +61,11 @@ class MockIO:
     def output(self):
         return self.new_out.getvalue()
 
+    def output_strip(self):
+        return self.output().strip()
+
     def output_contains(self, in_str):
         return in_str in self.output()
-
-
-def mock_args(args_list):
-    if not args_list:
-        args_list = []
-    return mock.patch.object(sys, 'argv', ['glue'] + args_list)
-
-
-def mock_output():
-    return mock.patch('sys.stdout', new=StringIO())
 
 
 # ------- TESTS -------
@@ -226,19 +227,19 @@ def test_time_conversions():
 
 # _CommandArgRule
 def test_CommandArgRule():
-    assert CommandArgRule(True, None, 'name', 'description', 'syntaxSuffix')._display_syntax_prefix() == 'name'
-    assert CommandArgRule(True, None, ['name1', 'name2'], 'description',
+    assert CliArgRule(True, None, 'name', 'description', 'syntaxSuffix')._display_syntax_prefix() == 'name'
+    assert CliArgRule(True, None, ['name1', 'name2'], 'description',
                           'syntaxSuffix')._display_syntax_prefix() == 'name1, name2'
-    assert CommandArgRule(True, None, ['name1', 'name2'], 'description', None).display_syntax() == 'name1, name2'
-    assert CommandArgRule(True, None, ['name1', 'name2'], 'description',
+    assert CliArgRule(True, None, ['name1', 'name2'], 'description', None).display_syntax() == 'name1, name2'
+    assert CliArgRule(True, None, ['name1', 'name2'], 'description',
                           '<suffix>').display_syntax() == 'name1, name2 <suffix>'
-    assert CommandArgRule(True, None, ['name1', 'name2'], 'description',
+    assert CliArgRule(True, None, ['name1', 'name2'], 'description',
                           ' <suffix>').display_syntax() == 'name1, name2 <suffix>'
-    assert CommandArgRule(True, None, ['name'], 'description', None).display_help(5) == 'name  - description'
-    assert CommandArgRule(True, None, ['name'], 'description', None).display_help(3) == 'name - description'
-    assert CommandArgRule(True, None, ['name'], 'description', '<suffix>').display_help(
+    assert CliArgRule(True, None, ['name'], 'description', None).display_help(5) == 'name  - description'
+    assert CliArgRule(True, None, ['name'], 'description', None).display_help(3) == 'name - description'
+    assert CliArgRule(True, None, ['name'], 'description', '<suffix>').display_help(
         3) == 'name <suffix> - description'
-    assert CommandArgRule(True, None, ['name'], 'description', '<s>').display_help(10) == 'name <s>   - description'
+    assert CliArgRule(True, None, ['name'], 'description', '<s>').display_help(10) == 'name <s>   - description'
 
 
 # ArgsProcessor
@@ -296,17 +297,17 @@ def actionIsF(argsProcessor):
 
 
 def sampleProcessor1():
-    argsProcessor = ArgsProcessor('appName', '1.0.1')
-    argsProcessor.bind_command(command1, 'command1', description='description1')
-    argsProcessor.bind_command(command2, ['command2', 'command22'], description='description2', suffix='<param>')
-    argsProcessor.bind_command(command3, ['command3', 'command33'], description='description2', suffix='<param>')
-    argsProcessor.bind_command(command4Remaining, 'remain', description='description4', suffix='<param>')
-    argsProcessor.bind_command(command5Poll, 'poll', description='description5')
-    argsProcessor.bind_option(command4Remaining, '--remain', description='join strings')
-    argsProcessor.bind_option(commandPrintVersionOnly, '-v2')
-    argsProcessor.bind_command(command6SetPara, '--set-para', description='set para')
-    argsProcessor.bind_param('para', '--para', 'set para')
-    return argsProcessor
+    ap = ArgsProcessor('appName', '1.0.1')
+    ap.bind_command(command1, 'command1', description='description1')
+    ap.bind_command(command2, ['command2', 'command22'], description='description2', suffix='<param>')
+    ap.bind_command(command3, ['command3', 'command33'], description='description2', suffix='<param>')
+    ap.bind_command(command4Remaining, 'remain', description='description4', suffix='<param>')
+    ap.bind_command(command5Poll, 'poll', description='description5')
+    ap.bind_option(command4Remaining, '--remain', description='join strings')
+    ap.bind_option(commandPrintVersionOnly, '-v2')
+    ap.bind_command(command6SetPara, '--set-para', description='set para')
+    ap.add_param('para', '--para', 'set para')
+    return ap
 
 
 def test_ArgsProcessor_noArg():
@@ -325,14 +326,12 @@ def test_ArgsProcessor_bindingsSetup():
 def test_ArgsProcessor_bindDefaultAction():
     # test bindings
     with MockIO([]) as mockio:
-        sampleProcessor1().bind_default_action(command1).process_all()
-        assert mockio.output() == 'None\n'
+        ap = ArgsProcessor(default_action=commandDupa)
+        ap.process_all()
+        assert mockio.output().strip() == 'dupa'
     with MockIO(['-h']) as mockio:
-        assert_system_exit(lambda: sampleProcessor1().bind_default_action(command1).process_all())
-    # rebinding
-    with MockIO([]) as mockio:
-        sampleProcessor1().bind_default_action(command1).bind_default_action(commandDupa).process_all()
-        assert mockio.output() == 'dupa\n'
+        ap = ArgsProcessor(default_action=command1)
+        assert_ap_exit(ap)
 
 
 def test_ArgsProcessor_bindDefaultAction():
@@ -384,16 +383,17 @@ def test_ArgsProcessor_pollRemainingJoined():
         assert mockio.output() == '\n'
     with MockIO(['remain', '1']) as mockio:
         sampleProcessor1().process_all()
-        assert mockio.output() == '1\n'
+        assert mockio.output_strip() == '1'
     with MockIO(['remain', '1', 'abc', 'd']) as mockio:
         sampleProcessor1().process_all()
-        assert mockio.output() == '1 abc d\n'
+        assert mockio.output_strip() == '1 abc d'
 
 
 def test_ArgsProcessor_pollRemaining():
     with MockIO(['remaining', 'jasna', 'dupa']) as mockio:
-        sampleProcessor1().bind_default_action(commandpollRemaining).process_all()
-        assert mockio.output() == "['remaining', 'jasna', 'dupa']\n"
+        ap = ArgsProcessor(default_action=commandpollRemaining)
+        ap.process_all()
+        assert mockio.output_strip() == "['remaining', 'jasna', 'dupa']"
 
 
 def test_ArgsProcessor_optionsPrecedence():
@@ -443,26 +443,21 @@ def test_ArgsProcessor_unknownArg():
 
 def test_ArgsProcessor_defaultAction():
     with MockIO(['dupa']) as mockio:
-        argsProcessor = sampleProcessor1()
-        argsProcessor.bind_default_action(command2, description='defaultAction', suffix='<param>')
-        argsProcessor.process_all()
+        ap = ArgsProcessor('appName', '1.0.1', default_action=command2)
+        ap.process_all()
         assert mockio.output() == 'dupa\n'
     with MockIO([]) as mockio:
-        argsProcessor = sampleProcessor1()
-        argsProcessor.bind_default_action(command1, description='defaultAction', suffix='<param>')
-        argsProcessor.process_all()
+        ap = ArgsProcessor('appName', '1.0.1', default_action=command2)
+        ap.process_all()
         assert mockio.output() == 'None\n'
     with MockIO([]) as mockio:
-        argsProcessor = ArgsProcessor('appName', '1.0.1')
-        argsProcessor.bind_default_action(print_help, description='defaultAction', suffix='<param>')
-        assert_system_exit(lambda: argsProcessor.process_all())
-        assert '<param>' in mockio.output()
-        assert 'defaultAction' in mockio.output()
+        ap = ArgsProcessor('appName', '1.0.1', default_action=print_help)
+        ap.process_all()
+        assert_system_exit(lambda: ap.process_all())
     # test getting params
     with MockIO(['dupa2']) as mockio:
-        argsProcessor = ArgsProcessor('appName', '1.0.1')
-        argsProcessor.bind_default_action(command2, description='defaultAction', suffix='<param>')
-        argsProcessor.process_all()
+        ap = ArgsProcessor('appName', '1.0.1', default_action=command2)
+        ap.process_all()
         assert mockio.output() == 'dupa2\n'
 
 
@@ -480,9 +475,9 @@ def test_ArgsProcessor_bindDefaultOptions():
 
 def test_ArgsProcessor_settingParams():
     with MockIO(['--para', 'dup']) as mockio:
-        argsProcessor = sampleProcessor1().bind_default_action(None)
-        argsProcessor.process_all()
-        assert argsProcessor.get_param('para') == 'dup'
+        ap = sampleProcessor1()
+        ap.process_all()
+        assert ap.get_param('para') == 'dup'
     with MockIO(['--set-para', 'dup']) as mockio:
         argsProcessor = sampleProcessor1()
         argsProcessor.process_all()
@@ -495,7 +490,7 @@ def actionSetObjectParam(argsProcessor):
 
 def test_ArgsProcessor_objectParams():
     with MockIO([]) as mockio:
-        argsProcessor = sampleProcessor1().bind_default_action(actionSetObjectParam)
+        argsProcessor = sampleProcessor1(default_action=actionSetObjectParam)
         argsProcessor.process_all()
         assert not argsProcessor.is_param('dupa')
         assert argsProcessor.get_param('dupa') is None
@@ -505,51 +500,48 @@ def test_ArgsProcessor_objectParams():
 
 def test_ArgsProcessor_optionsAndDefaultAcction():
     with MockIO(['-v2', '-v2']) as mockio:
-        argsProcessor = sampleProcessor1()
-        argsProcessor.bind_option(commandPrintVersionOnly, '-v2')
-        argsProcessor.bind_default_action(command1, description='defaultAction', suffix='<param>')
-        argsProcessor.process_all()
+        ap = ArgsProcessor('appName', '1.0.1', default_action=command1)
+        ap.bind_command(command1, 'command1', description='description1')
+        ap.process_all()
         assert mockio.output() == 'appName v1.0.1\nappName v1.0.1\nNone\n'
 
 
 def test_ArgsProcessor_toomanyargs():
     with MockIO(['command1', 'two', 'much']) as mockio:
         sampleProcessor1().process_all()
-        output = mockio.output()
-        assert 'None' in output
-        assert 'too many arguments: two much' in output
-
-
-def test_ArgsProcessor_defaultActionNone():
-    with MockIO([]) as mockio:
-        sampleProcessor1().clear().bind_default_action(None).process_all()
-        assert mockio.output() == ''
-    with MockIO([]) as mockio:
-        assert_system_exit(lambda: sampleProcessor1().clear().process_all())
+        assert 'None' in mockio.output()
+        assert 'too many arguments: two much' in mockio.output()
 
 
 def test_ArgsProcessor_bindFlag():
     with MockIO([]) as mockio:
-        sampleProcessor1().bind_flag('force').bind_default_action(actionIsForce).process_all()
+        ap = ArgsProcessor(default_action=actionIsForce)
+        ap.add_flag('force').process_all()
         assert mockio.output() == 'force is: False\n'
     with MockIO(['--force']) as mockio:
-        sampleProcessor1().bind_flag('force').bind_default_action(actionIsForce).process_all()
+        ap = ArgsProcessor(default_action=actionIsForce)
+        ap.add_flag('force').process_all()
         assert mockio.output() == 'force is: True\n'
     with MockIO([]) as mockio:
-        sampleProcessor1().bind_flag('force', '--for').bind_default_action(actionIsForce).process_all()
+        ap = ArgsProcessor(default_action=actionIsForce)
+        ap.add_flag('force', '--for').process_all()
         assert mockio.output() == 'force is: False\n'
     with MockIO(['--for']) as mockio:
-        sampleProcessor1().bind_flag('force', '--for').bind_default_action(actionIsForce).process_all()
+        ap = ArgsProcessor(default_action=actionIsForce)
+        ap.add_flag('force', '--for').process_all()
         assert mockio.output() == 'force is: True\n'
     # single letter
     with MockIO([]) as mockio:
-        sampleProcessor1().bind_flag('f').bind_default_action(actionIsForce).process_all()
+        ap = ArgsProcessor(default_action=actionIsForce)
+        ap.add_flag('f').process_all()
         assert mockio.output() == 'force is: False\n'
     with MockIO(['-f']) as mockio:
-        sampleProcessor1().bind_flag('f').bind_default_action(actionIsF).process_all()
+        ap = ArgsProcessor(default_action=actionIsF)
+        ap.add_flag('f').process_all()
         assert mockio.output() == 'force is: True\n'
     with MockIO(['-f']) as mockio:
-        sampleProcessor1().bind_flag('force', ['-f', '--force']).bind_default_action(actionIsForce).process_all()
+        ap = ArgsProcessor(default_action=actionIsForce)
+        ap.add_flag('force', ['-f', '--force']).process_all()
         assert mockio.output() == 'force is: True\n'
 
 
@@ -558,28 +550,27 @@ def actionPrintParam(ap):
     print('p is: %s' % ap.get_param('p'))
 
 
-def test_ArgsProcessor_bindParam():
+def test_args_add_Param():
     with MockIO([]) as mockio:
-        ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('param', description='set param').bind_default_action(actionPrintParam).process_all()
+        ap = ArgsProcessor(default_action=actionPrintParam)
+        ap.add_param('param', description='set param').process_all()
         assert 'param is: None\n' in mockio.output()
     with MockIO(['--param', 'dupa']) as mockio:
-        ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('param', description='set param').bind_default_action(actionPrintParam).process_all()
+        ap = ArgsProcessor(default_action=actionPrintParam)
+        ap.add_param('param', description='set param').process_all()
         assert 'param is: dupa\n' in mockio.output()
     with MockIO(['--parameter', 'dupa']) as mockio:
-        ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('param', keywords='--parameter', description='set param').bind_default_action(
-            actionPrintParam).process_all()
+        ap = ArgsProcessor(default_action=actionPrintParam)
+        ap.add_param('param', keywords='--parameter', description='set param').process_all()
         assert 'param is: dupa\n' in mockio.output()
     # single letter
     with MockIO([]) as mockio:
-        ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('p', description='set param').bind_default_action(actionPrintParam).process_all()
+        ap = ArgsProcessor(default_action=actionPrintParam)
+        ap.add_param('p', description='set param').process_all()
         assert 'p is: None\n' in mockio.output()
     with MockIO(['-p', 'dupa']) as mockio:
-        ap = ArgsProcessor('appName', '1.0.1')
-        ap.bind_param('p', description='set param').bind_default_action(actionPrintParam).process_all()
+        ap = ArgsProcessor(default_action=actionPrintParam)
+        ap.add_param('p', description='set param').process_all()
         assert 'p is: dupa\n' in mockio.output()
 
 
@@ -589,11 +580,11 @@ def actionPrintFromTo(argsProcessor):
 
 def test_ArgsProcessor_2params():
     with MockIO(['print', '--from', 'today', '--to', 'tomorrow']) as mockio:
-        argsProcessor = ArgsProcessor('appName', '1.0.1')
-        argsProcessor.bind_param('fromDate', keywords='--from')
-        argsProcessor.bind_param('toDate', keywords='--to')
-        argsProcessor.bind_command(actionPrintFromTo, 'print')
-        argsProcessor.process_all()
+        ap = ArgsProcessor('appName', '1.0.1')
+        ap.add_param('fromDate', keywords='--from')
+        ap.add_param('toDate', keywords='--to')
+        ap.bind_command(actionPrintFromTo, 'print')
+        ap.process_all()
         assert 'range: today - tomorrow' in mockio.output()
 
 
@@ -601,10 +592,96 @@ def actionGetParam(ap):
     print(ap.get_param('musthave', required=True))
 
 
-def test_getMissingRequiredParam():
+def test_args_getMissingRequiredParam():
     with MockIO([]) as mockio:
-        argsProcessor = ArgsProcessor('appName', '1.0.1')
-        argsProcessor.bind_param('musthave')
-        argsProcessor.bind_default_action(actionGetParam)
-        argsProcessor.process_all()
+        ap = ArgsProcessor('appName', '1.0.1', default_action=actionGetParam)
+        ap.add_param('musthave')
+        ap.process_all()
         assert 'no required param given: musthave' in mockio.output()
+
+
+def action_print_1():
+    print('1')
+
+
+def action_print_2():
+    print('2')
+
+
+def test_args_default_action():
+    with MockIO([]) as mockio:
+        ArgsProcessor(default_action=action_print_1).process_all()
+        assert mockio.output_contains('1')
+    # default action - help
+    with MockIO([]) as mockio:
+        ap = ArgsProcessor()
+        assert_ap_exit(ap)
+    # default action - help
+    with MockIO(['print2']) as mockio:
+        ap = ArgsProcessor(default_action=action_print_1).process_all()
+        ap.subcommand('print2', action=action_print_2)
+        ap.process_all()
+        assert mockio.output_contains('2')
+        assert not mockio.output_contains('1')
+
+
+def test_args_multilevel_commands():
+    with MockIO(['test']) as mockio:
+        ap = ArgsProcessor()
+        ap_test = ap.add_command('test')
+        ap_test_dupy = ap_test.add_command('dupy', action=action_print_1)
+        ap_test_dupy.add_command('2', action=action_print_2)
+        assert_ap_error(ap)
+    with MockIO(['test', 'dupy']) as mockio:
+        ap = ArgsProcessor()
+        ap_test = ap.add_command('test')
+        ap_test_dupy = ap_test.add_command('dupy', action=action_print_1)
+        ap_test_dupy.add_command('2', action=action_print_2)
+        ap.process_all()
+        assert mockio.output().strip() == '1'
+    with MockIO(['test', 'dupy', '2']) as mockio:
+        ap = ArgsProcessor()
+        ap_test = ap.add_command('test')
+        ap_test_dupy = ap_test.add_command('dupy', action=action_print_1)
+        ap_test_dupy.add_command('2', action=action_print_2)
+        ap.process_all()
+        assert mockio.output().strip() == '2'
+
+
+def action_print_param(ap):
+    print(ap.get_param('param'))
+
+
+def test_args_multilevel_params():
+    with MockIO(['test', 'dupy', '--param=dupa']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_command('test').add_command('dupy', action=action_print_param).add_param('param')
+        ap.process_all()
+        assert mockio.output().strip() == 'dupa'
+    with MockIO(['test', 'dupy', '--param', 'dupa']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_command('test').add_command('dupy', action=action_print_param).add_param('param')
+        ap.process_all()
+        assert mockio.output().strip() == 'dupa'
+
+
+def test_args_required_param():
+    with MockIO(['--param', 'dupa']) as mockio:
+        ap = ArgsProcessor(default_action=action_print_param)
+        ap.add_param('param')
+        ap.process_all()
+        assert mockio.output().strip() == 'dupa'
+    with MockIO(['--param']) as mockio:
+        ap = ArgsProcessor(default_action=action_print_param)
+        ap.add_param('param')
+        ap.process_all()
+        assert mockio.output().strip() == 'None'
+    with MockIO(['--param', 'dupa']) as mockio:
+        ap = ArgsProcessor(default_action=action_print_param)
+        ap.add_param('param', required=True)
+        ap.process_all()
+        assert mockio.output().strip() == 'dupa'
+    with MockIO(['--param']) as mockio:
+        ap = ArgsProcessor(default_action=action_print_param)
+        ap.add_param('param', required=True)
+        assert_ap_error(ap)

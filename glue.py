@@ -42,7 +42,7 @@ def exit_now(message=None):
     sys.exit(0)
 
 
-# ----- Input
+# ----- Input -----
 def input_string(prompt=None):
     """raw input compatible with python 2 and 3"""
     try:
@@ -61,7 +61,7 @@ def input_required(prompt):
         return inputted
 
 
-# ----- Shell
+# ----- Shell -----
 def shell(cmd):
     err_code = shell_error_code(cmd)
     if err_code != 0:
@@ -81,7 +81,7 @@ def shell_output(cmd, as_bytes=False):
         return output.decode('utf-8')
 
 
-# ----- String Splitting
+# ----- String Splitting -----
 def split_lines(str_in):
     all_lines = str_in.splitlines()
     return list(filter(lambda l: len(l) > 0, all_lines))  # filter nonempty
@@ -102,7 +102,7 @@ def split_to_tuples(lines, attrs_count=None, splitter='\t'):
     return list(map(lambda line: split_to_tuple(line, attrs_count, splitter), lines))
 
 
-# ----- RegEx
+# ----- RegEx -----
 def regex_match(str_in, regex_match_pattern):
     regex_matcher = re.compile(regex_match_pattern)
     return bool(regex_matcher.match(str_in))
@@ -139,7 +139,7 @@ def regex_replace_file(file_path, regex_match_pattern, regex_replace_pattern):
     return '\n'.join(lines)
 
 
-# ----- File, directories operations
+# ----- File, directories operations -----
 def read_file(file_path):
     with open(file_path, 'rb') as f:
         return f.read().decode('utf-8')
@@ -171,7 +171,7 @@ def script_real_dir():
     return os.path.dirname(os.path.realpath(__file__))
 
 
-# ----- Time format converters
+# ----- Time format converters -----
 def str2time(time_raw, pattern):
     """pattern: %Y-%m-%d, %H:%M:%S"""
     try:
@@ -187,7 +187,7 @@ def time2str(date_time, pattern):
     return date_time.strftime(pattern)
 
 
-# ----- Collections helpers - syntax reminders
+# ----- Collections helpers - syntax reminders -----
 def filter_list(condition, lst):
     # condition example: lambda l: len(l) > 0
     return list(filter(condition, lst))
@@ -198,11 +198,21 @@ def map_list(mapper, lst):
     return list(map(mapper, lst))
 
 
-# ----- CLI arguments rule
-class CommandArgRule:
-    def __init__(self, is_option, action, keywords, description, suffix):
-        self.isOption = is_option  # should it be processed first
-        self.action = action
+# ----- CLI arguments rule -----
+class CliArgRule:
+    def __init__(self, keywords=None, description=None, syntax=None, completer=None,
+                 completer_choices=None):
+        """
+        :param keywords: triggering keyword / keywords - string or list of string
+        :param description: description of action to show in help
+        :param syntax: syntax of action to show in help
+        :param completer: auto completer - possible choices generator
+        :param completer_choices: list of possible choices
+        """
+        self.help = description
+        self.syntax = syntax
+        self.completer = completer
+        self.completer_choices = completer_choices
         # store keywords list
         if not keywords:
             self.keywords = None
@@ -210,78 +220,129 @@ class CommandArgRule:
             self.keywords = keywords
         else:  # keyword as single string
             self.keywords = [keywords]
-        self.help = description
-        self.suffix = suffix
 
     def _display_syntax_prefix(self):
         return ', '.join(self.keywords) if self.keywords else ''
 
     def display_syntax(self):
-        syntax = self._display_syntax_prefix()
-        if self.suffix:
-            syntax += self.suffix if self.suffix[0] == ' ' else ' ' + self.suffix
-        return syntax
+        syntax_out = self._display_syntax_prefix()
+        if self.syntax:
+            syntax_out += self.syntax if self.syntax[0] == ' ' else ' ' + self.syntax
+        return syntax_out
 
     def display_help(self, syntax_padding):
-        disp_help = self.display_syntax()
+        display_help_out = self.display_syntax()
         if self.help:
-            disp_help = disp_help.ljust(syntax_padding) + ' - ' + self.help
-        return disp_help
+            display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + self.help
+        return display_help_out
 
 
-# ----- CLI arguments parser
+class CommandArgRule(CliArgRule):
+    def __init__(self, action, subparser, **kwargs):
+        """
+        :param keywords:
+        :param action: action to execute when triggered
+        :param description:
+        :param syntax:
+        :param completer:
+        :param completer_choices:
+        :param subparser:
+        """
+        super(CliArgRule, self).__init__(**kwargs)
+        self.subparser = subparser
+        self.action = action
+
+
+class ParamArgRule(CliArgRule):
+    def __init__(self, name, required, **kwargs):
+        super(CliArgRule, self).__init__(**kwargs)
+        self.name = name
+        self.required = required
+
+
+class FlagArgRule(CliArgRule):
+    def __init__(self, name, **kwargs):
+        super(CliArgRule, self).__init__(**kwargs)
+        self.name = name
+
+
+# ----- CLI arguments parser -----
 class CliSyntaxError(RuntimeError):
     pass
 
 
 class ArgsProcessor:
-    def __init__(self, app_name='Command Line Application', version='0.0.1'):
+    def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None):
         self._appName = app_name
         self._version = version
-        self._argsQue = sys.argv[1:]  # CLI arguments list
-        self._argsOffset = 0
-        self._default_action = None
-        self._arg_rules = []
+        self._default_action = default_action
+        self._syntax = syntax
+        self._rules_params = []
+        self._rules_flags = []
+        self._rules_commands = []
         self._params = {}
         self._flags = []
+        self._args_que = None
+        self._argsOffset = None
+        # default action - help
+        if not self._default_action:
+            self._default_action = print_help
         # bind default options: help, version
-        self.bind_option(print_help, ['-h', '--help'], description='display this help and exit')
-        self.bind_option(print_version, ['-v', '--version'], description='print version')
+        self.add_subcommand(['-h', '--help'], action=print_help, description='display this help and exit')
+        self.add_subcommand(['-v', '--version'], action=print_version, description='print version')
 
-    def clear(self):
-        # default action invoked when no command nor option is recognized or when arguments list is empty
-        self._default_action = None
-        self._arg_rules = []
-        self._params = {}
-        self._flags = []
+    def add_subcommand(self, keywords, action=None, description=None, syntax=None, completer=None,
+                       completer_choices=None):
+        """
+        Bind command keyword to an action. Command is processed after all params and flags.
+        It creates a sub-command processor to handle command specific params, flags or next level sub-commands.
+        :param keywords: trigger name or names (string or list of strings)
+        :param action: action to invoke when triggered
+        :param description: description of action to show in help
+        :param syntax: syntax of action to show in help
+        :param completer: auto completer - possible choices generator
+        :param completer_choices: list of possible choices
+        :return: next level subparser (with command context)
+        """
+        subparser = self._create_subparser(action=action)
+        self._rules_commands.append(
+            CommandArgRule(keywords=keywords, action=action, description=description, syntax=syntax,
+                           completer=completer, completer_choices=completer_choices, subparser=subparser))
+        return subparser
+
+    def add_param(self, name=None, keywords=None, description=None, completer=None, completer_choices=None,
+                  required=False):
+        """
+        Add parameter to retrieve later on. Syntax: '--param value' or '--param=value'
+        :param name: param name
+        :param keywords: trigger name or names (string or list of strings)
+        :param description: description of param to show in help
+        :param completer: auto completer - possible choices generator
+        :param completer_choices: list of possible choices
+        :param required: is param required
+        :return: this parser
+        """
+        if name and not keywords:  # complete keyword if not given
+            keywords = self._get_keyword_from_name(name)
+        self._rules_params.append(
+            ParamArgRule(name=name, keywords=keywords, description=description, completer=completer,
+                         completer_choices=completer_choices, required=required))
         return self
 
-    def bind_default_action(self, action, description=None, suffix=None):
-        """bind action when no command nor option is recognized or argments list is empty"""
-        self._default_action = CommandArgRule(False, action, None, description, suffix)
+    def add_flag(self, name, keywords=None, description=None):
+        """
+        Add flag to check later on. Syntax: '--flag', '-f'
+        :param name: flag name
+        :param keywords: trigger name or names (string or list of strings)
+        If missing, keywords will be autogenerated (--name or -n)
+        :param description: description of flag to show in help
+        :return: this parser
+        """
+        if name and not keywords:  # complete keyword if not given
+            keywords = self._get_keyword_from_name(name)
+        self._rules_flags.append(
+            FlagArgRule(name=name, keywords=keywords, description=description))
         return self
-
-    def bind_command(self, action, keywords, description=None, suffix=None):
-        """bind action to a command. Command is processed after all the options."""
-        self._arg_rules.append(CommandArgRule(False, action, keywords, description, suffix))
-        return self
-
-    def bind_option(self, action, keywords, description=None, suffix=None):
-        """bind action to an option. Options are processed first (before commands)."""
-        self._arg_rules.append(CommandArgRule(True, action, keywords, description, suffix))
-        return self
-
-    def bind_param(self, param_name, keywords=None, description=None):
-        if param_name and not keywords:  # complete keyword if not given
-            keywords = self._get_keyword_from_name(param_name)
-        action = lambda: self.set_param(param_name, self.poll_next(param_name))
-        return self.bind_option(action, keywords, description, suffix='<%s>' % param_name)
-
-    def bind_flag(self, flag_name, keywords=None, description=None):
-        if flag_name and not keywords:  # complete keyword if not given
-            keywords = self._get_keyword_from_name(flag_name)
-        action = lambda: self.set_flag(flag_name)
-        return self.bind_option(action, keywords, description)
 
     @staticmethod
     def _get_keyword_from_name(name):
@@ -297,24 +358,24 @@ class ArgsProcessor:
             if required_name:
                 raise CliSyntaxError('no %s given' % required_name)
             return None
-        next_arg = self._argsQue[self._argsOffset]
-        del self._argsQue[self._argsOffset]
+        next_arg = self._args_que[self._argsOffset]
+        del self._args_que[self._argsOffset]
         return next_arg
 
     def peek_next(self):
         """return next arg"""
         if not self.has_next():
             return None
-        return self._argsQue[self._argsOffset]
+        return self._args_que[self._argsOffset]
 
     def has_next(self):
-        if not self._argsQue:
+        if not self._args_que:
             return False
-        return len(self._argsQue) > self._argsOffset
+        return len(self._args_que) > self._argsOffset
 
     def poll_remaining(self):
-        ending = self._argsQue[self._argsOffset:]
-        self._argsQue = self._argsQue[:self._argsOffset]
+        ending = self._args_que[self._argsOffset:]
+        self._args_que = self._args_que[:self._argsOffset]
         return ending
 
     def poll_remaining_joined(self, joiner=' '):
@@ -323,50 +384,66 @@ class ArgsProcessor:
     # Processing args
     def process_all(self):
         try:
-            # process the options first
-            self.process_options()
-            # if left arguments list is empty
-            if not self._argsQue:
-                if self._default_action:  # run default action
-                    self._invoke_default_action()
-                else:  # help by default
-                    self.print_help()
-            else:
-                self._process_commands()
+            # CLI arguments list skipping executable name
+            self._process_all(sys.argv[1:])
         except CliSyntaxError as e:
             error('Wrong command line syntax: %s' % str(e))
+
+    def _process_all(self, args):
+        self._args_que = args
+        self._argsOffset = 0
+        # process the flags and params first
+        self._process_flags()
+        self._process_params()
+        # if there's no arguments left
+        if not self._args_que:
+            # no command to invoke - run default action
+            if self._default_action:
+                self._invoke_action(self._default_action)
+        else:
+            self._process_commands()
+
+    def _process_flags(self):
+        self._argsOffset = 0
+        while self.has_next():
+            next_arg = self.peek_next()
+            rule = self._find_rule_by_keyword(self._rules_flags, next_arg)
+            if rule:
+                # remove arg from list
+                self.poll_next()
+                # save flag is set
+                self.set_flag(rule.name)
+            else:
+                # skip it - it's not what we're looking for
+                self._argsOffset += 1
+
+    def _process_params(self):
+        self._argsOffset = 0
+        while self.has_next():
+            next_arg = self.peek_next()
+            if not self._process_param(next_arg):
+                # skip it - it's not what we're looking for
+                self._argsOffset += 1
 
     def _process_commands(self):
         self._argsOffset = 0
         # recognize first arg as command
         next_arg = self.peek_next()
-        rule = self._find_command_arg_rule(next_arg)
-        if rule:
+        rule = self._find_rule_by_keyword(self._rules_commands, next_arg)
+        if rule:  # if found a command
             self.poll_next()
-            self._invoke_action(rule.action)
+            # pass all remaining args to subparser
+            remaining_args = self.poll_remaining()
+            rule.subparser._process_all(remaining_args)
         # if not recognized - run default action
         elif self._default_action:
-            # run default action without removing arg
-            self._invoke_default_action()
+            # run default action without removing args
+            self._invoke_action(self._default_action)
         else:
-            raise CliSyntaxError('unknown argument: %s' % next_arg)
+            raise CliSyntaxError('unknown command: %s' % next_arg)
         # if some args left
         if self.has_next():
-            warn('too many arguments: %s' % self.poll_remaining_joined())
-
-    def process_options(self):
-        self._argsOffset = 0
-        while self.has_next():
-            next_arg = self.peek_next()
-            rule = self._find_command_arg_rule(next_arg)
-            if rule and rule.isOption:
-                # remove arg from list
-                self.poll_next()
-                # process option action
-                self._invoke_action(rule.action)
-            else:
-                # skip it - it's not the option
-                self._argsOffset += 1
+            warn('redundant arguments: %s' % self.poll_remaining_joined(' '))
 
     def _invoke_action(self, action):
         if action is not None:
@@ -377,14 +454,27 @@ class ArgsProcessor:
             else:
                 action()
 
-    def _invoke_default_action(self):
-        rule = self._default_action
-        self._invoke_action(rule.action)
-
-    def _find_command_arg_rule(self, arg):
-        for rule in self._arg_rules:
+    @staticmethod
+    def _find_rule_by_keyword(rules, arg):
+        for rule in rules:
             if arg in rule.keywords:
                 return rule
+
+    def _process_param(self, arg):
+        for rule in self._rules_params:
+            for keyword in rule.keywords:
+                if arg == keyword:
+                    # --param value
+                    self.poll_next()  # --param
+                    value = self.poll_next(required_name=rule.name)
+                    self.set_param(rule.name, value)
+                    return True
+                elif arg.startswith(keyword + '='):
+                    # --param=value
+                    param_with_value = self.poll_next()
+                    value = param_with_value[len(keyword + '='):]
+                    self.set_param(rule.name, value)
+                    return True
 
     # setting / getting params
     def set_param(self, name, value):
@@ -454,6 +544,10 @@ class ArgsProcessor:
 
     def print_version(self):
         print('%s v%s' % (self._appName, self._version))
+
+    @staticmethod
+    def _create_subparser(action):
+        return ArgsProcessor(default_action=action)
 
 
 # commands available to invoke (workaround for invoking by function reference)

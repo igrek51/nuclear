@@ -21,9 +21,9 @@ def main():
 
     ap.bind_command(actionHello, 'hello', suffix='<name>', description='display hello message')
     # bind 'force' flag to keywords '-f' or '--force'
-    ap.bind_flag('force', keywords=['-f', '--force'], description='enable force mode')
+    ap.add_flag('force', keywords=['-f', '--force'], description='enable force mode')
     # enable param 'surname' (bind to '--surname <surname>' syntax by default)
-    ap.bind_param('surname', description='set custom surname')
+    ap.add_param('surname', description='set custom surname')
     # do the magic
     ap.process_all()
 
