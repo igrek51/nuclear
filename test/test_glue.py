@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*-
-from mock import patch
+import mock
 
 from glue import *
 
@@ -9,6 +9,8 @@ try:
 except ImportError:
     from io import StringIO
 
+
+# ------- Testing tools -------
 
 def assert_error(action, expected_error=None):
     try:
@@ -29,50 +31,57 @@ def assert_system_exit(action):
 
 
 class MockIO:
-    def __init__(self, in_args_list):
+    def __init__(self, in_args_list=None):
+        # mock cli input
         if not in_args_list:
             in_args_list = []
         self.in_args_list = in_args_list
+        self._mock_args = mock.patch.object(sys, 'argv', ['glue'] + self.in_args_list)
+        # mock output
+        self.new_out, self.new_err = StringIO(), StringIO()
+        self.old_out, self.old_err = sys.stdout, sys.stderr
 
     def __enter__(self):
-        self._mock_args = patch.object(sys, 'argv', ['glue'] + self.in_args_list)
-        self._mock_output = patch('sys.stdout', new=StringIO())
+        self._mock_args.__enter__()
+        sys.stdout, sys.stderr = self.new_out, self.new_err
         return self
 
-    def __exit__(self, type, value, traceback):
-        self._mock_args.exit(type, value, traceback)
-        self._mock_output.exit(type, value, traceback)
+    def __exit__(self, exc_type, exc_value, traceback):
+        self._mock_args.__exit__(exc_type, exc_value, traceback)
+        sys.stdout, sys.stderr = self.old_out, self.old_err
 
     def output(self):
-        return self._mock_output.getvalue()
+        return self.new_out.getvalue()
 
     def output_contains(self, in_str):
-        return in_str in self._mock_output.getvalue()
+        return in_str in self.output()
 
 
 def mock_args(args_list):
     if not args_list:
         args_list = []
-    return patch.object(sys, 'argv', ['glue'] + args_list)
+    return mock.patch.object(sys, 'argv', ['glue'] + args_list)
 
 
 def mock_output():
-    return patch('sys.stdout', new=StringIO())
+    return mock.patch('sys.stdout', new=StringIO())
 
+
+# ------- TESTS -------
 
 def test_output():
-    with mock_output() as out:
+    with MockIO() as mockio:
         debug('message')
-        assert 'message' in out.getvalue()
-        assert 'debug' in out.getvalue()
+        assert mockio.output_contains('message')
+        assert mockio.output_contains('debug')
         info('message')
-        assert 'info' in out.getvalue()
+        assert mockio.output_contains('info')
         warn('message')
-        assert 'warn' in out.getvalue()
+        assert mockio.output_contains('warn')
         error('message')
-        assert 'ERROR' in out.getvalue()
+        assert mockio.output_contains('ERROR')
         info(7)
-        assert '7' in out.getvalue()
+        assert mockio.output_contains('7')
 
 
 def test_fatal():
@@ -82,7 +91,7 @@ def test_fatal():
     assert_system_exit(lambda: exit_now())
 
 
-def test_shellExec():
+def test_shell_exec():
     shell('echo test')
     assert_error(lambda: shell('dupafatality'))
     assert shell_error_code('echo test') == 0
@@ -93,7 +102,7 @@ def test_shellExec():
     assert shell_output('echo test', as_bytes=True).decode('utf-8') == 'test\n'
 
 
-def test_splitLines():
+def test_split_lines():
     assert split_lines('a\nb\nc') == ['a', 'b', 'c']
     assert split_lines('\na\n\n') == ['a']
     assert split_lines('\n\n\n') == []
@@ -101,7 +110,7 @@ def test_splitLines():
     assert split_lines('a\n\n\r\nb') == ['a', 'b']
 
 
-def test_splitToTuple():
+def test_split_to_tuple():
     assert split_to_tuple('a', 1) == ('a',)
     assert split_to_tuple('', 1) == ('',)
     assert_error(lambda: split_to_tuple('a', 2))
@@ -116,7 +125,7 @@ def test_splitToTuple():
     assert split_to_tuple('a') == ('a',)
 
 
-def test_splitToTuples():
+def test_split_to_tuples():
     assert split_to_tuples('a\tb\tc\nd\te\tf', 3) == [('a', 'b', 'c'), ('d', 'e', 'f')]
     assert split_to_tuples('\n\na\tb\tc\n\nd\te\tf\n', 3) == [('a', 'b', 'c'), ('d', 'e', 'f')]
     assert split_to_tuples('a\tb\tc', 3) == [('a', 'b', 'c')]
@@ -125,12 +134,12 @@ def test_splitToTuples():
     assert split_to_tuples(['a\tb\tc'], 3) == [('a', 'b', 'c')]
 
 
-def test_regexReplace():
+def test_regex_replace():
     assert regex_replace('abca', 'a', 'b') == 'bbcb'
     assert regex_replace('abc123a', r'\d', '5') == 'abc555a'
 
 
-def test_regexMatch():
+def test_regex_match():
     assert regex_match('ab 12 def 123', r'.*\d{2}')
     assert not regex_match('ab 1 def 1m2', r'.*\d{2}.*')
 
@@ -151,29 +160,29 @@ def test_regex_list():
     assert regex_replace_file('test/res/replaceme', r'[a-z]+', 'letters') == 'letters\n123'
 
 
-def test_input():
+def test_input_string():
     sys.stdin = open('test/res/inputs')
     assert input_string() == 'in1'
     assert input_string('prompt') == 'in2'
 
 
-def test_inputRequired():
+def test_input_required():
     sys.stdin = open('test/res/inputRequired')
     assert input_required('required: ') == 'valid'
 
 
-def test_readFile():
+def test_read_file():
     assert read_file('test/res/readme') == 'Readme\n123'
 
 
-def test_saveFile():
+def test_save_file():
     save_file('test/res/saveme', 'dupa\n123')
     assert read_file('test/res/saveme') == 'dupa\n123'
     save_file('test/res/saveme', '')
     assert read_file('test/res/saveme') == ''
 
 
-def test_listDir():
+def test_list_dir():
     assert list_dir('test/res/listme') == ['afile', 'dir', 'zlast', 'zlastdir']
 
 
@@ -186,25 +195,25 @@ def test_workdir():
     set_workdir(workdir)
 
 
-def test_getScriptRealDir():
-    realDirExpected = get_workdir()
-    assert script_real_dir() == realDirExpected
+def test_script_real_dir():
+    real_dir_expected = get_workdir()
+    assert script_real_dir() == real_dir_expected
 
 
-def test_fileExists():
+def test_file_exists():
     assert file_exists('test/res/readme')
     assert not file_exists('test/res/dupadupa')
 
 
-def test_filterList():
+def test_filter_list():
     assert filter_list(lambda e: len(e) <= 3, ['a', '123', '12345']) == ['a', '123']
 
 
-def test_mapList():
+def test_map_list():
     assert map_list(lambda e: e + e, ['a', '123', '']) == ['aa', '123123', '']
 
 
-def test_timeConversions():
+def test_time_conversions():
     pattern = '%H:%M:%S, %d.%m.%Y'
     sampleDate = '16:26:01, 20.12.2017'
     badDate = '16:26:01 20.12.17dupa'
