@@ -199,7 +199,7 @@ def map_list(mapper, lst):
 
 
 # ----- CLI arguments rule -----
-class CliArgRule:
+class CliArgRule(object):
     def __init__(self, keywords=None, description=None, syntax=None, completer=None,
                  completer_choices=None):
         """
@@ -251,13 +251,13 @@ class CommandArgRule(CliArgRule):
         :param completer_choices:
         :param subparser:
         """
-        super(CliArgRule, self).__init__(**kwargs)
+        super(CommandArgRule, self).__init__(**kwargs)
         self.subparser = subparser
         self.action = action
 
     def display_syntax_max_length(self):
-        rules = [self._rules_params + self._rules_flags + self._rules_commands]
-        max_length = super(CliArgRule, self).display_syntax_max_length()
+        rules = [self.subparser._rules_params + self.subparser._rules_flags + self.subparser._rules_commands]
+        max_length = super(CommandArgRule, self).display_syntax_max_length()
         for rule in rules:
             length = rule.display_syntax_max_length()
             if length > max_length:
@@ -267,14 +267,14 @@ class CommandArgRule(CliArgRule):
 
 class ParamArgRule(CliArgRule):
     def __init__(self, name, required, **kwargs):
-        super(CliArgRule, self).__init__(**kwargs)
+        super(ParamArgRule, self).__init__(**kwargs)
         self.name = name
         self.required = required
 
 
 class FlagArgRule(CliArgRule):
     def __init__(self, name, **kwargs):
-        super(CliArgRule, self).__init__(**kwargs)
+        super(FlagArgRule, self).__init__(**kwargs)
         self.name = name
 
 
@@ -283,7 +283,7 @@ class CliSyntaxError(RuntimeError):
     pass
 
 
-class SubArgsProcessor:
+class SubArgsProcessor(object):
     def __init__(self, default_action=None):
         self._default_action = default_action
         self._rules_params = []
@@ -388,7 +388,7 @@ class SubArgsProcessor:
         return joiner.join(self.poll_remaining())
 
     # Processing args
-    def process_all(self):
+    def process(self):
         try:
             # CLI arguments list skipping executable name
             self.process_args(sys.argv[1:])
@@ -515,7 +515,7 @@ class SubArgsProcessor:
 
 class ArgsProcessor(SubArgsProcessor):
     def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None):
-        super(SubArgsProcessor, self).__init__(self, default_action)
+        super(ArgsProcessor, self).__init__(default_action)
         self._appName = app_name
         self._version = version
         self._syntax = syntax

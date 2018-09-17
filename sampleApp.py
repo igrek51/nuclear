@@ -25,7 +25,7 @@ def main():
     # enable param 'surname' (bind to '--surname <surname>' syntax by default)
     ap.add_param('surname', description='set custom surname')
     # do the magic
-    ap.process_all()
+    ap.process()
 
 
 if __name__ == '__main__':
