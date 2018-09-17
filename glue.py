@@ -441,7 +441,7 @@ class SubArgsProcessor(object):
                 self._argsOffset += 1
         # check for unprocessed required params
         unprocessed = filter(lambda r: r.required and r not in processed_params, self._rules_params)
-        unprocessed = map(lambda r: r.name, unprocessed)
+        unprocessed = list(map(lambda r: r.name, unprocessed))
         if unprocessed:
             raise CliSyntaxError('The following missing params are required: %s' % ', '.join(unprocessed))
 

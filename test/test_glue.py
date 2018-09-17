@@ -766,3 +766,11 @@ def test_args_required_param():
         ap.add_param('param', required=True)
         ap.process()
         assert mockio.output_contains('missing params are required: --param')
+
+
+def test_args_python3_command():
+    # basic execution with no args
+    with MockIO([]) as mockio:
+        ap = ArgsProcessor(default_action=action_print_param)
+        ap.process()
+        assert mockio.output() == 'None\n'
