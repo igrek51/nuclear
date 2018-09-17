@@ -209,7 +209,7 @@ class CliArgRule(object):
         :param completer: auto completer - possible choices generator
         :param completer_choices: list of possible choices
         """
-        self.help = description
+        self.description = description
         self.syntax = syntax
         self.completer = completer
         self.completer_choices = completer_choices
@@ -233,8 +233,8 @@ class CliArgRule(object):
 
     def display_help(self, syntax_padding):
         display_help_out = self.display_syntax()
-        if self.help:
-            display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + self.help
+        if self.description:
+            display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + self.description
         return display_help_out
 
 
@@ -365,8 +365,6 @@ class SubArgsProcessor(object):
     def _trim_hyphens(strin):
         while strin.startswith('-'):
             strin = strin[1:]
-        while strin.endswith('-'):
-            strin = strin[:-1]
         return strin
 
     # Getting args
@@ -469,8 +467,6 @@ class SubArgsProcessor(object):
         elif self._default_action:
             # run default action without removing args
             self._invoke_action(self._default_action)
-        else:
-            raise CliSyntaxError('unknown command: %s' % next_arg)
         # if some args left
         if self.has_next():
             warn('redundant arguments: %s' % self.poll_remaining_joined(' '))
@@ -540,8 +536,8 @@ class SubArgsProcessor(object):
         prefix += command_rule._display_syntax_prefix() + ' '
         for subrule in self._rules_flags + self._rules_params:
             display_help_out = subrule.display_syntax()
-            if subrule.help:
-                display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + subrule.help
+            if subrule.description:
+                display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + subrule.description
             print('  %s%s' % (prefix, display_help_out))
         # next level sub commands
         for subcommand in self._rules_commands:

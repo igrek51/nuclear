@@ -785,8 +785,8 @@ def test_args_multilevel_commands_help():
         ap_test = ap.add_subcommand('test')
         ap_test.add_param('test-param')
         ap_test_dupy = ap_test.add_subcommand('dupy', action=action_print_1)
-        ap_test_dupy.add_param('z-parametrem')
-        ap_test.add_subcommand('audio', action=action_print_1)
+        ap_test_dupy.add_param('z-parametrem', description='with param')
+        ap_test.add_subcommand('audio', action=action_print_1, description='tests audio')
         ap_test_dupy.add_subcommand('2', action=action_print_2)
         assert_ap_exit(ap)
         assert mockio.output_contains('cmdline')
@@ -797,3 +797,11 @@ def test_args_multilevel_commands_help():
         assert mockio.output_contains('test dupy 2')
         assert mockio.output_contains('test audio')
         assert mockio.output_contains('--global-param <global-param>')
+
+
+def test_args_deafult_action_help():
+    with MockIO(['--help']) as mockio:
+        ap = ArgsProcessor('cmdline', '1.2.3', default_action=action_print_1, syntax=' <dupa> [optional]')
+        ap.add_param('global-param')
+        assert_ap_exit(ap)
+        assert mockio.output_contains('glue [options] <command> <dupa> [optional]')
