@@ -4,14 +4,14 @@ One script to rule them all. - Common Utilities Toolkit compatible with both Pyt
 
 Author: igrek51
 """
+import datetime
+import inspect
 import os
-import sys
 import re
 import subprocess
-import glob
-import inspect
-import datetime
+import sys
 from builtins import bytes
+
 
 # ----- Pretty output
 def debug(message):
@@ -147,14 +147,14 @@ def getScriptRealDir():
 
 # ----- Time format converters
 def str2time(timeRaw, pattern):
-    """pattern: %H:%M:%S, %d.%m.%Y"""
+    """pattern: %Y-%m-%d, %H:%M:%S"""
     try:
         return datetime.datetime.strptime(timeRaw, pattern)
     except ValueError as e:
         return None
 
 def time2str(datetim, pattern):
-    """pattern: %H:%M:%S, %d.%m.%Y"""
+    """pattern: %Y-%m-%d, %H:%M:%S"""
     if not datetim:
         return None
     return datetim.strftime(pattern)
