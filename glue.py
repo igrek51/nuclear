@@ -230,6 +230,9 @@ class CliArgRule:
             syntax_out += self.syntax if self.syntax[0] == ' ' else ' ' + self.syntax
         return syntax_out
 
+    def display_syntax_max_length(self):
+        return len(self.display_syntax())
+
     def display_help(self, syntax_padding):
         display_help_out = self.display_syntax()
         if self.help:
@@ -252,6 +255,15 @@ class CommandArgRule(CliArgRule):
         self.subparser = subparser
         self.action = action
 
+    def display_syntax_max_length(self):
+        rules = [self._rules_params + self._rules_flags + self._rules_commands]
+        max_length = super(CliArgRule, self).display_syntax_max_length()
+        for rule in rules:
+            length = rule.display_syntax_max_length()
+            if length > max_length:
+                max_length = length
+        return max_length
+
 
 class ParamArgRule(CliArgRule):
     def __init__(self, name, required, **kwargs):
@@ -271,12 +283,9 @@ class CliSyntaxError(RuntimeError):
     pass
 
 
-class ArgsProcessor:
-    def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None):
-        self._appName = app_name
-        self._version = version
+class SubArgsProcessor:
+    def __init__(self, default_action=None):
         self._default_action = default_action
-        self._syntax = syntax
         self._rules_params = []
         self._rules_flags = []
         self._rules_commands = []
@@ -284,12 +293,6 @@ class ArgsProcessor:
         self._flags = []
         self._args_que = None
         self._argsOffset = None
-        # default action - help
-        if not self._default_action:
-            self._default_action = print_help
-        # bind default options: help, version
-        self.add_subcommand(['-h', '--help'], action=print_help, description='display this help and exit')
-        self.add_subcommand(['-v', '--version'], action=print_version, description='print version')
 
     def add_subcommand(self, keywords, action=None, description=None, syntax=None, completer=None,
                        completer_choices=None):
@@ -305,7 +308,7 @@ class ArgsProcessor:
         :return: next level subparser (with command context)
         """
         # create subparser
-        subparser = ArgsProcessor(default_action=action)
+        subparser = SubArgsProcessor(default_action=action)
         self._rules_commands.append(
             CommandArgRule(action=action, subparser=subparser, keywords=keywords, description=description,
                            syntax=syntax,
@@ -388,11 +391,11 @@ class ArgsProcessor:
     def process_all(self):
         try:
             # CLI arguments list skipping executable name
-            self.process_all(sys.argv[1:])
+            self.process_args(sys.argv[1:])
         except CliSyntaxError as e:
             error('Wrong command line syntax: %s' % str(e))
 
-    def process_all(self, args):
+    def process_args(self, args):
         self._args_que = args
         self._argsOffset = 0
         # process the flags and params first
@@ -447,7 +450,7 @@ class ArgsProcessor:
             self.poll_next()
             # pass all remaining args to subparser
             remaining_args = self.poll_remaining()
-            rule.subparser.process_all(remaining_args)
+            rule.subparser.process_args(remaining_args)
         # if not recognized - run default action
         elif self._default_action:
             # run default action without removing args
@@ -509,19 +512,27 @@ class ArgsProcessor:
     def is_flag_set(self, name):
         return name in self._flags
 
+
+class ArgsProcessor(SubArgsProcessor):
+    def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None):
+        super(SubArgsProcessor, self).__init__(self, default_action)
+        self._appName = app_name
+        self._version = version
+        self._syntax = syntax
+        # default action - help
+        if not self._default_action:
+            self._default_action = print_help
+        # bind default options: help, version
+        self.add_subcommand(['-h', '--help'], action=print_help, description='display this help and exit')
+        self.add_subcommand(['-v', '--version'], action=print_version, description='print version')
+
     # auto generating help output
-    def _option_rules_count(self):
-        return sum(1 for rule in self._arg_rules if rule.isOption)
-
-    def _command_rules_count(self):
-        return sum(1 for rule in self._arg_rules if not rule.isOption)
-
     def _calc_min_syntax_padding(self):
         min_syntax_padding = 0
-        for rule in self._arg_rules:
-            syntax = rule.display_syntax()
-            if len(syntax) > min_syntax_padding:  # min padding = max from len(syntax)
-                min_syntax_padding = len(syntax)
+        for rule in self._rules_flags + self._rules_params + self._rules_commands:
+            syntax_length = rule.display_syntax_max_length()
+            if syntax_length > min_syntax_padding:  # min padding = max from len(syntax)
+                min_syntax_padding = syntax_length
         return min_syntax_padding
 
     def print_help(self):
@@ -529,34 +540,43 @@ class ArgsProcessor:
         self.print_version()
         # print main usage
         usage_syntax = sys.argv[0]
-        options_count = self._option_rules_count()
-        commands_count = self._command_rules_count()
+        commands_count = sum(1 for rule in self._rules_commands)
+        options_count = sum(1 for rule in self._rules_flags + self._rules_params)
         if options_count > 0:
             usage_syntax += ' [options]'
         if commands_count > 0:
             usage_syntax += ' <command>'
-        if commands_count == 0 and self._default_action and self._default_action.suffix:  # only default rule
-            usage_syntax += self._default_action.display_syntax()
+        if self._syntax:  # only default rule
+            usage_syntax += self._syntax
         print('\nUsage:\n  %s' % usage_syntax)
-        # description for default action
-        if self._default_action and self._default_action.help:  # only default rule
-            print('\n%s' % self._default_action.help)
-        # command and options help
+        # commands help
         syntax_padding = self._calc_min_syntax_padding()
         if commands_count > 0:
             print('\nCommands:')
-            for rule in self._arg_rules:
-                if not rule.isOption:
-                    print('  %s' % rule.display_help(syntax_padding))
+            for rule in self._rules_commands:
+                rule.subparser.print_commands(rule, syntax_padding)
+        # options
         if options_count > 0:
             print('\nOptions:')
-            for rule in self._arg_rules:
+            for rule in [self._rules_flags + self._rules_params]:
                 if rule.isOption:
                     print('  %s' % rule.display_help(syntax_padding))
         sys.exit(0)
 
     def print_version(self):
         print('%s v%s' % (self._appName, self._version))
+
+    def print_commands(self, command_rule, syntax_padding):
+        # command help
+        print('  %s' % command_rule.display_help(syntax_padding))
+        # and all its children
+        subrules = [self._rules_commands + self._rules_flags + self._rules_params]
+        display_help_prefix = command_rule.display_syntax()
+        for subrule in subrules:
+            display_help_out = display_help_prefix + subrule.display_syntax()
+            if subrule.help:
+                display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + subrule.help
+            print('  %s' % display_help_out)
 
 
 # commands available to invoke (workaround for invoking by function reference)
