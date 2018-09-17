@@ -8,10 +8,10 @@ def action_hello(ap):
     name = ap.poll_next('name')  # get first arg
     if ap.is_param('surname'):  # optional param 'surname'
         name += ' ' + ap.get_param('surname')
-        msg = 'Hello %s' % name
-        if ap.is_flag_set('force'):  # check flag is set
-            msg += ', May the Force be with you!'
-        print(msg)
+    msg = 'Hello %s' % name
+    if ap.is_flag_set('force'):  # check flag is set
+        msg += ', May the Force be with you!'
+    print(msg)
 
 
 # ----- Args definitions -----

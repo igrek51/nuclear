@@ -805,3 +805,15 @@ def test_args_deafult_action_help():
         ap.add_param('global-param')
         assert_ap_exit(ap)
         assert mockio.output_contains('glue [options] <command> <dupa> [optional]')
+
+
+def action_test_args_poll_from_subcommand(ap):
+    print(ap.poll_remaining_joined())
+
+
+def test_args_poll_from_subcommand():
+    with MockIO(['--autocomplete-install2', 'jasna', 'dupa']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('--autocomplete-install2', action=action_test_args_poll_from_subcommand)
+        ap.process()
+        assert mockio.output_strip() == 'jasna dupa'

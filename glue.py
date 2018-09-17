@@ -1,5 +1,5 @@
 """
-glue v2.0.1
+glue v2.0.2
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -439,11 +439,10 @@ class SubArgsProcessor(object):
             next_arg = self.peek_next()
             rule = self._process_param(next_arg)
             if rule:
-                # mark param was processed
+                # mark param as processed
                 processed_params.append(rule)
             else:
-                # skip it - it's not what we're looking for
-                self._argsOffset += 1
+                self._argsOffset += 1  # skip to next
         # check for unprocessed required params
         unprocessed = filter(lambda r: r.required and r not in processed_params, self._rules_params)
         unprocessed = list(map(lambda r: r.name, unprocessed))
@@ -543,6 +542,46 @@ class SubArgsProcessor(object):
         for subcommand in self._rules_commands:
             subcommand.subparser.print_commands(subcommand, syntax_padding, prefix)
 
+    # autocomplete
+    def autocomplete_install(self):
+        app_name = self.poll_next('appName')
+        shell("""cat << EOF > /etc/bash_completion.d/autocomplete_%s.sh
+#!/bin/bash
+# script location (command to invoke)
+AUTOCOMPLETE_SCRIPT_COMMAND=%s
+# space delimited application names (command line prefix)
+AUTOCOMPLETE_SCRIPT_NAMES=%s
+
+_autocomplete() {
+    COMPREPLY=( $(${AUTOCOMPLETE_SCRIPT_COMMAND} autocomplete "${COMP_LINE}") )
+}
+
+complete -F _autocomplete ${AUTOCOMPLETE_SCRIPT_NAMES}
+
+EOF
+""" % (app_name, app_name, app_name))
+        info('autocompleter has been installed. Please restart your shell.')
+
+    def autocomplete_command(self):
+        autocompletes = []
+        comp_line = self.pollRemainingJoined(joiner=' ')
+        if comp_line.startswith('"') and comp_line.endswith('"'):
+            comp_line = comp_line[1:-1]
+        parts = comp_line.split(' ')
+        prefix = ' '.join(parts[1:])
+        last = parts[-1]
+        # first command help
+        if len(parts) == 2:
+            cmds = ['war', 'go', 'age', 'aoe', 'test', 'screen', 'network', 'audio', 'vsync', 'voice', 'voices', 'info',
+                    'taunt', 'memory', 'help']
+            filtered = list(filter(lambda c: c.startswith(last), cmds))
+            autocompletes.extend(filtered)
+        else:
+            pass
+            # subcommands
+            # defineAutocompletes('test ', 3, ['audio', 'graphics', 'network', 'wine'])
+        print('\n'.join(autocompletes))
+
 
 class ArgsProcessor(SubArgsProcessor):
     def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None):
@@ -556,6 +595,10 @@ class ArgsProcessor(SubArgsProcessor):
         # bind default options: help, version
         self.add_subcommand(['-h', '--help'], action=print_help, description='display this help and exit')
         self.add_subcommand(['-v', '--version'], action=print_version, description='print version')
+        self.add_subcommand('--autocomplete-install', syntax='<appName>', action=autocomplete_install,
+                            description='installs bash autocompletion')
+        self.add_subcommand('--autocomplete', syntax='<cmdline>', action=autocomplete_command,
+                            description='return autocompletion list')
 
     # auto generating help output
     def _calc_min_syntax_padding(self):
@@ -609,3 +652,11 @@ def print_version(ap):
         ap = ap.parent
     ap.print_version()
     sys.exit(0)
+
+
+def autocomplete_install(ap):
+    ap.autocomplete_install()
+
+
+def autocomplete_command(ap):
+    ap.autocomplete_command()
