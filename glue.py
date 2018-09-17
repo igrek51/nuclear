@@ -304,10 +304,12 @@ class ArgsProcessor:
         :param completer_choices: list of possible choices
         :return: next level subparser (with command context)
         """
-        subparser = self._create_subparser(action=action)
+        # create subparser
+        subparser = ArgsProcessor(default_action=action)
         self._rules_commands.append(
-            CommandArgRule(keywords=keywords, action=action, description=description, syntax=syntax,
-                           completer=completer, completer_choices=completer_choices, subparser=subparser))
+            CommandArgRule(action=action, subparser=subparser, keywords=keywords, description=description,
+                           syntax=syntax,
+                           completer=completer, completer_choices=completer_choices))
         return subparser
 
     def add_param(self, name=None, keywords=None, description=None, completer=None, completer_choices=None,
@@ -324,9 +326,11 @@ class ArgsProcessor:
         """
         if name and not keywords:  # complete keyword if not given
             keywords = self._get_keyword_from_name(name)
+        if name:
+            syntax = '[%s]' % name
         self._rules_params.append(
-            ParamArgRule(name=name, keywords=keywords, description=description, completer=completer,
-                         completer_choices=completer_choices, required=required))
+            ParamArgRule(name=name, required=required, keywords=keywords, description=description, completer=completer,
+                         completer_choices=completer_choices, syntax=syntax))
         return self
 
     def add_flag(self, name, keywords=None, description=None):
@@ -340,8 +344,7 @@ class ArgsProcessor:
         """
         if name and not keywords:  # complete keyword if not given
             keywords = self._get_keyword_from_name(name)
-        self._rules_flags.append(
-            FlagArgRule(name=name, keywords=keywords, description=description))
+        self._rules_flags.append(FlagArgRule(name=name, keywords=keywords, description=description))
         return self
 
     @staticmethod
@@ -385,11 +388,11 @@ class ArgsProcessor:
     def process_all(self):
         try:
             # CLI arguments list skipping executable name
-            self._process_all(sys.argv[1:])
+            self.process_all(sys.argv[1:])
         except CliSyntaxError as e:
             error('Wrong command line syntax: %s' % str(e))
 
-    def _process_all(self, args):
+    def process_all(self, args):
         self._args_que = args
         self._argsOffset = 0
         # process the flags and params first
@@ -419,11 +422,21 @@ class ArgsProcessor:
 
     def _process_params(self):
         self._argsOffset = 0
+        processed_params = []
         while self.has_next():
             next_arg = self.peek_next()
-            if not self._process_param(next_arg):
+            rule = self._process_param(next_arg)
+            if rule:
+                # mark param was processed
+                processed_params.append(rule)
+            else:
                 # skip it - it's not what we're looking for
                 self._argsOffset += 1
+        # check for unprocessed required params
+        unprocessed = filter(lambda r: r.required and r not in processed_params, self._rules_params)
+        unprocessed = map(lambda r: r.name, unprocessed)
+        if unprocessed:
+            raise CliSyntaxError('The following missing params are required: %s' % ', '.join(unprocessed))
 
     def _process_commands(self):
         self._argsOffset = 0
@@ -434,7 +447,7 @@ class ArgsProcessor:
             self.poll_next()
             # pass all remaining args to subparser
             remaining_args = self.poll_remaining()
-            rule.subparser._process_all(remaining_args)
+            rule.subparser.process_all(remaining_args)
         # if not recognized - run default action
         elif self._default_action:
             # run default action without removing args
@@ -468,13 +481,13 @@ class ArgsProcessor:
                     self.poll_next()  # --param
                     value = self.poll_next(required_name=rule.name)
                     self.set_param(rule.name, value)
-                    return True
+                    return rule
                 elif arg.startswith(keyword + '='):
                     # --param=value
                     param_with_value = self.poll_next()
                     value = param_with_value[len(keyword + '='):]
                     self.set_param(rule.name, value)
-                    return True
+                    return rule
 
     # setting / getting params
     def set_param(self, name, value):
@@ -544,10 +557,6 @@ class ArgsProcessor:
 
     def print_version(self):
         print('%s v%s' % (self._appName, self._version))
-
-    @staticmethod
-    def _create_subparser(action):
-        return ArgsProcessor(default_action=action)
 
 
 # commands available to invoke (workaround for invoking by function reference)
