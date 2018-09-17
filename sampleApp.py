@@ -4,25 +4,25 @@ import glue
 
 # ----- Actions
 def actionHello(ap):
-	name = ap.pollNext('name') # get next arg
-	if ap.isParam('surname'): # optional param 'surname'
-		name += ' ' + ap.getParam('surname')
+    name = ap.poll_next('name')  # get next arg
+    if ap.is_param('surname'):  # optional param 'surname'
+        name += ' ' + ap.get_param('surname')
 	print('Hello %s' % name)
 
-	if ap.isFlag('force'):
+    if ap.is_flag_set('force'):
 		print('May the Force be with you!')
 
 # ----- Main
 def main():
 	ap = glue.ArgsProcessor('SampleApp', '1.0.1') # app name and version
 	# bind actionHello with 'hello' command keyword 
-	ap.bindCommand(actionHello, 'hello', suffix='<name>', help='display hello message')
+    ap.bind_command(actionHello, 'hello', suffix='<name>', help_info='display hello message')
 	# bind 'force' flag to keywords '-f' or '--force'
-	ap.bindFlag('force', keywords=['-f', '--force'], help='enable force mode')
+    ap.bind_flag('force', keywords=['-f', '--force'], help_info='enable force mode')
 	# enable param 'surname' (bind to '--surname <surname>' syntax by default)
-	ap.bindParam('surname', help='set custom surname')
+    ap.bind_param('surname', help_info='set custom surname')
 	# do the magic
-	ap.processAll()
+    ap.process_all()
 
 if __name__ == '__main__':
 	main() # will not be invoked when importing this module for testing purposes
