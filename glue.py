@@ -330,7 +330,7 @@ class SubArgsProcessor(object):
         name = self._get_keyword_from_name(name)
         # complete keyword if not given
         if not keywords:
-            keywords = self._get_keyword_from_name(name)
+            keywords = name
         syntax = '[%s]' % name
         self._rules_params.append(
             ParamArgRule(name=name, required=required, keywords=keywords, description=description, completer=completer,
@@ -346,8 +346,10 @@ class SubArgsProcessor(object):
         :param description: description of flag to show in help
         :return: this parser
         """
-        if name and not keywords:  # complete keyword if not given
-            keywords = self._get_keyword_from_name(name)
+        name = self._get_keyword_from_name(name)
+        # complete keyword if not given
+        if not keywords:
+            keywords = name
         self._rules_flags.append(FlagArgRule(name=name, keywords=keywords, description=description))
         return self
 
@@ -365,7 +367,7 @@ class SubArgsProcessor(object):
         """return next arg and remove"""
         if not self.has_next():
             if required_name:
-                raise CliSyntaxError('no %s given' % required_name)
+                raise CliSyntaxError('no required argument "%s" given' % required_name)
             return None
         next_arg = self._args_que[self._argsOffset]
         del self._args_que[self._argsOffset]
@@ -521,7 +523,8 @@ class SubArgsProcessor(object):
             self._flags.append(name)
 
     def is_flag_set(self, name):
-        return name in self._flags
+        name2 = self._get_keyword_from_name(name)
+        return name in self._flags or name2 in self._flags
 
     def print_commands(self, command_rule, syntax_padding):
         # command help
