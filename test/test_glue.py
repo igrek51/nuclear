@@ -905,7 +905,7 @@ def test_args_autocomplete_subcommand():
         assert not mockio.output_contains('c1')
         assert not mockio.output_contains('c2')
         mockio.assert_output_contains('c3\n')
-        mockio.assert_output_contains('--help\n')
+        assert not mockio.output_contains('--help')
 
 
 def test_args_autocomplete_params():
