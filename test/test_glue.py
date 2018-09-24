@@ -108,11 +108,11 @@ def test_shell_exec():
 
 
 def test_split_lines():
-    assert split_lines('a\nb\nc') == ['a', 'b', 'c']
-    assert split_lines('\na\n\n') == ['a']
-    assert split_lines('\n\n\n') == []
-    assert split_lines('') == []
-    assert split_lines('a\n\n\r\nb') == ['a', 'b']
+    assert nonempty_lines('a\nb\nc') == ['a', 'b', 'c']
+    assert nonempty_lines('\na\n\n') == ['a']
+    assert nonempty_lines('\n\n\n') == []
+    assert nonempty_lines('') == []
+    assert nonempty_lines('a\n\n\r\nb') == ['a', 'b']
 
 
 def test_split_to_tuple():

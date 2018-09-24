@@ -1,5 +1,5 @@
 """
-glue v2.0.7
+glue v2.0.8
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -88,7 +88,7 @@ def shell_output(cmd, as_bytes=False):
 
 
 # ----- String Splitting -----
-def split_lines(str_in):
+def nonempty_lines(str_in):
     all_lines = str_in.splitlines()
     return list(filter(lambda l: len(l) > 0, all_lines))  # filter nonempty
 
@@ -104,7 +104,7 @@ def split_to_tuple(line, attrs_count=None, splitter='\t'):
 def split_to_tuples(lines, attrs_count=None, splitter='\t'):
     # lines as list or raw string
     if not isinstance(lines, list):
-        lines = split_lines(lines)
+        lines = nonempty_lines(lines)
     return list(map(lambda line: split_to_tuple(line, attrs_count, splitter), lines))
 
 
@@ -140,7 +140,7 @@ def regex_search_file(file_path, regex_match_pattern, group_number):
 
 def regex_replace_file(file_path, regex_match_pattern, regex_replace_pattern):
     file_content = read_file(file_path)
-    lines = split_lines(file_content)
+    lines = nonempty_lines(file_content)
     lines = regex_replace_list(lines, regex_match_pattern, regex_replace_pattern)
     return '\n'.join(lines)
 
