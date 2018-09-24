@@ -1,5 +1,5 @@
 """
-glue v2.0.6
+glue v2.0.7
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -332,9 +332,6 @@ class SubArgsProcessor(object):
         :param choices: auto completer function - possible choices generator or list of possible choices
         :return: next level subparser (with command context)
         """
-        # default action - help
-        if not action:
-            action = print_help
         # create subparser
         subparser = SubArgsProcessor(default_action=action, parent=self)
         self._rules_commands.append(
@@ -451,8 +448,7 @@ class SubArgsProcessor(object):
                 self._process_commands()
             else:
                 # if there's no arguments left - run default action
-                if self._default_action:
-                    self._invoke_action(self._default_action)
+                self._invoke_default_action()
         # if some args left
         self._print_redundant_args()
 
@@ -515,10 +511,17 @@ class SubArgsProcessor(object):
             # pass all remaining args to subparser
             remaining_args = self.poll_remaining()
             rule.subparser.process_args(remaining_args)
-        # if not recognized - run default action
-        elif self._default_action:
+        else:
+            # if not recognized - run default action
+            self._invoke_default_action()
+
+    def _invoke_default_action(self):
+        if self._default_action:
             # run default action without removing args
             self._invoke_action(self._default_action)
+        elif self.parent:
+            # no default action - try to run parent default action
+            self.parent._invoke_default_action()
 
     def _print_redundant_args(self):
         self._argsOffset = 0
@@ -585,7 +588,8 @@ class SubArgsProcessor(object):
 
     def print_commands(self, command_rule, syntax_padding, prefix=''):
         # command help
-        print('  %s%s' % (prefix, command_rule.display_help(syntax_padding - len(prefix))))
+        if self._default_action or command_rule.syntax or command_rule.help:
+            print('  %s%s' % (prefix, command_rule.display_help(syntax_padding - len(prefix))))
         # and all its children
         prefix += command_rule._display_syntax_prefix() + ' '
         for subrule in self._rules_flags + self._rules_params:
@@ -676,6 +680,8 @@ EOF
                     if previous == val:
                         possible_choices = rule.generate_choices(self)
                         available.extend(possible_choices)
+                    if last == val:
+                        available.extend([val])
                     # append subparser autocompletions
                     subargs = args[idx:]
                     subcompletions = rule.subparser._generate_available_completions(subargs)

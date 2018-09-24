@@ -967,3 +967,12 @@ def test_args_autocomplete_command_choices():
         ap.add_subcommand('screen', choices=completer_screen2)
         ap.process()
         mockio.assert_output_contains('HDMI\neDP\n')
+
+
+def test_args_autocomplete_command_last_word_space():
+    with MockIO(['--bash-autocomplete', 'lichking info age']) as mockio:
+        ap = ArgsProcessor()
+        ap_info = ap.add_subcommand('info')
+        ap_info.add_subcommand('age')
+        ap.process()
+        mockio.assert_output_contains('age\n')
