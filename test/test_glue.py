@@ -67,6 +67,10 @@ class MockIO:
         assert in_str in self.output()
         return True
 
+    def assert_output(self, in_str):
+        assert in_str == self.output()
+        return True
+
 
 # ------- TESTS -------
 
@@ -871,3 +875,28 @@ def test_args_autocomplete():
         mockio.assert_output_contains('--flag2\n')
         mockio.assert_output_contains('--param1\n')
         mockio.assert_output_contains('--param2\n')
+    # subcommands autocomplete
+    with MockIO(['--bash-autocomplete', 'dupa command ']) as mockio:
+        ap = ArgsProcessor()
+        ap_command = ap.add_subcommand('command')
+        ap_command.add_subcommand('sub2')
+        ap_command.add_flag('flag1')
+        ap_command.add_param('param1')
+        ap.process()
+        assert not mockio.output_contains('command')
+        mockio.assert_output_contains('sub2\n')
+        mockio.assert_output_contains('--flag1\n')
+        mockio.assert_output_contains('--param1\n')
+    with MockIO(['--bash-autocomplete', 'dupa com']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('command')
+        ap.process()
+        mockio.assert_output('command\n')
+    with MockIO(['--bash-autocomplete', 'dupa c1 c2 ']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('c1').add_subcommand('c2').add_subcommand('c3')
+        ap.process()
+        assert not mockio.output_contains('c1')
+        assert not mockio.output_contains('c2')
+        mockio.assert_output_contains('c3\n')
+        mockio.assert_output_contains('--help\n')

@@ -622,20 +622,21 @@ EOF
         if comp_line.startswith('"') and comp_line.endswith('"'):
             comp_line = comp_line[1:-1]
         parts = comp_line.split(' ')
-        prefix = ' '.join(parts[1:])
         last = parts[-1]
-        # first command help
+        available = []
+        # available always - flags, params, primary options
+        rules = self._rules_flags + self._rules_params + self._rules_primary_options
+        available.extend([keyword for rule in rules for keyword in rule.keywords])
+        # first commands
         if len(parts) == 2:
-            # primary options, params, flags
-            rules = self._rules_flags + self._rules_params + self._rules_primary_options + self._rules_commands
-            keywords = [keyword for rule in rules for keyword in rule.keywords]
-            filtered = list(filter(lambda c: c.startswith(last), keywords))
-            autocompletes.extend(filtered)
+            rules = self._rules_commands
+            available.extend([keyword for rule in rules for keyword in rule.keywords])
         else:
             pass
             # subcommands
             # defineAutocompletes('test ', 3, ['audio', 'graphics', 'network', 'wine'])
-        print('\n'.join(autocompletes))
+        filtered = list(filter(lambda c: c.startswith(last), available))
+        print('\n'.join(filtered))
 
 
 class ArgsProcessor(SubArgsProcessor):
