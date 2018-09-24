@@ -692,7 +692,7 @@ def test_args_add_empty_command():
         ap = ArgsProcessor()
         ap.add_subcommand('test')
         ap.process()
-        assert mockio.output() == ''
+        assert mockio.output_contains('Usage:')  # prints help
 
 
 def test_args_multilevel_commands():

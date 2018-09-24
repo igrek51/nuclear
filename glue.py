@@ -1,5 +1,5 @@
 """
-glue v2.0.5
+glue v2.0.6
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -332,6 +332,9 @@ class SubArgsProcessor(object):
         :param choices: auto completer function - possible choices generator or list of possible choices
         :return: next level subparser (with command context)
         """
+        # default action - help
+        if not action:
+            action = print_help
         # create subparser
         subparser = SubArgsProcessor(default_action=action, parent=self)
         self._rules_commands.append(
