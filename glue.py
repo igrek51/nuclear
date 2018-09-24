@@ -585,14 +585,14 @@ class SubArgsProcessor(object):
 
     def print_commands(self, command_rule, syntax_padding, prefix=''):
         # command help
-        print('  %s%s' % (prefix, command_rule.display_help(syntax_padding)))
+        print('  %s%s' % (prefix, command_rule.display_help(syntax_padding - len(prefix))))
         # and all its children
         prefix += command_rule._display_syntax_prefix() + ' '
         for subrule in self._rules_flags + self._rules_params:
-            display_help_out = subrule.display_syntax()
+            display_help_out = prefix + subrule.display_syntax()
             if subrule.help:
                 display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + subrule.help
-            print('  %s%s' % (prefix, display_help_out))
+            print('  %s' % display_help_out)
         # next level sub commands
         for subcommand in self._rules_commands:
             subcommand.subparser.print_commands(subcommand, syntax_padding, prefix)
