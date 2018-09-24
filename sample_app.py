@@ -18,11 +18,11 @@ def action_hello(ap):
 def main():
     ap = glue.ArgsProcessor('SampleApp', '1.0.1')  # app name and version
     # bind 'hello' keyword with action_hello command
-    ap.add_subcommand('hello', action=action_hello, syntax='<name>', description='display hello message')
+    ap.add_subcommand('hello', action=action_hello, syntax='<name>', help='display hello message')
     # bind 'force' flag to keywords '-f' or '--force'
-    ap.add_flag('force', keywords=['-f', '--force'], description='enable force mode')
+    ap.add_flag('force', keywords=['-f', '--force'], help='enable force mode')
     # enable param 'surname' (bind to '--surname <surname>' or '--surname=<surname>' syntax by default)
-    ap.add_param('surname', description='set custom surname', choices=['brian', 'janusz', 'brianusz'])
+    ap.add_param('surname', help='set custom surname', choices=['brian', 'janusz', 'brianusz'])
     # do the magic
     ap.process()
 

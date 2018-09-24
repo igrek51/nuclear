@@ -235,23 +235,23 @@ def test_time_conversions():
 
 # CLI parser
 def test_cli_arg_rule():
-    assert CliArgRule(keywords='name', description='description',
+    assert CliArgRule(keywords='name', help='help',
                       syntax='syntaxSuffix')._display_syntax_prefix() == 'name'
-    assert CliArgRule(keywords=['name1', 'name2'], description='description',
+    assert CliArgRule(keywords=['name1', 'name2'], help='help',
                       syntax='syntaxSuffix')._display_syntax_prefix() == 'name1, name2'
-    assert CliArgRule(keywords=['name1', 'name2'], description='description',
+    assert CliArgRule(keywords=['name1', 'name2'], help='help',
                       syntax=None).display_syntax() == 'name1, name2'
-    assert CliArgRule(keywords=['name1', 'name2'], description='description',
+    assert CliArgRule(keywords=['name1', 'name2'], help='help',
                       syntax='<suffix>').display_syntax() == 'name1, name2 <suffix>'
-    assert CliArgRule(keywords=['name1', 'name2'], description='description',
+    assert CliArgRule(keywords=['name1', 'name2'], help='help',
                       syntax=' <suffix>').display_syntax() == 'name1, name2 <suffix>'
-    assert CliArgRule(keywords=['name'], description='description', syntax=None).display_help(
-        5) == 'name  - description'
-    assert CliArgRule(keywords=['name'], description='description', syntax=None).display_help(3) == 'name - description'
-    assert CliArgRule(keywords=['name'], description='description', syntax='<suffix>').display_help(
-        3) == 'name <suffix> - description'
-    assert CliArgRule(keywords=['name'], description='description', syntax='<s>').display_help(
-        10) == 'name <s>   - description'
+    assert CliArgRule(keywords=['name'], help='help', syntax=None).display_help(
+        5) == 'name  - help'
+    assert CliArgRule(keywords=['name'], help='help', syntax=None).display_help(3) == 'name - help'
+    assert CliArgRule(keywords=['name'], help='help', syntax='<suffix>').display_help(
+        3) == 'name <suffix> - help'
+    assert CliArgRule(keywords=['name'], help='help', syntax='<s>').display_help(
+        10) == 'name <s>   - help'
 
 
 # ArgsProcessor
@@ -310,12 +310,12 @@ def actionIsF(ap):
 
 def sample_processor1():
     ap = ArgsProcessor('appName', '1.0.1')
-    ap.add_subcommand('command1', action=command1, description='description1')
-    ap.add_subcommand(['command2', 'command22'], action=command2, description='description2', syntax='<param>')
-    ap.add_subcommand(['command3', 'command33'], action=command3, description='description2', syntax='<param>')
-    ap.add_subcommand('remain', action=command4Remaining, description='description4', syntax='<param>')
-    ap.add_subcommand('poll', action=command5Poll, description='description5')
-    ap.add_subcommand('--set-para', action=command6SetPara, description='set para')
+    ap.add_subcommand('command1', action=command1, help='help1')
+    ap.add_subcommand(['command2', 'command22'], action=command2, help='help2', syntax='<param>')
+    ap.add_subcommand(['command3', 'command33'], action=command3, help='help2', syntax='<param>')
+    ap.add_subcommand('remain', action=command4Remaining, help='help4', syntax='<param>')
+    ap.add_subcommand('poll', action=command5Poll, help='help5')
+    ap.add_subcommand('--set-para', action=command6SetPara, help='set para')
     return ap
 
 
@@ -560,7 +560,7 @@ def test_args_object_params():
 def test_args_options_and_default_acction():
     with MockIO(['-v2', '-v2']) as mockio:
         ap = ArgsProcessor('appName', '1.0.1', default_action=command1)
-        ap.add_subcommand(command1, 'command1', description='description1')
+        ap.add_subcommand(command1, 'command1', help='help1')
         ap.process()
         assert mockio.output_contains('None')
         assert mockio.output_contains('invalid arguments')
@@ -614,24 +614,24 @@ def action_print_params(ap):
 def test_args_add_param():
     with MockIO([]) as mockio:
         ap = ArgsProcessor(default_action=action_print_params)
-        ap.add_param('param', description='set param').process()
+        ap.add_param('param', help='set param').process()
         assert 'param is: None\n' in mockio.output()
     with MockIO(['--param', 'dupa']) as mockio:
         ap = ArgsProcessor(default_action=action_print_params)
-        ap.add_param('param', description='set param').process()
+        ap.add_param('param', help='set param').process()
         assert 'param is: dupa\n' in mockio.output()
     with MockIO(['--parameter', 'dupa']) as mockio:
         ap = ArgsProcessor(default_action=action_print_params)
-        ap.add_param('param', keywords='--parameter', description='set param').process()
+        ap.add_param('param', keywords='--parameter', help='set param').process()
         assert 'param is: dupa\n' in mockio.output()
     # single letter
     with MockIO([]) as mockio:
         ap = ArgsProcessor(default_action=action_print_params)
-        ap.add_param('p', description='set param').process()
+        ap.add_param('p', help='set param').process()
         assert 'p is: None\n' in mockio.output()
     with MockIO(['-p', 'dupa']) as mockio:
         ap = ArgsProcessor(default_action=action_print_params)
-        ap.add_param('p', description='set param').process()
+        ap.add_param('p', help='set param').process()
         assert 'p is: dupa\n' in mockio.output()
 
 
@@ -795,13 +795,13 @@ def test_args_multilevel_commands_help():
     with MockIO(['--help']) as mockio:
         ap = ArgsProcessor('cmdline', '1.2.3')
         ap.add_param('global-param')
-        ap.add_param('--global-param2', description='another parameter')
-        ap.add_flag('--flag', description='a flag')
+        ap.add_param('--global-param2', help='another parameter')
+        ap.add_flag('--flag', help='a flag')
         ap_test = ap.add_subcommand('test')
         ap_test.add_param('test-param')
         ap_test_dupy = ap_test.add_subcommand('dupy', action=action_print_1)
-        ap_test_dupy.add_param('z-parametrem', description='with param')
-        ap_test.add_subcommand('audio', action=action_print_1, description='tests audio')
+        ap_test_dupy.add_param('z-parametrem', help='with param')
+        ap_test.add_subcommand('audio', action=action_print_1, help='tests audio')
         ap_test_dupy.add_subcommand('2', action=action_print_2)
         ap.process()
         assert mockio.output_contains('Usage:')  # help
