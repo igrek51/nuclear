@@ -696,6 +696,8 @@ class ArgsProcessor(SubArgsProcessor):
 
 # commands available to invoke (workaround for invoking by function reference)
 def print_help(ap):
+    if ap.parent:
+        ap = ap.parent
     ap.print_help()
 
 
