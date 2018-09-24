@@ -1,5 +1,5 @@
 """
-glue v2.0.2
+glue v2.0.4
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -10,7 +10,6 @@ import os
 import re
 import subprocess
 import sys
-from builtins import bytes
 
 
 # ----- Pretty output
@@ -42,6 +41,13 @@ def exit_now(message=None):
     sys.exit(0)
 
 
+# ----- check imports -----
+try:
+    from builtins import bytes
+except ImportError:
+    error('builtins import not found, try running: "pip install future" to install')
+
+
 # ----- Input -----
 def input_string(prompt=None):
     """raw input compatible with python 2 and 3"""
@@ -57,7 +63,7 @@ def input_required(prompt):
         inputted = input_string(prompt)
         if not inputted:
             continue
-        print
+        print()
         return inputted
 
 
@@ -171,6 +177,10 @@ def script_real_dir():
     return os.path.dirname(os.path.realpath(__file__))
 
 
+def script_real_path():
+    return os.path.normpath(os.path.join(script_real_dir(), sys.argv[0]))
+
+
 # ----- Time format converters -----
 def str2time(time_raw, pattern):
     """pattern: %Y-%m-%d, %H:%M:%S"""
@@ -264,6 +274,12 @@ class CommandArgRule(CliArgRule):
         return max_length
 
 
+class PrimaryOptionRule(CliArgRule):
+    def __init__(self, action, **kwargs):
+        super(PrimaryOptionRule, self).__init__(**kwargs)
+        self.action = action
+
+
 class ParamArgRule(CliArgRule):
     def __init__(self, name, required, **kwargs):
         super(ParamArgRule, self).__init__(**kwargs)
@@ -289,6 +305,7 @@ class SubArgsProcessor(object):
         self._rules_params = []
         self._rules_flags = []
         self._rules_commands = []
+        self._rules_primary_options = []
         self._params = {}
         self._flags = []
         self._args_que = None
@@ -313,6 +330,12 @@ class SubArgsProcessor(object):
             CommandArgRule(action=action, subparser=subparser, keywords=keywords, description=description,
                            syntax=syntax, completer=completer, completer_choices=completer_choices))
         return subparser
+
+    def add_primary_option(self, keywords, action=None, description=None, syntax=None):
+        self._rules_primary_options.append(
+            PrimaryOptionRule(action=action, keywords=keywords, description=description,
+                              syntax=syntax))
+        return self
 
     def add_param(self, name=None, keywords=None, description=None, completer=None, completer_choices=None,
                   required=False):
@@ -408,15 +431,35 @@ class SubArgsProcessor(object):
     def process_args(self, args):
         self._args_que = args
         self._argsOffset = 0
-        # process the flags and params first
-        self._process_flags()
-        self._process_params()
-        if self._args_que:
-            self._process_commands()
-        else:
-            # if there's no arguments left - run default action
-            if self._default_action:
-                self._invoke_action(self._default_action)
+        # process primary options first - only one primary option
+        if not self._process_primary_options():
+            # then the flags and params
+            self._process_flags()
+            self._process_params()
+            if self._args_que:
+                # then commands
+                self._process_commands()
+            else:
+                # if there's no arguments left - run default action
+                if self._default_action:
+                    self._invoke_action(self._default_action)
+        # if some args left
+        self._print_redundant_args()
+
+    def _process_primary_options(self):
+        self._argsOffset = 0
+        while self.has_next():
+            next_arg = self.peek_next()
+            rule = self._find_rule_by_keyword(self._rules_primary_options, next_arg)
+            if rule:
+                # remove arg from list
+                self.poll_next()
+                # run the action
+                self._invoke_action(rule.action)
+                return True  # one primary option only
+            else:
+                # skip it - it's not what we're looking for
+                self._argsOffset += 1
 
     def _process_flags(self):
         self._argsOffset = 0
@@ -466,9 +509,11 @@ class SubArgsProcessor(object):
         elif self._default_action:
             # run default action without removing args
             self._invoke_action(self._default_action)
-        # if some args left
+
+    def _print_redundant_args(self):
+        self._argsOffset = 0
         if self.has_next():
-            warn('redundant arguments: %s' % self.poll_remaining_joined(' '))
+            warn('invalid arguments: %s' % self.poll_remaining_joined(' '))
 
     def _invoke_action(self, action):
         if action is not None:
@@ -542,29 +587,38 @@ class SubArgsProcessor(object):
         for subcommand in self._rules_commands:
             subcommand.subparser.print_commands(subcommand, syntax_padding, prefix)
 
-    # autocomplete
-    def autocomplete_install(self):
-        app_name = self.poll_next('appName')
+    def bash_install(self):
+        """
+        Installs script link in /usr/bin/{appname}
+        and Creates bash autocompletion script
+        """
+        app_name = self.poll_next('appname')
+        # creating /usr/bin/ link
+        usr_bin_executable = '/usr/bin/%s' % app_name
+        if file_exists(usr_bin_executable):
+            warn('file %s already exists.' % usr_bin_executable)
+        else:
+            script_path = script_real_path()
+            info('creating link: %s -> %s' % (usr_bin_executable, script_path))
+            shell('ln -s %s %s' % (script_path, usr_bin_executable))
+        # bash autocompletion install
         shell("""cat << EOF > /etc/bash_completion.d/autocomplete_%s.sh
 #!/bin/bash
 # script location (command to invoke)
 AUTOCOMPLETE_SCRIPT_COMMAND=%s
 # space delimited application names (command line prefix)
 AUTOCOMPLETE_SCRIPT_NAMES=%s
-
 _autocomplete() {
     COMPREPLY=( $(${AUTOCOMPLETE_SCRIPT_COMMAND} autocomplete "${COMP_LINE}") )
 }
-
 complete -F _autocomplete ${AUTOCOMPLETE_SCRIPT_NAMES}
-
 EOF
 """ % (app_name, app_name, app_name))
-        info('autocompleter has been installed. Please restart your shell.')
+        info('Autocompleter has been installed. Please restart your shell.')
 
-    def autocomplete_command(self):
+    def bash_autocomplete(self):
         autocompletes = []
-        comp_line = self.pollRemainingJoined(joiner=' ')
+        comp_line = self.poll_remaining_joined(joiner=' ')
         if comp_line.startswith('"') and comp_line.endswith('"'):
             comp_line = comp_line[1:-1]
         parts = comp_line.split(' ')
@@ -572,9 +626,10 @@ EOF
         last = parts[-1]
         # first command help
         if len(parts) == 2:
-            cmds = ['war', 'go', 'age', 'aoe', 'test', 'screen', 'network', 'audio', 'vsync', 'voice', 'voices', 'info',
-                    'taunt', 'memory', 'help']
-            filtered = list(filter(lambda c: c.startswith(last), cmds))
+            # primary options, params, flags
+            rules = self._rules_flags + self._rules_params + self._rules_primary_options + self._rules_commands
+            keywords = [keyword for rule in rules for keyword in rule.keywords]
+            filtered = list(filter(lambda c: c.startswith(last), keywords))
             autocompletes.extend(filtered)
         else:
             pass
@@ -586,19 +641,19 @@ EOF
 class ArgsProcessor(SubArgsProcessor):
     def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None):
         super(ArgsProcessor, self).__init__(default_action)
-        self._appName = app_name
+        self._app_name = app_name
         self._version = version
         self._syntax = syntax
         # default action - help
         if not self._default_action:
             self._default_action = print_help
         # bind default options: help, version
-        self.add_subcommand(['-h', '--help'], action=print_help, description='display this help and exit')
-        self.add_subcommand(['-v', '--version'], action=print_version, description='print version')
-        self.add_subcommand('--autocomplete-install', syntax='<appName>', action=autocomplete_install,
-                            description='installs bash autocompletion')
-        self.add_subcommand('--autocomplete', syntax='<cmdline>', action=autocomplete_command,
-                            description='return autocompletion list')
+        self.add_primary_option(['-h', '--help'], action=print_help, description='display this help and exit')
+        self.add_primary_option(['-v', '--version'], action=print_version, description='print version')
+        self.add_primary_option('--bash-install', syntax='<appname>', action=bash_install,
+                                description='installs bash script and autocompletion')
+        self.add_primary_option('--bash-autocomplete', syntax='<cmdline>', action=bash_autocomplete,
+                                description='return autocompletion list')
 
     # auto generating help output
     def _calc_min_syntax_padding(self):
@@ -615,7 +670,7 @@ class ArgsProcessor(SubArgsProcessor):
         # print main usage
         usage_syntax = sys.argv[0]
         commands_count = sum(1 for _ in self._rules_commands)
-        options_count = sum(1 for _ in self._rules_flags + self._rules_params)
+        options_count = sum(1 for _ in self._rules_flags + self._rules_params + self._rules_primary_options)
         if options_count > 0:
             usage_syntax += ' [options]'
         if commands_count > 0:
@@ -632,31 +687,25 @@ class ArgsProcessor(SubArgsProcessor):
         # options
         if options_count > 0:
             print('\nOptions:')
-            for rule in self._rules_flags + self._rules_params:
+            for rule in self._rules_flags + self._rules_params + self._rules_primary_options:
                 print('  %s' % rule.display_help(syntax_padding))
-        sys.exit(0)
 
     def print_version(self):
-        print('%s v%s' % (self._appName, self._version))
+        print('%s v%s' % (self._app_name, self._version))
 
 
 # commands available to invoke (workaround for invoking by function reference)
 def print_help(ap):
-    if ap.parent:
-        ap = ap.parent
     ap.print_help()
 
 
 def print_version(ap):
-    if ap.parent:
-        ap = ap.parent
     ap.print_version()
-    sys.exit(0)
 
 
-def autocomplete_install(ap):
-    ap.autocomplete_install()
+def bash_install(ap):
+    ap.bash_install()
 
 
-def autocomplete_command(ap):
-    ap.autocomplete_command()
+def bash_autocomplete(ap):
+    ap.bash_autocomplete()

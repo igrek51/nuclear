@@ -201,6 +201,11 @@ def test_script_real_dir():
     assert script_real_dir() == real_dir_expected
 
 
+def test_script_real_path():
+    real_dir_expected = get_workdir()
+    assert script_real_path() == os.path.join(real_dir_expected, 'glue.py')
+
+
 def test_file_exists():
     assert file_exists('test/res/readme')
     assert not file_exists('test/res/dupadupa')
