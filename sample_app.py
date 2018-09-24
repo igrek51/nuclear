@@ -22,7 +22,7 @@ def main():
     # bind 'force' flag to keywords '-f' or '--force'
     ap.add_flag('force', keywords=['-f', '--force'], description='enable force mode')
     # enable param 'surname' (bind to '--surname <surname>' or '--surname=<surname>' syntax by default)
-    ap.add_param('surname', description='set custom surname')
+    ap.add_param('surname', description='set custom surname', choices=['brian', 'janusz', 'brianusz'])
     # do the magic
     ap.process()
 

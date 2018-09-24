@@ -604,20 +604,20 @@ class SubArgsProcessor(object):
         # creating /usr/bin/ link
         usr_bin_executable = '/usr/bin/%s' % app_name
         if file_exists(usr_bin_executable):
-            warn('file %s already exists.' % usr_bin_executable)
+            warn('file %s already exists - skipping.' % usr_bin_executable)
         else:
             script_path = script_real_path()
             info('creating link: %s -> %s' % (usr_bin_executable, script_path))
             shell('ln -s %s %s' % (script_path, usr_bin_executable))
         # bash autocompletion install
-        shell("""cat << EOF > /etc/bash_completion.d/autocomplete_%s.sh
+        shell("""cat <<'EOF' > /etc/bash_completion.d/autocomplete_%s.sh
 #!/bin/bash
 # script location (command to invoke)
 AUTOCOMPLETE_SCRIPT_COMMAND=%s
 # space delimited application names (command line prefix)
 AUTOCOMPLETE_SCRIPT_NAMES=%s
 _autocomplete() {
-    COMPREPLY=( $(${AUTOCOMPLETE_SCRIPT_COMMAND} autocomplete "${COMP_LINE}") )
+    COMPREPLY=( $(${AUTOCOMPLETE_SCRIPT_COMMAND} --bash-autocomplete "${COMP_LINE}") )
 }
 complete -F _autocomplete ${AUTOCOMPLETE_SCRIPT_NAMES}
 EOF
@@ -635,6 +635,8 @@ EOF
         available = self._generate_available_completions(args)
 
         filtered = list(filter(lambda c: c.startswith(last), available))
+        # remove '...=' prefix
+        filtered = list(map(lambda c: regex_replace(c, r'(.*)=(.*)', '\\2'), filtered))
         print('\n'.join(filtered))
 
     def _generate_available_completions(self, args):
@@ -643,41 +645,45 @@ EOF
         available = []
         last = args[-1] if len(args) > 0 else ''
         previous = args[-2] if len(args) > 1 else None
-        # available always - flags, params, primary options
-        rules = self._rules_flags + self._rules_params + self._rules_primary_options
-        available.extend([keyword for rule in rules for keyword in rule.keywords])
         # "--param value" autocompletion
+        found_params = False
         if previous:
             for rule in self._rules_params:
                 for keyword in rule.keywords:
                     if previous == keyword:
                         possible_choices = rule.generate_choices(self)
                         available.extend(possible_choices)
+                        found_params = True
         # "--param=value" autocompletion
         for rule in self._rules_params:
             for keyword in rule.keywords:
                 if last.startswith(keyword + '='):
                     possible_choices = list(map(lambda c: keyword + '=' + c, rule.generate_choices(self)))
                     available.extend(possible_choices)
-        # subcommands
-        found_subcommand = False
-        for idx, val in enumerate(args):
-            rule = self._find_rule_by_keyword(self._rules_commands, val)
-            if rule:  # if found a command
-                # append this command autcompletion (if it's last command)
-                if previous == val:
-                    possible_choices = rule.generate_choices(self)
-                    available.extend(possible_choices)
-                # append subparser autocompletions
-                subargs = args[idx:]
-                subcompletions = rule.subparser._generate_available_completions(subargs)
-                available.extend(subcompletions)
-                found_subcommand = True
-                break
-        # all subcommands only when none was found
-        if not found_subcommand:
-            rules = self._rules_commands
+                    found_params = True
+        if not found_params:
+            # available always - flags, params, primary options
+            rules = self._rules_flags + self._rules_params + self._rules_primary_options
             available.extend([keyword for rule in rules for keyword in rule.keywords])
+            # subcommands
+            found_subcommand = False
+            for idx, val in enumerate(args):
+                rule = self._find_rule_by_keyword(self._rules_commands, val)
+                if rule:  # if found a command
+                    # append this command autcompletion (if it's last command)
+                    if previous == val:
+                        possible_choices = rule.generate_choices(self)
+                        available.extend(possible_choices)
+                    # append subparser autocompletions
+                    subargs = args[idx:]
+                    subcompletions = rule.subparser._generate_available_completions(subargs)
+                    available.extend(subcompletions)
+                    found_subcommand = True
+                    break
+            # all subcommands only when none was found
+            if not found_subcommand:
+                rules = self._rules_commands
+                available.extend([keyword for rule in rules for keyword in rule.keywords])
 
         return available
 

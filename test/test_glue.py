@@ -916,7 +916,7 @@ def test_args_autocomplete_params():
     with MockIO(['--bash-autocomplete', 'dupa --param=']) as mockio:
         ap = ArgsProcessor().add_param('param', choices=['jasna', 'dupa'])
         ap.process()
-        mockio.assert_output('--param=jasna\n--param=dupa\n')
+        mockio.assert_output('jasna\ndupa\n')
 
 
 def completer_screen1():
@@ -939,13 +939,13 @@ def test_args_autocomplete_params_choices():
         ap.add_param('new')
         ap.add_param('screen', choices=completer_screen1)
         ap.process()
-        mockio.assert_output('--screen=HDMI\n--screen=eDP\n')
+        mockio.assert_output('HDMI\neDP\n')
     with MockIO(['--bash-autocomplete', 'dupa --new AWSME --screen=']) as mockio:
         ap = ArgsProcessor()
         ap.add_param('new')
         ap.add_param('screen', choices=completer_screen2)
         ap.process()
-        mockio.assert_output('--screen=HDMI\n--screen=eDP\n')
+        mockio.assert_output('HDMI\neDP\n')
 
 
 def test_args_autocomplete_command_choices():
