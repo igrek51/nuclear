@@ -5,9 +5,14 @@ import glue
 
 # ----- Actions -----
 def action_hello(ap):
-    name = ap.poll_next('name')  # get first arg
+    """
+    Displays hello message with user name
+    :param ap: ArgsProcessor - You can get the parameter values,
+    flags states or any other CLI argument from here
+    """
+    name = ap.poll_next('name')  # get first arg from args queue
     if ap.is_param('surname'):  # optional param 'surname'
-        name += ' ' + ap.get_param('surname')
+        name += ' ' + ap.get_param('surname')  # get param 'value'
     print('Hello %s' % name)
     if ap.is_flag_set('force'):  # check flag is set
         print('May the Force be with you!')
@@ -32,7 +37,8 @@ def list_xrandr_screens():
 
 # ----- CLI definitions -----
 def main():
-    ap = glue.ArgsProcessor(app_name='Sample glue application', version='1.0.1')  # app name and version
+    # app name and version for help printing
+    ap = glue.ArgsProcessor(app_name='Sample glue application', version='1.0.1')
     # bind 'hello' keyword with action_hello function
     ap.add_subcommand('hello', action=action_hello, syntax='<name>', help='display hello message')
     # enable param 'surname' (bind to '--surname <surname>' or '--surname=<surname>' syntax)
@@ -51,4 +57,4 @@ def main():
 
 
 if __name__ == '__main__':
-    main()
+    main()  # it will not be invoked when importing this module for testing purposes
