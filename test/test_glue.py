@@ -18,7 +18,7 @@ def assert_error(action, expected_error=None):
         assert False
     except RuntimeError as e:
         if expected_error:
-            assert str(e) == expected_error
+            assert expected_error in str(e)
 
 
 def assert_system_exit(action):
@@ -830,3 +830,44 @@ def test_args_poll_from_subcommand():
         ap.add_subcommand('--autocomplete-install2', action=action_test_args_poll_from_subcommand)
         ap.process()
         assert mockio.output_strip() == 'jasna dupa'
+
+
+def test_args_bash_install_permissions():
+    with MockIO(['--bash-install', 'dupa']) as mockio:
+        ap = ArgsProcessor()
+        assert_ap_error(ap, 'failed executing')
+
+
+def test_args_autocomplete():
+    with MockIO(['--bash-autocomplete', 'dupa']) as mockio:
+        ap = ArgsProcessor()
+        ap.process()
+        assert mockio.output() == '\n'
+    # test autocomplete first list commands
+    with MockIO(['--bash-autocomplete', 'dupa ']) as mockio:
+        ap = ArgsProcessor()
+        ap.process()
+        mockio.assert_output_contains('-h\n')
+        mockio.assert_output_contains('--help\n')
+        mockio.assert_output_contains('-v\n')
+        mockio.assert_output_contains('--version\n')
+        mockio.assert_output_contains('--bash-install\n')
+        mockio.assert_output_contains('--bash-autocomplete\n')
+    with MockIO(['--bash-autocomplete', '"dupa "']) as mockio:
+        ap = ArgsProcessor()
+        ap.process()
+        mockio.assert_output_contains('--help\n')
+    # command, flag, param are available in autocompletions
+    with MockIO(['--bash-autocomplete', 'dupa ']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_subcommand('command')
+        ap.add_flag('flag1')
+        ap.add_flag('--flag2')
+        ap.add_param('param1')
+        ap.add_param('--param2')
+        ap.process()
+        mockio.assert_output_contains('command\n')
+        mockio.assert_output_contains('--flag1\n')
+        mockio.assert_output_contains('--flag2\n')
+        mockio.assert_output_contains('--param1\n')
+        mockio.assert_output_contains('--param2\n')
