@@ -668,9 +668,6 @@ EOF
                     available.extend(possible_choices)
                     found_params = True
         if not found_params:
-            # available always - flags, params, primary options
-            rules = self._rules_flags + self._rules_params + self._rules_primary_options
-            available.extend([keyword for rule in rules for keyword in rule.keywords])
             # subcommands
             found_subcommand = False
             for idx, val in enumerate(args):
@@ -688,8 +685,11 @@ EOF
                     available.extend(subcompletions)
                     found_subcommand = True
                     break
-            # all subcommands only when none was found
             if not found_subcommand:
+                # available when no completer found - flags, params, primary options
+                rules = self._rules_flags + self._rules_params + self._rules_primary_options
+                available.extend([keyword for rule in rules for keyword in rule.keywords])
+                # all subcommands only when none was found
                 rules = self._rules_commands
                 available.extend([keyword for rule in rules for keyword in rule.keywords])
 
