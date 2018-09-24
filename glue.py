@@ -702,7 +702,7 @@ class ArgsProcessor(SubArgsProcessor):
     # auto generating help output
     def _calc_min_syntax_padding(self):
         min_syntax_padding = 0
-        for rule in self._rules_flags + self._rules_params + self._rules_commands:
+        for rule in self._rules_flags + self._rules_params + self._rules_commands + self._rules_primary_options:
             syntax_length = rule.display_syntax_max_length()
             if syntax_length > min_syntax_padding:  # min padding = max from len(syntax)
                 min_syntax_padding = syntax_length
