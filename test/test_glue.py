@@ -847,7 +847,9 @@ def test_args_autocomplete():
         ap = ArgsProcessor()
         ap.process()
         assert mockio.output() == '\n'
-    # test autocomplete first list commands
+
+
+def test_args_autocomplete_first_list():
     with MockIO(['--bash-autocomplete', 'dupa ']) as mockio:
         ap = ArgsProcessor()
         ap.process()
@@ -861,7 +863,9 @@ def test_args_autocomplete():
         ap = ArgsProcessor()
         ap.process()
         mockio.assert_output_contains('--help\n')
-    # command, flag, param are available in autocompletions
+
+
+def test_args_autocomplete_command_flag_param():
     with MockIO(['--bash-autocomplete', 'dupa ']) as mockio:
         ap = ArgsProcessor()
         ap.add_subcommand('command')
@@ -875,7 +879,9 @@ def test_args_autocomplete():
         mockio.assert_output_contains('--flag2\n')
         mockio.assert_output_contains('--param1\n')
         mockio.assert_output_contains('--param2\n')
-    # subcommands autocomplete
+
+
+def test_args_autocomplete_subcommand():
     with MockIO(['--bash-autocomplete', 'dupa command ']) as mockio:
         ap = ArgsProcessor()
         ap_command = ap.add_subcommand('command')
@@ -883,7 +889,7 @@ def test_args_autocomplete():
         ap_command.add_flag('flag1')
         ap_command.add_param('param1')
         ap.process()
-        assert not mockio.output_contains('command')
+        assert not 'command' in mockio.output()
         mockio.assert_output_contains('sub2\n')
         mockio.assert_output_contains('--flag1\n')
         mockio.assert_output_contains('--param1\n')
@@ -900,3 +906,64 @@ def test_args_autocomplete():
         assert not mockio.output_contains('c2')
         mockio.assert_output_contains('c3\n')
         mockio.assert_output_contains('--help\n')
+
+
+def test_args_autocomplete_params():
+    with MockIO(['--bash-autocomplete', 'dupa --param ']) as mockio:
+        ap = ArgsProcessor().add_param('param', choices=['jasna', 'dupa'])
+        ap.process()
+        mockio.assert_output_contains('jasna\ndupa\n')
+    with MockIO(['--bash-autocomplete', 'dupa --param=']) as mockio:
+        ap = ArgsProcessor().add_param('param', choices=['jasna', 'dupa'])
+        ap.process()
+        mockio.assert_output('--param=jasna\n--param=dupa\n')
+
+
+def completer_screen1():
+    return ['HDMI', 'eDP']
+
+
+def completer_screen2(ap):
+    return ['HDMI', 'eDP']
+
+
+def test_args_autocomplete_params_choices():
+    with MockIO(['--bash-autocomplete', 'dupa --new AWSME --screen ']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_param('new')
+        ap.add_param('screen', choices=['HDMI', 'eDP'])
+        ap.process()
+        mockio.assert_output_contains('HDMI\neDP\n')
+    with MockIO(['--bash-autocomplete', 'dupa --new AWSME --screen=']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_param('new')
+        ap.add_param('screen', choices=completer_screen1)
+        ap.process()
+        mockio.assert_output('--screen=HDMI\n--screen=eDP\n')
+    with MockIO(['--bash-autocomplete', 'dupa --new AWSME --screen=']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_param('new')
+        ap.add_param('screen', choices=completer_screen2)
+        ap.process()
+        mockio.assert_output('--screen=HDMI\n--screen=eDP\n')
+
+
+def test_args_autocomplete_command_choices():
+    with MockIO(['--bash-autocomplete', 'dupa --new AWSME screen ']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_param('new')
+        ap.add_subcommand('screen', choices=['HDMI', 'eDP'])
+        ap.process()
+        mockio.assert_output_contains('HDMI\neDP\n')
+    with MockIO(['--bash-autocomplete', 'dupa --new AWSME screen ']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_param('new')
+        ap.add_subcommand('screen', choices=completer_screen1)
+        ap.process()
+        mockio.assert_output_contains('HDMI\neDP\n')
+    with MockIO(['--bash-autocomplete', 'dupa --new AWSME screen ']) as mockio:
+        ap = ArgsProcessor()
+        ap.add_param('new')
+        ap.add_subcommand('screen', choices=completer_screen2)
+        ap.process()
+        mockio.assert_output_contains('HDMI\neDP\n')

@@ -210,8 +210,7 @@ def map_list(mapper, lst):
 
 # ----- CLI arguments rule -----
 class CliArgRule(object):
-    def __init__(self, keywords=None, description=None, syntax=None, completer=None,
-                 completer_choices=None):
+    def __init__(self, keywords=None, description=None, syntax=None, choices=None):
         """
         :param keywords: triggering keyword / keywords - string or list of string
         :param description: description of action to show in help
@@ -221,8 +220,7 @@ class CliArgRule(object):
         """
         self.description = description
         self.syntax = syntax
-        self.completer = completer
-        self.completer_choices = completer_choices
+        self.choices = choices
         # store keywords list
         if isinstance(keywords, list):
             self.keywords = keywords
@@ -246,6 +244,19 @@ class CliArgRule(object):
         if self.description:
             display_help_out = display_help_out.ljust(syntax_padding) + ' - ' + self.description
         return display_help_out
+
+    def generate_choices(self, ap):
+        if not self.choices:
+            return []
+        elif isinstance(self.choices, list):
+            return self.choices
+        else:
+            # generator function - execute action(ap) or action()
+            (args, _, _, _) = inspect.getargspec(self.choices)
+            if args:
+                return self.choices(ap)
+            else:
+                return self.choices()
 
 
 class CommandArgRule(CliArgRule):
@@ -311,8 +322,7 @@ class SubArgsProcessor(object):
         self._args_que = None
         self._argsOffset = None
 
-    def add_subcommand(self, keywords, action=None, description=None, syntax=None, completer=None,
-                       completer_choices=None):
+    def add_subcommand(self, keywords, action=None, description=None, syntax=None, choices=None):
         """
         Bind command keyword to an action. Command is processed after all params and flags.
         It creates a sub-command processor to handle command specific params, flags or next level sub-commands.
@@ -320,15 +330,14 @@ class SubArgsProcessor(object):
         :param action: action to invoke when triggered
         :param description: description of action to show in help
         :param syntax: syntax of action to show in help
-        :param completer: auto completer - possible choices generator
-        :param completer_choices: list of possible choices
+        :param choices: auto completer function - possible choices generator or list of possible choices
         :return: next level subparser (with command context)
         """
         # create subparser
         subparser = SubArgsProcessor(default_action=action, parent=self)
         self._rules_commands.append(
             CommandArgRule(action=action, subparser=subparser, keywords=keywords, description=description,
-                           syntax=syntax, completer=completer, completer_choices=completer_choices))
+                           syntax=syntax, choices=choices))
         return subparser
 
     def add_primary_option(self, keywords, action=None, description=None, syntax=None):
@@ -337,15 +346,14 @@ class SubArgsProcessor(object):
                               syntax=syntax))
         return self
 
-    def add_param(self, name=None, keywords=None, description=None, completer=None, completer_choices=None,
+    def add_param(self, name=None, keywords=None, description=None, choices=None,
                   required=False):
         """
         Add parameter to retrieve later on. Syntax: '--param value' or '--param=value'
         :param name: param name
         :param keywords: trigger name or names (string or list of strings)
         :param description: description of param to show in help
-        :param completer: auto completer - possible choices generator
-        :param completer_choices: list of possible choices
+        :param choices: auto completer function - possible choices generator or list of possible choices
         :param required: is param required
         :return: this parser
         """
@@ -355,8 +363,8 @@ class SubArgsProcessor(object):
             keywords = name
         syntax = '<%s>' % self._trim_hyphens(name)
         self._rules_params.append(
-            ParamArgRule(name=name, required=required, keywords=keywords, description=description, completer=completer,
-                         completer_choices=completer_choices, syntax=syntax))
+            ParamArgRule(name=name, required=required, keywords=keywords, description=description, choices=choices,
+                         syntax=syntax))
         return self
 
     def add_flag(self, name, keywords=None, description=None):
@@ -617,26 +625,61 @@ EOF
         info('Autocompleter has been installed. Please restart your shell.')
 
     def bash_autocomplete(self):
-        autocompletes = []
         comp_line = self.poll_remaining_joined(joiner=' ')
         if comp_line.startswith('"') and comp_line.endswith('"'):
             comp_line = comp_line[1:-1]
         parts = comp_line.split(' ')
-        last = parts[-1]
+        args = parts[1:]
+        last = args[-1] if len(args) > 0 else ''
+
+        available = self._generate_available_completions(args)
+
+        filtered = list(filter(lambda c: c.startswith(last), available))
+        print('\n'.join(filtered))
+
+    def _generate_available_completions(self, args):
+        if not args:
+            return []
         available = []
+        last = args[-1] if len(args) > 0 else ''
+        previous = args[-2] if len(args) > 1 else None
         # available always - flags, params, primary options
         rules = self._rules_flags + self._rules_params + self._rules_primary_options
         available.extend([keyword for rule in rules for keyword in rule.keywords])
-        # first commands
-        if len(parts) == 2:
+        # "--param value" autocompletion
+        if previous:
+            for rule in self._rules_params:
+                for keyword in rule.keywords:
+                    if previous == keyword:
+                        possible_choices = rule.generate_choices(self)
+                        available.extend(possible_choices)
+        # "--param=value" autocompletion
+        for rule in self._rules_params:
+            for keyword in rule.keywords:
+                if last.startswith(keyword + '='):
+                    possible_choices = list(map(lambda c: keyword + '=' + c, rule.generate_choices(self)))
+                    available.extend(possible_choices)
+        # subcommands
+        found_subcommand = False
+        for idx, val in enumerate(args):
+            rule = self._find_rule_by_keyword(self._rules_commands, val)
+            if rule:  # if found a command
+                # append this command autcompletion (if it's last command)
+                if previous == val:
+                    possible_choices = rule.generate_choices(self)
+                    available.extend(possible_choices)
+                # append subparser autocompletions
+                subargs = args[idx:]
+                subcompletions = rule.subparser._generate_available_completions(subargs)
+                available.extend(subcompletions)
+                found_subcommand = True
+                break
+        # all subcommands only when none was found
+        if not found_subcommand:
             rules = self._rules_commands
             available.extend([keyword for rule in rules for keyword in rule.keywords])
-        else:
-            pass
-            # subcommands
-            # defineAutocompletes('test ', 3, ['audio', 'graphics', 'network', 'wine'])
-        filtered = list(filter(lambda c: c.startswith(last), available))
-        print('\n'.join(filtered))
+
+        return available
 
 
 class ArgsProcessor(SubArgsProcessor):
