@@ -618,14 +618,10 @@ class SubArgsProcessor(object):
         # bash autocompletion install
         shell("""cat <<'EOF' > /etc/bash_completion.d/autocomplete_%s.sh
 #!/bin/bash
-# script location (command to invoke)
-AUTOCOMPLETE_SCRIPT_COMMAND=%s
-# space delimited application names (command line prefix)
-AUTOCOMPLETE_SCRIPT_NAMES=%s
 _autocomplete() {
-    COMPREPLY=( $(${AUTOCOMPLETE_SCRIPT_COMMAND} --bash-autocomplete "${COMP_LINE}") )
+    COMPREPLY=( $(%s --bash-autocomplete "${COMP_LINE}") )
 }
-complete -F _autocomplete ${AUTOCOMPLETE_SCRIPT_NAMES}
+complete -F _autocomplete %s
 EOF
 """ % (app_name, app_name, app_name))
         info('Autocompleter has been installed. Please restart your shell.')
