@@ -1,5 +1,5 @@
 """
-glue v2.0.9
+glue v2.0.10
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -63,7 +63,6 @@ def input_required(prompt):
         inputted = input_string(prompt)
         if not inputted:
             continue
-        print()
         return inputted
 
 
