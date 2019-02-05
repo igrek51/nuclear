@@ -1,5 +1,5 @@
 """
-glue v2.0.8
+glue v2.0.9
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -615,16 +615,19 @@ class SubArgsProcessor(object):
             script_path = script_real_path()
             info('creating link: %s -> %s' % (usr_bin_executable, script_path))
             shell('ln -s %s %s' % (script_path, usr_bin_executable))
+        script_name = '/etc/bash_completion.d/autocomplete_%s.sh' % app_name
+        app_hash = hash(app_name) % (10**8)
+        function_name = '_autocomplete_%s' % app_hash  # unique across bash env
         # bash autocompletion install
-        shell("""cat <<'EOF' > /etc/bash_completion.d/autocomplete_%s.sh
+        shell("""cat <<'EOF' > %s
 #!/bin/bash
-_autocomplete() {
+%s() {
     COMPREPLY=( $(%s --bash-autocomplete "${COMP_LINE}") )
 }
-complete -F _autocomplete %s
+complete -F %s %s
 EOF
-""" % (app_name, app_name, app_name))
-        info('Autocompleter has been installed. Please restart your shell.')
+""" % (script_name, function_name, app_name, function_name, app_name))
+        info('Autocompleter has been installed in %s. Please restart your shell.' % script_name)
 
     def bash_autocomplete(self):
         comp_line = self.poll_remaining_joined(joiner=' ')
@@ -633,9 +636,7 @@ EOF
         parts = comp_line.split(' ')
         args = parts[1:]
         last = args[-1] if len(args) > 0 else ''
-
         available = self._generate_available_completions(args)
-
         filtered = list(filter(lambda c: c.startswith(last), available))
         # remove '...=' prefix
         filtered = list(map(lambda c: regex_replace(c, r'(.*)=(.*)', '\\2'), filtered))
