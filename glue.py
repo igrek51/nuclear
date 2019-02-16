@@ -1,5 +1,5 @@
 """
-glue v2.0.10
+glue v2.0.11
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -45,7 +45,7 @@ def exit_now(message=None):
 try:
     from builtins import bytes
 except ImportError:
-    error('builtins import not found, try running: "pip install future" to install')
+    error('builtins import not found, try running: "pip install future" to install missing lib')
 
 
 # ----- Input -----
@@ -693,11 +693,12 @@ EOF
 
 
 class ArgsProcessor(SubArgsProcessor):
-    def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None):
+    def __init__(self, app_name='Command Line Application', version='0.0.1', default_action=None, syntax=None, description=None):
         super(ArgsProcessor, self).__init__(default_action)
         self._app_name = app_name
         self._version = version
         self._syntax = syntax
+        self._description = description
         # default action - help
         if not self._default_action:
             self._default_action = print_help
@@ -721,6 +722,8 @@ class ArgsProcessor(SubArgsProcessor):
     def print_help(self):
         # auto generate help
         self.print_version()
+        if self._description:
+            print('\nDescription:\n  %s' % self._description)
         # print main usage
         usage_syntax = sys.argv[0]
         commands_count = sum(1 for _ in self._rules_commands)

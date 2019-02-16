@@ -976,3 +976,10 @@ def test_args_autocomplete_command_last_word_space():
         ap_info.add_subcommand('age')
         ap.process()
         mockio.assert_output_contains('age\n')
+
+
+def test_args_processor_description():
+    with MockIO(['--help']) as mockio:
+        ArgsProcessor(app_name='Appname', version='1.0.1', description='This is sample application').process()
+        mockio.assert_output_contains('Appname v1.0.1\n')
+        mockio.assert_output_contains('This is sample application')
