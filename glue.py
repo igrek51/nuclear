@@ -79,7 +79,7 @@ def shell_error_code(cmd):
 
 def shell_output(cmd, as_bytes=False):
     process = subprocess.Popen(cmd, stdout=subprocess.PIPE, shell=True)
-    output, err = process.communicate()
+    output, _ = process.communicate()
     if as_bytes:
         return output
     else:

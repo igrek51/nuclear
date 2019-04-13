@@ -1,6 +1,8 @@
 # glue
 `glue` is a Python library with the most common tools for command-line applications.
 
+`glue` lets you to bind Command-Line rules with a particular action (function). 
+
 It is compatible with both Python 2.7 and 3.5+.
 
 ## Command line parser
