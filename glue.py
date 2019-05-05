@@ -1,5 +1,5 @@
 """
-glue v2.0.11
+glue v2.0.12
 One script to rule them all. - Common Utilities Toolkit compatible with both Python 2.7 and 3
 
 Author: igrek51
@@ -530,7 +530,11 @@ class SubArgsProcessor(object):
     def _invoke_action(self, action):
         if action is not None:
             # execute action(self) or action()
-            (args, _, _, _) = inspect.getargspec(action)
+            if (sys.version_info >= (3, 0)):
+                (args, _, _, _, _, _, _) = inspect.getfullargspec(action)
+            else:
+                (args, _, _, _) = inspect.getargspec(action)
+
             if args:
                 action(self)
             else:
