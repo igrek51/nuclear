@@ -30,6 +30,16 @@ You only need to bind a keyword to the function and `glue` is doing all the rest
 * Basic file operations helpers
 * Datetime to string (and vice-versa) convertions
 
+## glue vs argparse
+argparse:
+- no multilevel commands
+- no autocompletion
+- declarative way of CLI logic
+- auto action binding & injecting arguments
+glue:
+- easier CLI building
+- a new way of building and documenting Command Line Interface
+
 ## Quick start
 
 Let's create simple command-line application using `glue`:

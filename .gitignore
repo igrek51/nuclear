@@ -3,4 +3,6 @@
 .coverage
 __pycache__
 .pytest_cache
-/.idea
+.mypy_cache/
+.idea
+*.iml
