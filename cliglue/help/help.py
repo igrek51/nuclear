@@ -15,10 +15,7 @@ class _OptionHelp(object):
     parent: '_OptionHelp' = None
 
 
-def print_help(rules: List[CliRule], app_name: str = None, version: str = None, help: str = None, *subcommands: str):
-
-    print(subcommands)
-
+def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subcommands: List[str]):
     # App info
     app_info: str = app_name
     if version:

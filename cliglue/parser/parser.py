@@ -5,7 +5,7 @@ from typing import Type, Any, List, TypeVar, Optional
 from cliglue.args.args import is_args_container_name, ArgsContainer
 from cliglue.args.args_que import ArgsQue
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, ParentRule, KeywordRule, \
-    DefaultActionRule, ValueRule, filter_rules, TCliRule, PositionalArgumentRule, AllArgumentsRule
+    DefaultActionRule, ValueRule, filter_rules, TCliRule, PositionalArgumentRule, AllArgumentsRule, SubcommandRule
 from cliglue.builder.typedef import Action
 from cliglue.utils.output import warn
 from .error import CliDefinitionError, CliSyntaxError
@@ -71,17 +71,17 @@ class Parser(object):
         return filter_rules(self.__rules, *types)
 
     def parse_args(self, args_list: List[str]):
-        self._parse_args_queue(ArgsQue(args_list))
+        args = ArgsQue(args_list)
+        self._parse_args_queue(args)
+        self._check_superfluous_args(args)
 
     def _parse_args_queue(self, args: ArgsQue):
         self._parse_flags(args)
         self._parse_params(args)
-        if not self._parse_primary_options(args):
-            if not self._parse_deeper(args):
-                self._parse_positional_arguments(args)
-                self._parse_remaining_arguments(args)
-                self._run_default_action()
-        self._check_superfluous_args(args)
+        if not self._parse_deeper(args):
+            self._parse_positional_arguments(args)
+            self._parse_remaining_arguments(args)
+            self._run_default_action()
 
     def _parse_flags(self, args: ArgsQue):
         for arg in args:
@@ -106,27 +106,33 @@ class Parser(object):
             for name in names_from_keywords(rule.keywords):
                 self.vars[name] = parsed_value
 
-    def _parse_primary_options(self, args: ArgsQue):
+    def _parse_deeper(self, args: ArgsQue) -> bool:
+        if self._parse_primary_oprions(args):
+            return True
+        if self._parse_subcommand(args):
+            return True
+        return False
+
+    def _parse_primary_oprions(self, args: ArgsQue) -> bool:
         for arg in args:
             rule: PrimaryOptionRule = self._find_rule(PrimaryOptionRule, arg)
             if rule:
                 args.pop_current()
-                self._run_action(rule.run)
-                return True  # one primary option only
-        return False
-
-    def _parse_deeper(self, args: ArgsQue):
-        if args:
-            first = next(iter(args))
-            # recognize first arg as command
-            rule: ParentRule = self._find_rule(ParentRule, first)
-            if rule:
-                args.pop_current()
-                # pass all remaining args to subparser
                 subparser = Parser(rule.subrules, rule.run, parent=self)
                 subparser._parse_args_queue(args)
                 return True
         return False
+
+    def _parse_subcommand(self, args: ArgsQue) -> bool:
+        if args:
+            # recognize first arg as command
+            first = next(iter(args))
+            rule: ParentRule = self._find_rule(SubcommandRule, first)
+            if rule:
+                args.pop_current()
+                subparser = Parser(rule.subrules, rule.run, parent=self)
+                subparser._parse_args_queue(args)
+                return True
 
     def _parse_positional_arguments(self, args: ArgsQue):
         for arg, rule in zip(args.reset(), self.rules(PositionalArgumentRule)):
@@ -145,7 +151,7 @@ class Parser(object):
             self.vars[rule.name] = value
 
     def _run_default_action(self):
-        self._check_required_params()
+        self._check_required_arguments()
         if self.__run:
             self._run_action(self.__run)
         elif self.parent:
@@ -165,7 +171,7 @@ class Parser(object):
         if args:
             warn('unrecognized arguments: {}'.format(' '.join(args)))
 
-    def _check_required_params(self):
+    def _check_required_arguments(self):
         for rule in self.rules(ParameterRule):
             if rule.required:
                 for name in names_from_keywords(rule.keywords):
@@ -177,8 +183,9 @@ class Parser(object):
                 if not self.vars[rule.name]:
                     raise CliSyntaxError('required positional argument "{}" is not given'.format(rule.name))
 
-        if self.parent:
-            self.parent._check_required_params()
+        # TODO validate required arguments from outside?
+        # if self.parent:
+        #     self.parent._check_required_params()
 
     TKeywordRule = TypeVar('TKeywordRule', bound=KeywordRule)
 

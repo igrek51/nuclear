@@ -43,7 +43,7 @@ def test_optional_argument():
 
 def test_missing_required_param():
     with MockIO():
-        cli = CliBuilder(run=print_pos_arg1).has(
+        cli = CliBuilder(run=print_pos_arg1, help_onerror=False).has(
             argument('arg1'),
         )
         assert_cli_error(lambda: cli.run())

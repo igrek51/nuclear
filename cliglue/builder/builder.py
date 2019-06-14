@@ -109,14 +109,14 @@ class CliBuilder(object):
             error('CLI error: ' + str(e))
             raise e
 
-    def print_help(self, *subcommands: str):
-        print_help(self.__subrules, self.__name, self.__version, self.__help, *subcommands)
+    def print_help(self, subcommands: List[str] = None):
+        if not subcommands:
+            subcommands = []
+        print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands)
 
     def __add_default_rules(self):
         def __print_help(subcommands: List[str]):
-            if not subcommands:
-                subcommands = []
-            self.print_help(*subcommands)
+            self.print_help(subcommands)
 
         def __print_version():
             print_version(self.__name, self.__version)

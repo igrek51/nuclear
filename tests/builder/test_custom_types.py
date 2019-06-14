@@ -36,7 +36,7 @@ def test_invalid_datetime():
         print(str(d))
 
     with MockIO('-d=2019'):
-        cli = CliBuilder(run=print_datetime).has(
+        cli = CliBuilder(run=print_datetime, help_onerror=False).has(
             parameter('d', type=datetime_format('%Y-%m-%d %H:%M:%S', '%Y-%m-%d')),
         )
         assert_cli_error(lambda: cli.run())
@@ -47,7 +47,7 @@ def test_invalid_file():
         print(file)
 
     with MockIO('--file=dupa'):
-        cli = CliBuilder(run=print_file).has(
+        cli = CliBuilder(run=print_file, help_onerror=False).has(
             parameter('file', type=existing_file),
         )
         assert_cli_error(lambda: cli.run())

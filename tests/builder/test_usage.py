@@ -4,7 +4,7 @@ from .actions import *
 
 
 def test_multilevel_commands_usage():
-    CliBuilder('multiapp', version='1.2.3').has(
+    CliBuilder('multiapp', version='1.2.3', with_defaults=False).has(
         subcommand('git').has(
             subcommand('help', run=action_print, help='shows help'),
             subcommand('push', run=action_print).has(

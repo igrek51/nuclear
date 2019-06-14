@@ -7,4 +7,4 @@ def test_empty_builder():
         CliBuilder()
         mockio.assert_output('')
     with MockIO():
-        CliBuilder().run()
+        CliBuilder(with_defaults=False).run()
