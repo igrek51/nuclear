@@ -8,7 +8,7 @@ from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, Cli
     DefaultActionRule, ValueRule, filter_rules, TCliRule, PositionalArgumentRule, AllArgumentsRule
 from cliglue.builder.typedef import Action
 from cliglue.utils.output import warn
-from .error import CliDefinitionError, ArgumentSyntaxError
+from .error import CliDefinitionError, CliSyntaxError
 from .keyword import names_from_keywords, keywords_from_names
 from .param import match_param, parse_argument_value
 
@@ -132,6 +132,9 @@ class Parser(object):
         for arg, rule in zip(args.reset(), self.rules(PositionalArgumentRule)):
             self._parse_positional_argument(rule, args.pop_current())
 
+    def _parse_positional_argument(self, rule: PositionalArgumentRule, arg: str):
+        self.vars[rule.name] = parse_argument_value(rule, arg)
+
     def _parse_remaining_arguments(self, args: ArgsQue):
         for rule in self.rules(AllArgumentsRule):
             remaining_args = args.pop_all()
@@ -141,17 +144,14 @@ class Parser(object):
                 value = remaining_args
             self.vars[rule.name] = value
 
-    def _parse_positional_argument(self, rule: PositionalArgumentRule, arg: str):
-        self.vars[rule.name] = parse_argument_value(rule, arg)
-
     def _run_default_action(self):
+        self._check_required_params()
         if self.__run:
             self._run_action(self.__run)
         elif self.parent:
             self.parent._run_default_action()
 
     def _run_action(self, action: Action):
-        self._check_required_params()
         if action is not None:
             (args, _, _, _, _, _, annotations) = inspect.getfullargspec(action)
             if not args:
@@ -170,12 +170,15 @@ class Parser(object):
             if rule.required:
                 for name in names_from_keywords(rule.keywords):
                     if not self.vars[name]:
-                        raise ArgumentSyntaxError('required parameter "{}" is not given'.format(', '.join(rule.keywords)))
+                        raise CliSyntaxError('required parameter "{}" is not given'.format(', '.join(rule.keywords)))
 
         for rule in self.rules(PositionalArgumentRule):
             if rule.required:
                 if not self.vars[rule.name]:
-                    raise ArgumentSyntaxError('required positional argument "{}" is not given'.format(rule.name))
+                    raise CliSyntaxError('required positional argument "{}" is not given'.format(rule.name))
+
+        if self.parent:
+            self.parent._check_required_params()
 
     TKeywordRule = TypeVar('TKeywordRule', bound=KeywordRule)
 

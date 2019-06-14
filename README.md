@@ -256,3 +256,8 @@ git clone https://github.com/igrek51/glue
 cd glue
 ./pytest23.sh
 ```
+
+## Install develop package
+```bash
+sudo python3 setup.py develop
+```

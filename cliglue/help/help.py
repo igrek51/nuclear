@@ -1,97 +1,180 @@
 import sys
-from typing import List
+from typing import List, Set
 
-from cliglue.parser.keyword import name_from_keyword
-from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, filter_rules
+from dataclasses import dataclass
+
+from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, filter_rules, \
+    PositionalArgumentRule, AllArgumentsRule
+from cliglue.parser.keyword import names_from_keywords
 
 
-def print_help(rules: List[CliRule],
-               app_name: str = None,
-               version: str = None,
-               help: str = None
-               ):
-    print_version(app_name, version)
+@dataclass
+class _OptionHelp(object):
+    cmd: str
+    help: str
+    parent: '_OptionHelp' = None
 
+
+def print_help(rules: List[CliRule], app_name: str = None, version: str = None, help: str = None, *subcommands: str):
+
+    print(subcommands)
+
+    # App info
+    app_info: str = app_name
+    if version:
+        version = _normalized_version(version)
+        app_info += f' {version}'
     if help:
-        print('\nDescription:\n  {}'.format(help))
+        app_info += f' - {help}'
+    print(app_info)
 
-    usage_syntax: str = sys.argv[0]
+    # Usage
+    app_bin = sys.argv[0]
+    usage_syntax: str = app_bin
 
-    commands = filter_rules(rules, SubcommandRule)
+    command_rules = filter_rules(rules, SubcommandRule)
     flags = filter_rules(rules, FlagRule)
     parameters = filter_rules(rules, ParameterRule)
     primary_options = filter_rules(rules, PrimaryOptionRule)
+    pos_arguments = filter_rules(rules, PositionalArgumentRule)
+    all_args = filter_rules(rules, AllArgumentsRule)
+
+    for rule in flags:
+        for keyword in rule.keywords:
+            usage_syntax += f' [{keyword}]'
+
+    for rule in parameters:
+        keywords_joined = '|'.join(rule.keywords)
+        var_name = _param_var_name(rule)
+        if rule.required:
+            usage_syntax += f' {keywords_joined} {var_name}'
+        else:
+            usage_syntax += f' [{keywords_joined} {var_name}]'
 
     for rule in primary_options:
         for keyword in rule.keywords:
-            usage_syntax += ' [{}]'.format(keyword)
-    for rule in flags:
-        for keyword in rule.keywords:
-            usage_syntax += ' [{}]'.format(keyword)
+            usage_syntax += f' [{keyword}]'
 
-    for rule in parameters:
-        for keyword in rule.keywords:
-            name = name_from_keyword(keyword).upper()
-            if rule.required:
-                usage_syntax += ' {} {}'.format(keyword, name)
+    if command_rules:
+        usage_syntax += ' COMMAND'
+
+    for rule in pos_arguments:
+        var_name = _argument_var_name(rule)
+        if rule.required:
+            usage_syntax += f' {var_name}'
+        else:
+            usage_syntax += f' [{var_name}]'
+
+    for rule in all_args:
+        usage_syntax += f' [{rule.name}...]'
+
+    print(f'\nUsage:\n  {usage_syntax}')
+
+    # commands & options
+    options: List[_OptionHelp] = []
+    _add_options_helps(options, rules)
+    commands: List[_OptionHelp] = []
+    _add_commands_helps(commands, command_rules)
+
+    if options:
+        print('\nOptions:')
+        padding = _max_name_width(options)
+        for helper in options:
+            name_padded = helper.cmd.ljust(padding)
+            if helper.help:
+                print(f'  {name_padded} - {helper.help}')
             else:
-                usage_syntax += ' [{} {}]'.format(keyword, name)
-
-    if commands:
-        usage_syntax += ' <command>'
-
-    print('\nUsage:\n  %s' % usage_syntax)
+                print(f'  {name_padded}')
 
     if commands:
         print('\nCommands:')
-        for rule in commands:
-            _print_help_command(rule)
+        padding = _max_name_width(commands)
+        for helper in commands:
+            name_padded = helper.cmd.ljust(padding)
+            if helper.help:
+                print(f'  {name_padded} - {helper.help}')
+            else:
+                print(f'  {name_padded}')
 
-    # options
-    if primary_options or flags or parameters:
-        print('\nOptions:')
-        for rule in primary_options:
-            _print_help_primary_option(rule)
-        for rule in flags:
-            _print_help_flag(rule)
-        for rule in parameters:
-            _print_help_parameter(rule)
+        print(f'\nRun "{app_bin} COMMAND --help" for more information on a command.')
 
-    # TODO multilevel subhelps for subcommands
+    sys.exit(0)
 
 
-def print_version(app_name: str = None,
-                  version: str = None):
-    if not version.startswith('v'):
-        version = 'v{}'.format(version)
-    print('{} v{}'.format(app_name, version))
+def print_version(app_name: str, version: str):
+    if version:
+        version = _normalized_version(version)
+        print(f'{app_name} {version}')
+    else:
+        print(app_name)
 
 
-def _print_help_command(rule: SubcommandRule, prefix: str = ''):
-    prefix += ', '.join(rule.keywords)
-    print('  {}'.format(prefix))
-    if rule.help:
-        print('    {}'.format(rule.help))
-    # deeper subcommands
-    prefix += ' '
-    for subrule in rule.subrules:
-        _print_help_command(subrule, prefix)
+def _normalized_version(version: str) -> str:
+    if version.startswith('v'):
+        return version
+    return f'v{version}'
 
 
-def _print_help_primary_option(rule: PrimaryOptionRule):
-    print('  {}'.format(', '.join(rule.keywords)))
-    if rule.help:
-        print('    {}'.format(rule.help))
+def _max_name_width(helps: List[_OptionHelp]) -> int:
+    return max(map(lambda h: len(h.cmd), helps))
 
 
-def _print_help_flag(rule: FlagRule):
-    print('  {}'.format(', '.join(rule.keywords)))
-    if rule.help:
-        print('    {}'.format(rule.help))
+def _add_options_helps(options: List[_OptionHelp], rules: List[CliRule]):
+    for rule in rules:
+        if isinstance(rule, PrimaryOptionRule):
+            options.append(_primary_option_help(rule))
+        elif isinstance(rule, FlagRule):
+            options.append(_flag_help(rule))
+        elif isinstance(rule, ParameterRule):
+            options.append(_parameter_help(rule))
 
 
-def _print_help_parameter(rule: ParameterRule):
-    name = name_from_keyword(next(iter(rule.keywords))).upper()
-    print('  {} {}'.format(', '.join(rule.keywords), name))
-    if rule.help:
-        print('    {}'.format(rule.help))
+def _add_commands_helps(commands: List[_OptionHelp], rules: List[CliRule], parent: _OptionHelp = None):
+    for rule in rules:
+        if isinstance(rule, SubcommandRule):
+            helper = _subcommand_help(rule, parent)
+            commands.append(helper)
+            _add_commands_helps(commands, rule.subrules, helper)
+
+
+def _subcommand_prefix(helper: _OptionHelp) -> str:
+    if not helper:
+        return ''
+    return helper.cmd + ' '
+
+
+def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp) -> _OptionHelp:
+    cmd = _subcommand_prefix(parent) + '|'.join(rule.keywords)
+    return _OptionHelp(cmd, rule.help, parent)
+
+
+def _primary_option_help(rule: PrimaryOptionRule) -> _OptionHelp:
+    cmd = ', '.join(rule.keywords)
+    return _OptionHelp(cmd, rule.help)
+
+
+def _flag_help(rule: FlagRule) -> _OptionHelp:
+    cmd = ', '.join(rule.keywords)
+    return _OptionHelp(cmd, rule.help)
+
+
+def _parameter_help(rule: ParameterRule) -> _OptionHelp:
+    cmd = ', '.join(rule.keywords) + ' ' + _param_var_name(rule)
+    return _OptionHelp(cmd, rule.help)
+
+
+def _param_var_name(rule: ParameterRule) -> str:
+    if rule.name:
+        return rule.name.upper()
+    else:
+        # get name from longest keyword
+        names: Set[str] = names_from_keywords(rule.keywords)
+        return max(names, lambda n: len(n)).upper()
+
+
+def _subcommand_short_name(rule: SubcommandRule) -> str:
+    return rule.keywords[0]
+
+
+def _argument_var_name(rule: PositionalArgumentRule) -> str:
+    return rule.name.upper()

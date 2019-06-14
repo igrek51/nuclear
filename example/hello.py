@@ -9,10 +9,10 @@ def say_hello(name: str, surname: str, force: bool):
 
 
 def main():
-    CliBuilder('multiapp').has(
-		argument('name'),
-		argument('surname', required=False),
-    	flag('force'),
+    CliBuilder('multiapp', run=say_hello).has(
+        argument('name'),
+        argument('surname', required=False, default=''),
+        flag('force'),
     ).run()
 
 

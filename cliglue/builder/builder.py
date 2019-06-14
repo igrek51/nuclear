@@ -1,8 +1,8 @@
 import sys
 from typing import Any, List, Optional
 
-from cliglue.help.help import print_version
-from cliglue.parser.error import CliError, ArgumentSyntaxError, CliDefinitionError
+from cliglue.help.help import print_version, print_help
+from cliglue.parser.error import CliError, CliSyntaxError, CliDefinitionError
 from cliglue.parser.parser import Parser
 from cliglue.utils.output import error
 from .rule import SubcommandRule, PrimaryOptionRule, ParameterRule, PositionalArgumentRule, AllArgumentsRule, \
@@ -73,15 +73,17 @@ class CliBuilder(object):
     def __init__(self,
                  name: str = None,
                  version: str = None,
-                 run: Action = None,
                  help: str = None,
+                 run: Action = None,
                  with_defaults: bool = True,
+                 help_onerror: bool = True,
                  ):
         self.__name: str = name
         self.__version: str = version
         self.__help: str = help
         self.__subrules: List[CliRule] = []
         self.__run: Action = run
+        self.__help_onerror: bool = help_onerror
         if with_defaults:
             self.__add_default_rules()
 
@@ -96,24 +98,30 @@ class CliBuilder(object):
         try:
             Parser(self.__subrules, self.__run).parse_args(args)
         except CliDefinitionError as e:
-            error('CLI definition error: ' + str(e))
+            error(e)
             raise e
-        except ArgumentSyntaxError as e:
-            error('Syntax error: ' + str(e))
+        except CliSyntaxError as e:
+            error(e)
+            if self.__help_onerror:
+                self.print_help()
             raise e
         except CliError as e:
             error('CLI error: ' + str(e))
             raise e
 
+    def print_help(self, *subcommands: str):
+        print_help(self.__subrules, self.__name, self.__version, self.__help, *subcommands)
+
     def __add_default_rules(self):
-        def __print_help():
-            # TODO print_help(self.__subrules, self.__name, self.__version, self.__help)
-            pass
+        def __print_help(subcommands: List[str]):
+            if not subcommands:
+                subcommands = []
+            self.print_help(*subcommands)
 
         def __print_version():
             print_version(self.__name, self.__version)
 
-        def __bash_install(appname: str):
+        def __bash_install(app_name: str):
             # TODO
             pass
 
@@ -122,11 +130,12 @@ class CliBuilder(object):
             pass
 
         self.has(
-            primary_option('--help', '-h', run=__print_help, help='display this help and exit'),
-            primary_option('--version', run=__print_version, help='show application version'),
+            primary_option('-h', '--help', run=__print_help, help='Display this help and exit').has(
+                all_arguments('subcommands'),
+            ),
+            primary_option('--version', run=__print_version, help='Print version information and exit'),
             primary_option('--bash-install', run=__bash_install,
-                           help='install script as a bash binary and add autocompletion links'
-                           ).has(
+                           help='install script as a bash binary and add autocompletion links').has(
                 argument('app-name', help='binary name'),
             ),
             primary_option('--bash-autocomplete', run=__bash_autocomplete, help='return autocompletion list').has(
