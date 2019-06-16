@@ -1,3 +1,5 @@
 dataclasses
 mock
+coverage
+pytest
 
