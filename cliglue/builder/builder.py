@@ -135,10 +135,10 @@ class CliBuilder(object):
             ),
             primary_option('--version', run=__print_version, help='Print version information and exit'),
             primary_option('--bash-install', run=__bash_install,
-                           help='install script as a bash binary and add autocompletion links').has(
+                           help='Install script as a bash binary and add autocompletion links').has(
                 argument('app-name', help='binary name'),
             ),
-            primary_option('--bash-autocomplete', run=__bash_autocomplete, help='return autocompletion list').has(
+            primary_option('--bash-autocomplete', run=__bash_autocomplete, help='Return matching autocompletion proposals').has(
                 all_arguments('cmdline', joined_with=' '),
             ),
             default_action(run=__print_help),

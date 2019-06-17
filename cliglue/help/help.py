@@ -21,23 +21,21 @@ def print_help(rules: List[CliRule], app_name: str, version: str, help: str, sub
     sys.exit(0)
 
 
-def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, subcommands: List[str]) -> List[str]:
+def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, sub_keywords: List[str]) -> List[str]:
     options: List[_OptionHelp] = []
-    return generate_subcommand_help(rules, app_name, version, help, subcommands, [], options, [])
+    return generate_subcommand_help(rules, app_name, version, help, sub_keywords, [], options, [])
 
 
-def generate_subcommand_help(rules: List[CliRule],
-                             app_name: str,
-                             version: str,
-                             help: str,
-                             subcommand_keywords: List[str],
-                             subcommand_rules: List[SubcommandRule],
-                             options: List[_OptionHelp],
-                             precommands: List[str],
-                             ) -> List[str]:
-
-    app_bin = sys.argv[0]
-
+def generate_subcommand_help(
+        rules: List[CliRule],
+        app_name: str,
+        version: str,
+        help: str,
+        subcommand_keywords: List[str],
+        subcommand_rules: List[SubcommandRule],
+        options: List[_OptionHelp],
+        precommands: List[str],
+) -> List[str]:
     command_rules = filter_rules(rules, SubcommandRule)
     flags = filter_rules(rules, FlagRule)
     parameters = filter_rules(rules, ParameterRule)
@@ -49,7 +47,7 @@ def generate_subcommand_help(rules: List[CliRule],
     commands: List[_OptionHelp] = []
     _add_commands_helps(commands, command_rules)
 
-    # go to deeper subcommands
+    # match deeper subcommands first
     if subcommand_keywords:
         first = subcommand_keywords.pop(0)
         for rule in command_rules:
@@ -60,7 +58,6 @@ def generate_subcommand_help(rules: List[CliRule],
                                                 subcommand_rules, options, precommands)
 
     out = []
-
     # App info
     app_info: str = app_name
     if version:
@@ -71,10 +68,11 @@ def generate_subcommand_help(rules: List[CliRule],
     out.append(app_info)
 
     # Usage
+    app_bin = sys.argv[0]
     app_bin_prefix = ' '.join([app_bin] + precommands)
     usage_syntax: str = app_bin_prefix
 
-    if command_rules:
+    if commands:
         usage_syntax += ' [COMMAND]'
 
     if flags or parameters or primary_options:
@@ -89,49 +87,29 @@ def generate_subcommand_help(rules: List[CliRule],
 
     for rule in all_args:
         usage_syntax += f' [{rule.name}...]'
-    # for rule in flags:
-    #     for keyword in rule.keywords:
-    #         usage_syntax += f' [{keyword}]'
-    #
-    # for rule in parameters:
-    #     keywords_joined = '|'.join(rule.keywords)
-    #     var_name = _param_var_name(rule)
-    #     if rule.required:
-    #         usage_syntax += f' {keywords_joined} {var_name}'
-    #     else:
-    #         usage_syntax += f' [{keywords_joined} {var_name}]'
-    #
-    # if primary_options:
-    #     usage_syntax += '\n  ' + ''.ljust(len(app_bin_prefix))
-    #     for rule in primary_options:
-    #         for keyword in rule.keywords:
-    #             usage_syntax += f' [{keyword}]'
 
     out.append(f'\nUsage:\n  {usage_syntax}')
 
     if options:
         out.append('\nOptions:')
-        padding = _max_name_width(options)
-        for helper in options:
-            name_padded = helper.cmd.ljust(padding)
-            if helper.help:
-                out.append(f'  {name_padded} - {helper.help}')
-            else:
-                out.append(f'  {name_padded}')
+        __helpers_output(options, out)
 
     if commands:
         out.append('\nCommands:')
-        padding = _max_name_width(commands)
-        for helper in commands:
-            name_padded = helper.cmd.ljust(padding)
-            if helper.help:
-                out.append(f'  {name_padded} - {helper.help}')
-            else:
-                out.append(f'  {name_padded}')
-
+        __helpers_output(commands, out)
         out.append(f'\nRun "{app_bin_prefix} COMMAND --help" for more information on a command.')
 
     return out
+
+
+def __helpers_output(commands, out):
+    padding = _max_name_width(commands)
+    for helper in commands:
+        name_padded = helper.cmd.ljust(padding)
+        if helper.help:
+            out.append(f'  {name_padded} - {helper.help}')
+        else:
+            out.append(f'  {name_padded}')
 
 
 def print_version(app_name: str, version: str):
@@ -170,15 +148,15 @@ def _add_commands_helps(commands: List[_OptionHelp], rules: List[CliRule], paren
             _add_commands_helps(commands, rule.subrules, helper)
 
 
+def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp) -> _OptionHelp:
+    cmd = _subcommand_prefix(parent) + '|'.join(rule.keywords)
+    return _OptionHelp(cmd, rule.help, parent)
+
+
 def _subcommand_prefix(helper: _OptionHelp) -> str:
     if not helper:
         return ''
     return helper.cmd + ' '
-
-
-def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp) -> _OptionHelp:
-    cmd = _subcommand_prefix(parent) + '|'.join(rule.keywords)
-    return _OptionHelp(cmd, rule.help, parent)
 
 
 def _primary_option_help(rule: PrimaryOptionRule) -> _OptionHelp:
@@ -203,10 +181,6 @@ def _param_var_name(rule: ParameterRule) -> str:
         # get name from longest keyword
         names: Set[str] = names_from_keywords(rule.keywords)
         return max(names, key=lambda n: len(n)).upper()
-
-
-def _subcommand_short_name(rule: SubcommandRule) -> str:
-    return next(iter(rule.keywords))
 
 
 def _argument_var_name(rule: PositionalArgumentRule) -> str:
