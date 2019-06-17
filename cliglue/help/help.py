@@ -149,7 +149,7 @@ def _add_commands_helps(commands: List[_OptionHelp], rules: List[CliRule], paren
 
 
 def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp) -> _OptionHelp:
-    cmd = _subcommand_prefix(parent) + '|'.join(rule.keywords)
+    cmd = _subcommand_prefix(parent) + '|'.join(sorted_keywords(rule.keywords))
     return _OptionHelp(cmd, rule.help, parent)
 
 
@@ -160,17 +160,17 @@ def _subcommand_prefix(helper: _OptionHelp) -> str:
 
 
 def _primary_option_help(rule: PrimaryOptionRule) -> _OptionHelp:
-    cmd = ', '.join(rule.keywords)
+    cmd = ', '.join(sorted_keywords(rule.keywords))
     return _OptionHelp(cmd, rule.help)
 
 
 def _flag_help(rule: FlagRule) -> _OptionHelp:
-    cmd = ', '.join(rule.keywords)
+    cmd = ', '.join(sorted_keywords(rule.keywords))
     return _OptionHelp(cmd, rule.help)
 
 
 def _parameter_help(rule: ParameterRule) -> _OptionHelp:
-    cmd = ', '.join(rule.keywords) + ' ' + _param_var_name(rule)
+    cmd = ', '.join(sorted_keywords(rule.keywords)) + ' ' + _param_var_name(rule)
     return _OptionHelp(cmd, rule.help)
 
 
@@ -185,3 +185,8 @@ def _param_var_name(rule: ParameterRule) -> str:
 
 def _argument_var_name(rule: PositionalArgumentRule) -> str:
     return rule.name.upper()
+
+
+def sorted_keywords(keywords: Set[str]) -> List[str]:
+    # shortest keywords first, then alphabetically
+    return sorted(keywords, key=lambda k: (len(k), k))
