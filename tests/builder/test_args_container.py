@@ -1,5 +1,5 @@
 from cliglue.builder import *
-from tests.testing_utils import MockIO
+from tests.asserts import MockIO
 
 
 def test_args_container_by_attr():

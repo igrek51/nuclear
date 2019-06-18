@@ -1,7 +1,7 @@
 from typing import List
 
 from cliglue.builder import *
-from tests.testing_utils import MockIO
+from tests.asserts import MockIO
 
 
 def print_all_args(remainder: List[str]):

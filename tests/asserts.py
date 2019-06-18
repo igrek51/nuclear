@@ -15,15 +15,6 @@ def assert_error(action, expected_error=None):
             assert expected_error in str(e)
 
 
-def assert_system_exit(action):
-    try:
-        action()
-        assert False
-    except SystemExit as e:
-        # exit with error code 0
-        assert str(e) == '0'
-
-
 def assert_cli_error(action, expected_error=None):
     try:
         action()
@@ -31,6 +22,15 @@ def assert_cli_error(action, expected_error=None):
     except CliError as e:
         if expected_error:
             assert expected_error in str(e)
+
+
+def assert_system_exit(action):
+    try:
+        action()
+        assert False
+    except SystemExit as e:
+        # exit with error code 0
+        assert str(e) == '0'
 
 
 class MockIO:

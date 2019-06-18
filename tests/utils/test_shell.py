@@ -1,5 +1,11 @@
-from utils.shell import *
-from .utils import *
+import os
+import sys
+
+from cliglue.utils.files import script_real_dir, script_real_path
+from cliglue.utils.input import input_required
+from cliglue.utils.output import debug, info, warn, error, fatal
+from cliglue.utils.shell import shell, shell_error_code, shell_output
+from tests.asserts import MockIO, assert_error
 
 
 def test_output():
@@ -17,6 +23,11 @@ def test_output():
         assert mockio.output_contains('7')
 
 
+def test_input_required():
+    sys.stdin = open('tests/utils/res/inputRequired')
+    assert input_required('required: ') == 'valid'
+
+
 def test_fatal():
     assert_error(lambda: fatal('fatality'))
     assert_error(lambda: fatal('fatality'), 'fatality')
@@ -24,7 +35,7 @@ def test_fatal():
 
 def test_shell_exec():
     shell('echo test')
-    assert_error(lambda: shell('dupafatality'))
+    assert_error(lambda: shell('no-faking-command'))
     assert shell_error_code('echo test') == 0
     assert shell_output('echo test') == 'test\n'
     assert shell_output('echo żółć') == u'żółć\n'
@@ -34,8 +45,8 @@ def test_shell_exec():
 
 
 def test_script_real_dir():
-    real_dir_expected = os.path.join(os.getcwd(), 'cli_glue')
-    assert script_real_dir() == real_dir_expected
+    real_dir_expected = os.path.join(os.getcwd(), 'cliglue')
+    assert real_dir_expected in script_real_dir()
 
 
 def test_script_real_path():

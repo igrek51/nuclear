@@ -1,7 +1,5 @@
 from typing import List, Union
 
-from .output import fatal
-
 
 def nonempty_lines(str_in):
     all_lines = str_in.splitlines()
@@ -11,7 +9,7 @@ def nonempty_lines(str_in):
 def split_to_tuple(line, attrs_count=None, splitter='\t'):
     parts = line.split(splitter)
     if attrs_count and len(parts) != attrs_count:
-        fatal(f'invalid split parts count (found: {len(parts)}, expected: {attrs_count}) in line: {line}')
+        raise RuntimeError(f'invalid split parts count (found: {len(parts)}, expected: {attrs_count}) in line: {line}')
     return tuple(parts)
 
 

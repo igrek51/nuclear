@@ -1,5 +1,5 @@
 from cliglue.builder import *
-from tests.testing_utils import MockIO, assert_system_exit
+from tests.asserts import MockIO, assert_system_exit
 from .actions import *
 
 
