@@ -56,14 +56,3 @@ class MockIO:
 
     def stripped_output(self):
         return self.output().strip()
-
-    def output_contains(self, in_str):
-        return in_str in self.output()
-
-    def assert_output_contains(self, in_str):
-        assert in_str in self.output()
-        return True
-
-    def assert_output(self, in_str):
-        assert in_str == self.output()
-        return True

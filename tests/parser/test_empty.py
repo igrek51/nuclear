@@ -5,6 +5,6 @@ from tests.asserts import MockIO
 def test_empty_builder():
     with MockIO() as mockio:
         CliBuilder()
-        mockio.assert_output('')
+        assert mockio.output() == ''
     with MockIO():
         CliBuilder(with_defaults=False).run()

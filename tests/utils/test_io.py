@@ -8,16 +8,16 @@ from tests.asserts import MockIO, assert_error
 def test_output():
     with MockIO() as mockio:
         debug('message')
-        assert mockio.output_contains('message')
-        assert mockio.output_contains('debug')
+        assert 'message' in mockio.output()
+        assert 'debug' in mockio.output()
         info('message')
-        assert mockio.output_contains('info')
+        assert 'info' in mockio.output()
         warn('message')
-        assert mockio.output_contains('warn')
+        assert 'warn' in mockio.output()
         error('message')
-        assert mockio.output_contains('ERROR')
+        assert 'ERROR' in mockio.output()
         info(7)
-        assert mockio.output_contains('7')
+        assert '7' in mockio.output()
 
 
 def test_input_required():

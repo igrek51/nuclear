@@ -2,8 +2,8 @@ import inspect
 from typing import Dict, Mapping
 from typing import Type, Any, List, TypeVar, Optional
 
-from cliglue.args.container import is_args_container_name, ArgsContainer
 from cliglue.args.args_que import ArgsQue
+from cliglue.args.container import is_args_container_name, ArgsContainer
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, ParentRule, KeywordRule, \
     DefaultActionRule, ValueRule, filter_rules, TCliRule, PositionalArgumentRule, AllArgumentsRule, SubcommandRule
 from cliglue.builder.typedef import Action
@@ -18,9 +18,11 @@ class Parser(object):
                  rules: List[CliRule],
                  run: Action,
                  parent: 'Parser' = None,
+                 action_triggered: bool = False,
                  ):
         self.__run: Action = run
         self.__rules: List[CliRule] = rules
+        self.__action_triggered = action_triggered
         self.init_rules()
 
         self.parent: Optional['Parser'] = parent
@@ -81,6 +83,7 @@ class Parser(object):
         if not self._parse_deeper(args):
             self._parse_positional_arguments(args)
             self._parse_remaining_arguments(args)
+            self._check_required_arguments()
             self._run_default_action()
 
     def _parse_flags(self, args: ArgsQue):
@@ -111,21 +114,17 @@ class Parser(object):
                 self.vars[name] = parsed_value
 
     def _parse_deeper(self, args: ArgsQue) -> bool:
-        if self._parse_primary_oprions(args):
-            return True
-        if self._parse_subcommand(args):
-            return True
-        return False
+        return self._parse_primary_oprions(args) or \
+               self._parse_subcommand(args)
 
     def _parse_primary_oprions(self, args: ArgsQue) -> bool:
         for arg in args:
             rule: PrimaryOptionRule = self._find_rule(PrimaryOptionRule, arg)
             if rule:
                 args.pop_current()
-                subparser = Parser(rule.subrules, rule.run, parent=self)
+                subparser = Parser(rule.subrules, rule.run, parent=self, action_triggered=True)
                 subparser._parse_args_queue(args)
                 return True
-        return False
 
     def _parse_subcommand(self, args: ArgsQue) -> bool:
         if args:
@@ -158,7 +157,6 @@ class Parser(object):
             self.vars[rule.name] = value
 
     def _run_default_action(self):
-        self._check_required_arguments()
         if self.__run:
             self._run_action(self.__run)
         elif self.parent:
@@ -179,6 +177,9 @@ class Parser(object):
             warn(f'unrecognized arguments: {" ".join(args)}')
 
     def _check_required_arguments(self):
+        if self.__action_triggered:
+            return
+
         for rule in self.rules(ParameterRule):
             if rule.required:
                 for name in names_from_keywords(rule.keywords):

@@ -18,7 +18,6 @@ class _OptionHelp(object):
 def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subcommands: List[str]):
     helps = generate_help(rules, app_name, version, help, subcommands)
     print('\n'.join(helps))
-    sys.exit(0)
 
 
 def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, sub_keywords: List[str]) -> List[str]:
