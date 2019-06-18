@@ -98,24 +98,26 @@ class CliBuilder(object):
         try:
             Parser(self.__subrules, self.__run).parse_args(args)
         except CliDefinitionError as e:
-            error(e)
+            error(f'CLI Definition error: {e}')
             raise e
         except CliSyntaxError as e:
-            error(e)
+            error(f'Syntax error: {e}')
             if self.__help_onerror:
-                self.print_help()
+                self.print_help([])
             raise e
         except CliError as e:
-            error('CLI error: ' + str(e))
+            error(f'CLI error: {e}')
             raise e
 
-    def print_help(self, subcommands: List[str] = None):
-        if not subcommands:
-            subcommands = []
+    def print_help(self, subcommands: List[str]):
         print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands)
 
     def __add_default_rules(self):
-        def __print_help(subcommands: List[str]):
+        def __print_root_help():
+            # TODO inject subcommands even on default action
+            self.print_help([])
+
+        def __print_subcommand_help(subcommands: List[str]):
             self.print_help(subcommands)
 
         def __print_version():
@@ -130,7 +132,7 @@ class CliBuilder(object):
             pass
 
         self.has(
-            primary_option('-h', '--help', run=__print_help, help='Display this help and exit').has(
+            primary_option('-h', '--help', run=__print_subcommand_help, help='Display this help and exit').has(
                 all_arguments('subcommands'),
             ),
             primary_option('--version', run=__print_version, help='Print version information and exit'),
@@ -141,5 +143,5 @@ class CliBuilder(object):
             primary_option('--bash-autocomplete', run=__bash_autocomplete, help='Return matching autocompletion proposals').has(
                 all_arguments('cmdline', joined_with=' '),
             ),
-            default_action(run=__print_help),
+            default_action(run=__print_root_help),
         )

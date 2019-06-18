@@ -11,7 +11,7 @@ def nonempty_lines(str_in):
 def split_to_tuple(line, attrs_count=None, splitter='\t'):
     parts = line.split(splitter)
     if attrs_count and len(parts) != attrs_count:
-        fatal('invalid split parts count (found: {}, expected: {}) in line: {}'.format(len(parts), attrs_count, line))
+        fatal(f'invalid split parts count (found: {len(parts)}, expected: {attrs_count}) in line: {line}')
     return tuple(parts)
 
 

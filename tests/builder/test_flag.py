@@ -50,7 +50,7 @@ def test_adding_flag_by_name():
 
 def test_adding_flag_by_short_name():
     def print_flag_f(f: bool):
-        print('force: {}'.format(f))
+        print(f'force: {f}')
 
     with MockIO('-f') as mockio:
         CliBuilder(run=print_flag_f).has(

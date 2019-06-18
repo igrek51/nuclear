@@ -11,11 +11,11 @@ def print_bad():
 
 
 def print_flag_force(force: bool):
-    print('force: {}'.format(force))
+    print(f'force: {force}')
 
 
 def print_param(param):
-    print('param: {}'.format(param))
+    print(f'param: {param}')
 
 
 def list_devices():

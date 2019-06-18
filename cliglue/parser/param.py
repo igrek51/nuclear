@@ -22,11 +22,15 @@ def match_param(rule: ParameterRule, args: ArgsQue, arg: str) -> Optional[str]:
 
 
 def parse_argument_value(rule: ValueRule, arg: str) -> Any:
-    try:
-        # custom parser
-        if callable(rule.type):
-            return rule.type(arg)
-        # cast to custom type or default types
+    # custom parser
+    if callable(rule.type):
         return rule.type(arg)
-    except ValueError as e:
-        raise CliSyntaxError('conversion error') from e
+    # cast to custom type or default types
+    return rule.type(arg)
+
+
+def parameter_display_name(rule: ParameterRule) -> str:
+    if rule.name:
+        return rule.name
+    else:
+        return ', '.join(rule.keywords)

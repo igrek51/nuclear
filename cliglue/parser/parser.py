@@ -10,7 +10,7 @@ from cliglue.builder.typedef import Action
 from cliglue.utils.output import warn
 from .error import CliDefinitionError, CliSyntaxError
 from .keyword import names_from_keywords, keywords_from_names
-from .param import match_param, parse_argument_value
+from .param import match_param, parse_argument_value, parameter_display_name
 
 
 class Parser(object):
@@ -99,7 +99,11 @@ class Parser(object):
                     self._parse_param(rule, value)
 
     def _parse_param(self, rule: ParameterRule, value_str: str):
-        parsed_value = parse_argument_value(rule, value_str)
+        try:
+            parsed_value = parse_argument_value(rule, value_str)
+        except ValueError as e:
+            param_name = parameter_display_name(rule)
+            raise CliSyntaxError(f'parsing parameter "{param_name}"') from e
         if rule.name:
             self.vars[rule.name] = parsed_value
         else:
@@ -139,7 +143,10 @@ class Parser(object):
             self._parse_positional_argument(rule, args.pop_current())
 
     def _parse_positional_argument(self, rule: PositionalArgumentRule, arg: str):
-        self.vars[rule.name] = parse_argument_value(rule, arg)
+        try:
+            self.vars[rule.name] = parse_argument_value(rule, arg)
+        except ValueError as e:
+            raise CliSyntaxError(f'parsing positional argument "{rule.name}"') from e
 
     def _parse_remaining_arguments(self, args: ArgsQue):
         for rule in self.rules(AllArgumentsRule):
@@ -169,23 +176,22 @@ class Parser(object):
     @staticmethod
     def _check_superfluous_args(args):
         if args:
-            warn('unrecognized arguments: {}'.format(' '.join(args)))
+            warn(f'unrecognized arguments: {" ".join(args)}')
 
     def _check_required_arguments(self):
         for rule in self.rules(ParameterRule):
             if rule.required:
                 for name in names_from_keywords(rule.keywords):
                     if not self.vars[name]:
-                        raise CliSyntaxError('required parameter "{}" is not given'.format(', '.join(rule.keywords)))
+                        raise CliSyntaxError(f'required parameter "{", ".join(rule.keywords)}" is not given')
 
         for rule in self.rules(PositionalArgumentRule):
             if rule.required:
                 if not self.vars[rule.name]:
-                    raise CliSyntaxError('required positional argument "{}" is not given'.format(rule.name))
+                    raise CliSyntaxError(f'required positional argument "{rule.name}" is not given')
 
-        # TODO validate required arguments from outside?
-        # if self.parent:
-        #     self.parent._check_required_params()
+        if self.parent:
+            self.parent._check_required_arguments()
 
     TKeywordRule = TypeVar('TKeywordRule', bound=KeywordRule)
 
@@ -206,5 +212,5 @@ class Parser(object):
         elif is_args_container_name(arg, annotations):
             return ArgsContainer(self.vars)
         else:
-            warn("can't inject argument '{}': name not found".format(arg))
+            warn(f"can't inject argument '{arg}': name not found")
             return None

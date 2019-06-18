@@ -5,7 +5,7 @@ from tests.testing_utils import MockIO
 
 
 def print_all_args(remainder: List[str]):
-    print('remainder: {}'.format(', '.join(remainder)))
+    print(f'remainder: {", ".join(remainder)}')
 
 
 def test_remaining_args():
@@ -26,7 +26,7 @@ def test_remaining_args_empty():
 
 def test_pos_arg_with_remaining_args():
     def print_args(arg1, arg2, remainder: List[str]):
-        print('args: {} {} {}'.format(arg1, arg2, ', '.join(remainder)))
+        print(f'args: {arg1} {arg2} {", ".join(remainder)}')
 
     with MockIO('1', '2', '3', '4') as mockio:
         CliBuilder(run=print_args).has(
@@ -39,7 +39,7 @@ def test_pos_arg_with_remaining_args():
 
 def test_remaining_args_joined():
     def proint_remainder(remainder: str):
-        print('remainder: {}'.format(remainder))
+        print(f'remainder: {remainder}')
 
     with MockIO('1', '2', '3') as mockio:
         CliBuilder(run=proint_remainder).has(

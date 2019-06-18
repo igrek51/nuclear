@@ -3,11 +3,11 @@ from tests.testing_utils import MockIO, assert_cli_error
 
 
 def print_pos_arg1(arg1):
-    print('arg1: {}'.format(arg1))
+    print(f'arg1: {arg1}')
 
 
 def print_2_args(arg1, arg2):
-    print('args: {}, {}'.format(arg1, arg2))
+    print(f'args: {arg1}, {arg2}')
 
 
 def test_1_positional_arg():
@@ -41,7 +41,7 @@ def test_optional_argument():
         assert mockio.output() == 'arg1: None\n'
 
 
-def test_missing_required_param():
+def test_missing_required_argument():
     with MockIO():
         cli = CliBuilder(run=print_pos_arg1, help_onerror=False).has(
             argument('arg1'),

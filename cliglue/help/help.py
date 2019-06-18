@@ -59,13 +59,9 @@ def generate_subcommand_help(
 
     out = []
     # App info
-    app_info: str = app_name
-    if version:
-        version = _normalized_version(version)
-        app_info += f' {version}'
-    if help:
-        app_info += f' - {help}'
-    out.append(app_info)
+    app_info = app_help_info(app_name, help, version)
+    if app_info:
+        out.append(app_info)
 
     # Usage
     app_bin = sys.argv[0]
@@ -88,7 +84,7 @@ def generate_subcommand_help(
     for rule in all_args:
         usage_syntax += f' [{rule.name}...]'
 
-    out.append(f'\nUsage:\n  {usage_syntax}')
+    out.append(f'Usage:\n  {usage_syntax}')
 
     if options:
         out.append('\nOptions:')
@@ -100,6 +96,20 @@ def generate_subcommand_help(
         out.append(f'\nRun "{app_bin_prefix} COMMAND --help" for more information on a command.')
 
     return out
+
+
+def app_help_info(app_name, help, version):
+    if app_name:
+        app_info: str = app_name
+        if version:
+            version = _normalized_version(version)
+            app_info += f' {version}'
+        if help:
+            app_info += f' - {help}'
+        return f'{app_info}\n'
+    if help:
+        return f'{help}\n'
+    return None
 
 
 def __helpers_output(commands, out):

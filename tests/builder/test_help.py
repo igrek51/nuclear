@@ -46,9 +46,15 @@ def build_builder() -> CliBuilder:
     )
 
 
+def test_default_print_help_empty():
+    with MockIO():
+        cli = CliBuilder()
+        assert_system_exit(lambda: cli.run())
+
+
 def test_root_help():
     with MockIO() as mockio:
-        assert_system_exit(lambda: build_builder().print_help())
+        assert_system_exit(lambda: build_builder().print_help([]))
         assert 'helpgen v1.0.0' in mockio.output()
         assert 'Usage:' in mockio.output()
         assert 'Options:' in mockio.output()
