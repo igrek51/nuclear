@@ -1,5 +1,5 @@
 from cliglue.processor import *
-from .utils import *
+from tests.utils import *
 
 
 def action_test_args_poll_from_subcommand(ap):

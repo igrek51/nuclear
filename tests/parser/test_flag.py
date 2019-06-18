@@ -1,6 +1,6 @@
 from cliglue.builder import *
 from tests.asserts import MockIO
-from .actions import *
+from tests.parser.actions import *
 
 
 def test_setting_flag():

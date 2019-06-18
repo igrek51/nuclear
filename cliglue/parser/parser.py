@@ -2,7 +2,7 @@ import inspect
 from typing import Dict, Mapping
 from typing import Type, Any, List, TypeVar, Optional
 
-from cliglue.args.args import is_args_container_name, ArgsContainer
+from cliglue.args.container import is_args_container_name, ArgsContainer
 from cliglue.args.args_que import ArgsQue
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, ParentRule, KeywordRule, \
     DefaultActionRule, ValueRule, filter_rules, TCliRule, PositionalArgumentRule, AllArgumentsRule, SubcommandRule

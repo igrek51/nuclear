@@ -1,6 +1,6 @@
 from cliglue import types
 from cliglue.builder import *
-from .actions import *
+from tests.parser.actions import *
 
 
 def test_multilevel_commands_usage():

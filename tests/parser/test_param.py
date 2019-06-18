@@ -1,6 +1,6 @@
 from cliglue.builder import *
 from tests.asserts import MockIO, assert_cli_error
-from .actions import *
+from tests.parser.actions import *
 
 
 def test_param_with_2_args():

@@ -1,6 +1,5 @@
 from cliglue.builder import *
 from tests.asserts import MockIO, assert_system_exit
-from .actions import *
 
 
 def build_builder() -> CliBuilder:
