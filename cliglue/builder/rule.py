@@ -1,4 +1,4 @@
-from typing import List, Any, Set, TypeVar, Type, Optional
+from typing import List, Any, Set, Optional, TypeVar
 
 from dataclasses import dataclass, field
 
@@ -76,7 +76,3 @@ class AllArgumentsRule(CliRule):
 
 
 TCliRule = TypeVar('TCliRule', bound=CliRule)
-
-
-def filter_rules(rules: List[CliRule], *types: Type[TCliRule]) -> List[TCliRule]:
-    return [r for r in rules if isinstance(r, (*types,))]

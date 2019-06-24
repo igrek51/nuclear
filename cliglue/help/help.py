@@ -1,11 +1,15 @@
 import sys
-from typing import List, Set
+from typing import List, Set, Optional
 
 from dataclasses import dataclass
 
-from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, filter_rules, \
-    PositionalArgumentRule, AllArgumentsRule, ParentRule
+from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
+    PositionalArgumentRule, AllArgumentsRule
+from cliglue.parser.context import RunContext
+from cliglue.parser.error import CliError
 from cliglue.parser.keyword import names_from_keywords
+from cliglue.parser.parser import Parser
+from cliglue.parser.rule_process import filter_rules
 
 
 @dataclass
@@ -15,46 +19,41 @@ class _OptionHelp(object):
     parent: '_OptionHelp' = None
 
 
-def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subcommands: List[str]):
-    helps = generate_help(rules, app_name, version, help, subcommands)
+def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str]):
+    helps = generate_help(rules, app_name, version, help, subargs)
     print('\n'.join(helps))
 
 
-def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, sub_keywords: List[str]) -> List[str]:
-    options: List[_OptionHelp] = []
-    return generate_subcommand_help(rules, app_name, version, help, sub_keywords, [], options, [])
+def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str]) -> List[str]:
+    try:
+        run_context: Optional[RunContext] = Parser(rules, dry=True).parse_args(subargs)
+        all_rules: List[CliRule] = run_context.active_rules
+        activate_subcommands = run_context.active_subcommands
+        precommands: List[str] = [_subcommand_short_name(rule) for rule in activate_subcommands]
+    except CliError:
+        all_rules: List[CliRule] = rules
+        precommands: List[str] = []
+
+    return generate_subcommand_help(rules, all_rules, app_name, version, help, precommands)
 
 
 def generate_subcommand_help(
-        rules: List[CliRule],
+        subrules: List[CliRule],
+        all_rules: List[CliRule],
         app_name: str,
         version: str,
         help: str,
-        subcommand_keywords: List[str],
-        subcommand_rules: List[SubcommandRule],
-        options: List[_OptionHelp],
         precommands: List[str],
 ) -> List[str]:
-    command_rules = filter_rules(rules, SubcommandRule)
-    flags = filter_rules(rules, FlagRule)
-    parameters = filter_rules(rules, ParameterRule)
-    primary_options = filter_rules(rules, PrimaryOptionRule)
-    pos_arguments = filter_rules(rules, PositionalArgumentRule)
-    all_args = filter_rules(rules, AllArgumentsRule)
+    command_rules = filter_rules(subrules, SubcommandRule)
+    flags = filter_rules(all_rules, FlagRule)
+    parameters = filter_rules(all_rules, ParameterRule)
+    primary_options = filter_rules(all_rules, PrimaryOptionRule)
+    pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
+    all_args = filter_rules(all_rules, AllArgumentsRule)
 
-    _add_options_helps(options, rules)
-    commands: List[_OptionHelp] = []
-    _add_commands_helps(commands, command_rules)
-
-    # match deeper subcommands first
-    if subcommand_keywords:
-        first = subcommand_keywords.pop(0)
-        for rule in command_rules:
-            if first in rule.keywords:
-                subcommand_rules.append(rule)
-                precommands.append(first)
-                return generate_subcommand_help(rule.subrules, app_name, version, help, subcommand_keywords,
-                                                subcommand_rules, options, precommands)
+    options: List[_OptionHelp] = _generate_options_helps(all_rules)
+    commands: List[_OptionHelp] = _generate_commands_helps(command_rules)
 
     out = []
     # App info
@@ -63,8 +62,7 @@ def generate_subcommand_help(
         out.append(app_info)
 
     # Usage
-    app_bin = sys.argv[0]
-    app_bin_prefix = ' '.join([app_bin] + precommands)
+    app_bin_prefix = ' '.join([sys.argv[0]] + precommands)
     usage_syntax: str = app_bin_prefix
 
     if commands:
@@ -139,22 +137,28 @@ def _max_name_width(helps: List[_OptionHelp]) -> int:
     return max(map(lambda h: len(h.cmd), helps))
 
 
-def _add_options_helps(options: List[_OptionHelp], rules: List[CliRule]):
-    for rule in rules:
-        if isinstance(rule, PrimaryOptionRule):
-            options.append(_primary_option_help(rule))
-        elif isinstance(rule, FlagRule):
-            options.append(_flag_help(rule))
-        elif isinstance(rule, ParameterRule):
-            options.append(_parameter_help(rule))
+def _generate_options_helps(rules: List[CliRule]) -> List[_OptionHelp]:
+    # filter non-empty
+    return list(filter(lambda o: o, [_generate_option_help(rule) for rule in rules]))
 
 
-def _add_commands_helps(commands: List[_OptionHelp], rules: List[CliRule], parent: _OptionHelp = None):
+def _generate_option_help(rule: CliRule) -> Optional[_OptionHelp]:
+    if isinstance(rule, PrimaryOptionRule):
+        return _primary_option_help(rule)
+    elif isinstance(rule, FlagRule):
+        return _flag_help(rule)
+    elif isinstance(rule, ParameterRule):
+        return _parameter_help(rule)
+
+
+def _generate_commands_helps(rules: List[CliRule], parent: _OptionHelp = None) -> List[_OptionHelp]:
+    commands: List[_OptionHelp] = []
     for rule in rules:
         if isinstance(rule, SubcommandRule):
             helper = _subcommand_help(rule, parent)
             commands.append(helper)
-            _add_commands_helps(commands, rule.subrules, helper)
+            commands.extend(_generate_commands_helps(rule.subrules, helper))
+    return commands
 
 
 def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp) -> _OptionHelp:
@@ -194,6 +198,10 @@ def _param_var_name(rule: ParameterRule) -> str:
 
 def _argument_var_name(rule: PositionalArgumentRule) -> str:
     return rule.name.upper()
+
+
+def _subcommand_short_name(rule: SubcommandRule) -> str:
+    return next(iter(rule.keywords))
 
 
 def sorted_keywords(keywords: Set[str]) -> List[str]:

@@ -1,6 +1,7 @@
 import sys
 from typing import Any, List, Optional
 
+from cliglue.autocomplete.autocomplete import bash_install, bash_autocomplete
 from cliglue.help.help import print_version, print_help
 from cliglue.parser.error import CliError, CliSyntaxError, CliDefinitionError
 from cliglue.parser.parser import Parser
@@ -82,7 +83,10 @@ class CliBuilder(object):
         self.__version: str = version
         self.__help: str = help
         self.__subrules: List[CliRule] = []
-        self.__run: Action = run
+
+        if run:
+            self.has(default_action(run))
+
         self.__help_onerror: bool = help_onerror
         if with_defaults:
             self.__add_default_rules()
@@ -96,7 +100,7 @@ class CliBuilder(object):
 
     def run_with_args(self, args: List[str]):
         try:
-            Parser(self.__subrules, self.__run).parse_args(args)
+            Parser(self.__subrules).parse_args(args)
         except CliDefinitionError as e:
             error(f'CLI Definition error: {e}')
             raise e
@@ -109,39 +113,46 @@ class CliBuilder(object):
             error(f'CLI error: {e}')
             raise e
 
-    def print_help(self, subcommands: List[str]):
-        print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands)
+    def print_help(self, subargs: List[str]):
+        print_help(self.__subrules, self.__name, self.__version, self.__help, subargs)
+
+    def bash_autocomplete(self, cmdline: str):
+        bash_autocomplete(self.__subrules, cmdline)
 
     def __add_default_rules(self):
         def __print_root_help():
             # TODO inject subcommands even on default action
             self.print_help([])
 
-        def __print_subcommand_help(subcommands: List[str]):
-            self.print_help(subcommands)
+        def __print_subcommand_help(subargs: List[str]):
+            self.print_help(subargs)
 
         def __print_version():
             print_version(self.__name, self.__version)
 
         def __bash_install(app_name: str):
-            # TODO
-            pass
+            bash_install(app_name)
 
         def __bash_autocomplete(cmdline: str):
-            # TODO
-            pass
+            self.bash_autocomplete(cmdline)
 
         self.has(
             primary_option('-h', '--help', run=__print_subcommand_help, help='Display this help and exit').has(
-                all_arguments('subcommands'),
+                all_arguments('subargs'),
             ),
             primary_option('--version', run=__print_version, help='Print version information and exit'),
             primary_option('--bash-install', run=__bash_install,
                            help='Install script as a bash binary and add autocompletion links').has(
                 argument('app-name', help='binary name'),
             ),
-            primary_option('--bash-autocomplete', run=__bash_autocomplete, help='Return matching autocompletion proposals').has(
+            primary_option('--bash-autocomplete', run=__bash_autocomplete,
+                           help='Return matching autocompletion proposals').has(
                 all_arguments('cmdline', joined_with=' '),
             ),
-            default_action(run=__print_root_help),
         )
+
+        if not self.__has_default_action():
+            self.has(default_action(__print_root_help))
+
+    def __has_default_action(self) -> bool:
+        return any([isinstance(rule, DefaultActionRule) for rule in self.__subrules])
