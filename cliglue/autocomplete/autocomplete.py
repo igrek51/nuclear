@@ -6,6 +6,9 @@ from typing import List, Optional, Any
 
 from cliglue.builder.rule import ValueRule, CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
     PositionalArgumentRule, AllArgumentsRule, KeywordRule
+from cliglue.parser.context import RunContext
+from cliglue.parser.error import CliError
+from cliglue.parser.parser import Parser
 from cliglue.parser.rule_process import filter_rules
 from cliglue.utils.files import script_real_path
 from cliglue.utils.output import warn, info
@@ -65,69 +68,69 @@ def _extract_quotes(cmdline):
 
 
 def _find_available_completions(rules: List[CliRule], args: List[str], current_word: str) -> List[str]:
-    return _find_available_subcompletions(rules, args, current_word, [])
-
-
-def _find_available_subcompletions(rules: List[CliRule], args: List[str], current_word: str, completions: List[str]) -> List[str]:
     if not args:
         return []
 
-    command_rules = filter_rules(rules, SubcommandRule)
-    flags = filter_rules(rules, FlagRule)
-    parameters = filter_rules(rules, ParameterRule)
-    primary_options = filter_rules(rules, PrimaryOptionRule)
-    pos_arguments = filter_rules(rules, PositionalArgumentRule)
-    all_args = filter_rules(rules, AllArgumentsRule)
+    try:
+        run_context: Optional[RunContext] = Parser(rules, dry=True).parse_args(args)
+        all_rules: List[CliRule] = run_context.active_rules
+        activate_subcommands = run_context.active_subcommands
+    except CliError:
+        all_rules: List[CliRule] = rules
+        precommands: List[str] = []
 
-    # # "--param value" autocompletion
-    # found_params: bool = False
-    # previous: Optional[str] = args[-2] if len(args) > 1 else None
-    # if previous:
-    #     for rule in parameters:
-    #         for keyword in rule.keywords:
-    #             if previous == keyword:
-    #                 possible_choices: List[str] = generate_choices(rule)
-    #                 completions.extend(possible_choices)
-    #                 found_params = True
-    #
-    # # "--param=value" autocompletion
-    # for rule in parameters:
-    #     for keyword in rule.keywords:
-    #         if current_word.startswith(keyword + '='):
-    #             possible_choices: List[str] = list(map(lambda c: keyword + '=' + c, generate_choices(rule)))
-    #             completions.extend(possible_choices)
-    #             found_params = True
-    #
-    # if not found_params:
-    #     # subcommands
-    #     found_subcommand = False
-    #     for idx, val in enumerate(args):
-    #     for rule in command_rules:
-    #         if first in rule.keywords:
-    #             # append this command autcompletion (if it's last command)
-    #             if previous == val:
-    #                 possible_choices: List[str] = generate_choices(rule)
-    #                 completions.extend(possible_choices)
-    #             if current_word == val:
-    #                 completions.extend([val])
-    #             # append subparser autocompletions
-    #             subargs: List[str] = args[idx:]
-    #             subcompletions: List[str] = rule.subparser._generate_available_completions(subargs)
-    #             completions.extend(subcompletions)
-    #             found_subcommand = True
-    #             break
-    #     if not found_subcommand:
-    #         # available when no completer found - flags, parameter names, primary options
-    #         rules: List[KeywordRule] = filter_rules(rules, KeywordRule)
-    #         completions.extend([keyword for rule in rules for keyword in rule.keywords])
-    #         # all subcommands only when none was found
-    #         rules = self._rules_commands
-    #         completions.extend([keyword for rule in rules for keyword in rule.keywords])
+    completions: List[str] = []
+
+    command_rules = filter_rules(rules, SubcommandRule)
+    flags = filter_rules(all_rules, FlagRule)
+    parameters = filter_rules(all_rules, ParameterRule)
+    primary_options = filter_rules(all_rules, PrimaryOptionRule)
+    pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
+    all_args = filter_rules(all_rules, AllArgumentsRule)
+
+    # "--param value" autocompletion
+    found_params: bool = False
+    previous: Optional[str] = args[-2] if len(args) > 1 else None
+    if previous:
+        for rule in parameters:
+            for keyword in rule.keywords:
+                if previous == keyword:
+                    possible_choices: List[str] = generate_value_choices(rule)
+                    completions.extend(possible_choices)
+                    found_params = True
+
+    # "--param=value" autocompletion
+    for rule in parameters:
+        for keyword in rule.keywords:
+            if current_word.startswith(keyword + '='):
+                possible_choices: List[str] = list(map(lambda c: keyword + '=' + c, generate_value_choices(rule)))
+                completions.extend(possible_choices)
+                found_params = True
+
+    if not found_params:
+        # subcommands
+        for rule in command_rules:
+            completions.extend(rule.keywords)
+
+        # flags, parameter names, primary options
+        for rule in flags:
+            completions.extend(rule.keywords)
+
+        for rule in parameters:
+            completions.extend(rule.keywords)
+
+        for rule in primary_options:
+            completions.extend(rule.keywords)
+
+        # positional arguments
+        for rule in pos_arguments:
+            possible_choices: List[str] = generate_value_choices(rule)
+            completions.extend(possible_choices)
 
     return completions
 
 
-def generate_choices(rule: ValueRule) -> List[Any]:
+def generate_value_choices(rule: ValueRule) -> List[Any]:
     if not rule.choices:
         return []
     elif isinstance(rule.choices, list):

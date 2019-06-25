@@ -30,7 +30,7 @@ class Parser(object):
 
         self.__parent: Optional['Parser'] = parent
         self.__action_triggered = parent.__action_triggered if parent else False
-        self.__dry = dry
+        self.__dry = parent.__dry if parent else dry
 
         self.__vars: Dict[str, Any] = dict()
         self._init_vars()
@@ -76,7 +76,7 @@ class Parser(object):
         return filter_rules(self.__rules, *types)
 
     def parse_args(self, args_list: List[str]) -> Optional[RunContext]:
-        args = ArgsQue(args_list)
+        args = ArgsQue(args_list[:])
         run_context: Optional[RunContext] = self._parse_args_queue(args)
         self._check_superfluous_args(args)
         return run_context
@@ -84,9 +84,11 @@ class Parser(object):
     def _parse_args_queue(self, args: ArgsQue) -> Optional[RunContext]:
         self._parse_flags(args)
         self._parse_params(args)
-        deeper: Optional[RunContext] = self._parse_deeper(args)
-        if deeper:
-            return deeper
+        return self._parse_primary_oprions(args) or \
+            self._parse_subcommand(args) or \
+            self._parse_current_level(args)
+
+    def _parse_current_level(self, args):
         self._parse_positional_arguments(args)
         self._parse_remaining_arguments(args)
         self._check_required_arguments()
@@ -119,16 +121,12 @@ class Parser(object):
             for name in names_from_keywords(rule.keywords):
                 self.__vars[name] = parsed_value
 
-    def _parse_deeper(self, args: ArgsQue) -> Optional[RunContext]:
-        return self._parse_primary_oprions(args) or \
-               self._parse_subcommand(args)
-
     def _parse_primary_oprions(self, args: ArgsQue) -> Optional[RunContext]:
         for arg in args:
             rule: PrimaryOptionRule = self._find_rule(PrimaryOptionRule, arg)
             if rule:
                 args.pop_current()
-                self.action_triggered = True
+                self.__action_triggered = True
                 subparser = Parser(rule.subrules, rule.run, parent=self)
                 return subparser._parse_args_queue(args)
 
@@ -162,13 +160,15 @@ class Parser(object):
             self.__vars[rule.name] = value
 
     def _run_default_action(self) -> Optional[RunContext]:
+        if self.__dry:
+            return self._build_run_context(self.__run)
         if self.__run:
             return self._run_action(self.__run)
         elif self.__parent:
             return self.__parent._run_default_action()
 
     def _run_action(self, action: Action) -> RunContext:
-        if action and not self.__dry:
+        if action:
             (args, _, _, _, _, _, annotations) = inspect.getfullargspec(action)
             if not args:
                 action()
@@ -177,13 +177,12 @@ class Parser(object):
                 action(**kwargs)
         return self._build_run_context(action)
 
-    @staticmethod
-    def _check_superfluous_args(args):
-        if args:
+    def _check_superfluous_args(self, args):
+        if args and not self.__dry:
             warn(f'unrecognized arguments: {" ".join(args)}')
 
     def _check_required_arguments(self):
-        if self.__action_triggered:
+        if self.__action_triggered or self.__dry:
             return
 
         for rule in self._rules(ParameterRule):
@@ -237,7 +236,7 @@ class Parser(object):
         return subcommands
 
     def _active_rules(self) -> List[CliRule]:
-        active_rules: List[CliRule] = self.__rules
+        active_rules: List[CliRule] = self.__rules[:]
         if self.__parent:
             active_rules.extend(self.__parent._active_rules())
         return active_rules

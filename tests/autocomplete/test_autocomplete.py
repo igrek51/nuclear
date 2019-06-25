@@ -2,131 +2,153 @@ from cliglue.builder import *
 from tests.asserts import MockIO, assert_system_exit, assert_error
 
 
-# TODO completer depending on current args
-def completer_screen1():
+def list_screens():
     return ['HDMI', 'eDP']
 
 
-# def test_args_autocomplete():
-#     with MockIO('--bash-autocomplete', 'dupa') as mockio:
-#         CliBuilder().run()
-#         assert mockio.output() == '\n'
-#
-#
-# def test_args_autocomplete_first_list():
-#     with MockIO('--bash-autocomplete', 'dupa ') as mockio:
-#         CliBuilder().run()
-#         mockio.assert_output_contains('-h\n')
-#         mockio.assert_output_contains('--help\n')
-#         mockio.assert_output_contains('-v\n')
-#         mockio.assert_output_contains('--version\n')
-#         mockio.assert_output_contains('--bash-install\n')
-#         mockio.assert_output_contains('--bash-autocomplete\n')
-#     with MockIO('--bash-autocomplete', '"dupa "') as mockio:
-#         CliBuilder().run()
-#         mockio.assert_output_contains('--help\n')
-#
-#
-# def test_args_autocomplete_command_flag_param():
-#     with MockIO('--bash-autocomplete', 'dupa ') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_subcommand('command')
-#         ap.add_flag('flag1')
-#         ap.add_flag('--flag2')
-#         ap.add_param('param1')
-#         ap.add_param('--param2')
-#         ap.process()
-#         mockio.assert_output_contains('command\n')
-#         mockio.assert_output_contains('--flag1\n')
-#         mockio.assert_output_contains('--flag2\n')
-#         mockio.assert_output_contains('--param1\n')
-#         mockio.assert_output_contains('--param2\n')
-#
-#
-# def test_args_autocomplete_subcommand():
-#     with MockIO('--bash-autocomplete', 'dupa command ') as mockio:
-#         ap = ArgsProcessor()
-#         ap_command = ap.add_subcommand('command')
-#         ap_command.add_subcommand('sub2')
-#         ap_command.add_flag('flag1')
-#         ap_command.add_param('param1')
-#         ap.process()
-#         assert 'command' not in mockio.output()
-#         mockio.assert_output_contains('sub2\n')
-#         mockio.assert_output_contains('--flag1\n')
-#         mockio.assert_output_contains('--param1\n')
-#     with MockIO('--bash-autocomplete', 'dupa com') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_subcommand('command')
-#         ap.process()
-#         mockio.assert_output('command\n')
-#     with MockIO('--bash-autocomplete', 'dupa c1 c2 ') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_subcommand('c1').add_subcommand('c2').add_subcommand('c3')
-#         ap.process()
-#         assert not mockio.output_contains('c1')
-#         assert not mockio.output_contains('c2')
-#         mockio.assert_output_contains('c3\n')
-#         assert not mockio.output_contains('--help')
-#
-#
-# def test_args_autocomplete_params():
-#     with MockIO('--bash-autocomplete', 'dupa --param ') as mockio:
-#         ap = ArgsProcessor().add_param('param', choices=['jasna', 'dupa'])
-#         ap.process()
-#         mockio.assert_output_contains('jasna\ndupa\n')
-#     with MockIO('--bash-autocomplete', 'dupa --param=') as mockio:
-#         ap = ArgsProcessor().add_param('param', choices=['jasna', 'dupa'])
-#         ap.process()
-#         mockio.assert_output('jasna\ndupa\n')
-#
-#
-# def test_args_autocomplete_params_choices():
-#     with MockIO('--bash-autocomplete', 'dupa --new AWSME --screen ') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_param('new')
-#         ap.add_param('screen', choices=['HDMI', 'eDP'])
-#         ap.process()
-#         mockio.assert_output_contains('HDMI\neDP\n')
-#     with MockIO('--bash-autocomplete', 'dupa --new AWSME --screen=') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_param('new')
-#         ap.add_param('screen', choices=completer_screen1)
-#         ap.process()
-#         mockio.assert_output('HDMI\neDP\n')
-#     with MockIO('--bash-autocomplete', 'dupa --new AWSME --screen=') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_param('new')
-#         ap.add_param('screen', choices=completer_screen_with_ap)
-#         ap.process()
-#         mockio.assert_output('HDMI\neDP\n')
-#
-#
-# def test_args_autocomplete_command_choices():
-#     with MockIO('--bash-autocomplete', 'dupa --new AWSME screen ') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_param('new')
-#         ap.add_subcommand('screen', choices=['HDMI', 'eDP'])
-#         ap.process()
-#         mockio.assert_output_contains('HDMI\neDP\n')
-#     with MockIO('--bash-autocomplete', 'dupa --new AWSME screen ') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_param('new')
-#         ap.add_subcommand('screen', choices=completer_screen1)
-#         ap.process()
-#         mockio.assert_output_contains('HDMI\neDP\n')
-#     with MockIO('--bash-autocomplete', 'dupa --new AWSME screen ') as mockio:
-#         ap = ArgsProcessor()
-#         ap.add_param('new')
-#         ap.add_subcommand('screen', choices=completer_screen_with_ap)
-#         ap.process()
-#         mockio.assert_output_contains('HDMI\neDP\n')
-#
-#
-# def test_args_autocomplete_command_last_word_space():
-#     with MockIO('--bash-autocomplete', 'lichking info age') as mockio:
-#         ap = ArgsProcessor()
-#         ap_info = ap.add_subcommand('info')
-#         ap_info.add_subcommand('age')
-#         ap.process()
-#         mockio.assert_output_contains('age\n')
+def test_no_match():
+    with MockIO('--bash-autocomplete', 'nomatch') as mockio:
+        CliBuilder().run()
+        assert mockio.output() == '\n'
+
+
+def test_empty_builder_proposals():
+    with MockIO('--bash-autocomplete', '""') as mockio:
+        CliBuilder(with_defaults=True).run()
+        assert '-h\n' in mockio.output()
+        assert '--help\n' in mockio.output()
+        assert '--version\n' in mockio.output()
+        assert '--bash-install\n' in mockio.output()
+        assert '--bash-autocomplete\n' in mockio.output()
+    with MockIO('--bash-autocomplete', '"nomatch "') as mockio:
+        CliBuilder(with_defaults=True).run()
+        assert '--help\n' in mockio.output()
+
+
+def test_autocomplete_subcommands():
+    def cli_subcommands():
+        return CliBuilder(with_defaults=False).has(
+            subcommand('git').has(
+                subcommand('push'),
+                subcommand('remote').has(
+                    subcommand('set-url', 'rename'),
+                ),
+            ),
+            subcommand('xrandr'),
+        )
+    with MockIO('--bash-autocomplete', '') as mockio:
+        cli_subcommands().run()
+        assert 'git\n' in mockio.output()
+        assert 'xrandr\n' in mockio.output()
+    with MockIO('--bash-autocomplete', '"nomatch "') as mockio:
+        cli_subcommands().run()
+        assert 'git\n' in mockio.output()
+        assert 'xrandr\n' in mockio.output()
+    with MockIO('--bash-autocomplete', '"g"') as mockio:
+        cli_subcommands().run()
+        assert mockio.output() == 'git\n'
+    with MockIO('--bash-autocomplete', '"git"') as mockio:
+        cli_subcommands().run()
+        assert mockio.output() == 'git\n'
+    with MockIO('--bash-autocomplete', '"git "') as mockio:
+        cli_subcommands().run()
+        assert 'push\n' in mockio.output()
+        assert 'remote\n' in mockio.output()
+        assert 'git\n' not in mockio.output()
+        assert 'xrandr\n' not in mockio.output()
+    with MockIO('--bash-autocomplete', '"git remote "') as mockio:
+        cli_subcommands().run()
+        assert mockio.output() == 'set-url\n'
+
+
+def test_autocomplete_flags():
+    def cli_flags():
+        return CliBuilder(with_defaults=False).has(
+            subcommand('sub').has(
+                flag('--flag-local'),
+            ),
+            flag('--flag-global'),
+        )
+    with MockIO('--bash-autocomplete', '') as mockio:
+        cli_flags().run()
+        assert '--flag-global\n' in mockio.output()
+        assert '--flag-local\n' not in mockio.output()
+    with MockIO('--bash-autocomplete', 'sub ') as mockio:
+        cli_flags().run()
+        assert '--flag-global\n' in mockio.output()
+        assert '--flag-local\n' in mockio.output()
+
+
+def test_autocomplete_parameters():
+    def cli_parameters():
+        return CliBuilder(with_defaults=False).has(
+            subcommand('sub').has(
+                parameter('--param-local'),
+            ),
+            parameter('--param-global'),
+        )
+    with MockIO('--bash-autocomplete', '') as mockio:
+        cli_parameters().run()
+        assert '--param-global\n' in mockio.output()
+        assert '--param-local\n' not in mockio.output()
+    with MockIO('--bash-autocomplete', 'sub ') as mockio:
+        cli_parameters().run()
+        assert '--param-global\n' in mockio.output()
+        assert '--param-local\n' in mockio.output()
+
+
+def test_autocomplete_parameters_choice():
+    def cli_parameters():
+        return CliBuilder(with_defaults=False).has(
+            subcommand('sub').has(
+                parameter('--parameter', choices=list_screens),
+            ),
+        )
+    with MockIO('--bash-autocomplete', '"sub --param"') as mockio:
+        cli_parameters().run()
+        assert mockio.output() == '--parameter\n'
+    with MockIO('--bash-autocomplete', '"sub --parameter"') as mockio:
+        cli_parameters().run()
+        assert '--parameter\n' in mockio.output()
+        assert '--parameter=\n' in mockio.output()
+    with MockIO('--bash-autocomplete', '"sub --parameter "') as mockio:
+        cli_parameters().run()
+        assert 'HDMI\n' in mockio.output()
+        assert 'eDP\n' in mockio.output()
+    with MockIO('--bash-autocomplete', '"sub --parameter H"') as mockio:
+        cli_parameters().run()
+        assert mockio.output() == 'HDMI\n'
+    with MockIO('--bash-autocomplete', '"sub --parameter="') as mockio:
+        cli_parameters().run()
+        assert '--parameter=HDMI\n' in mockio.output()
+        assert '--parameter=eDP\n' in mockio.output()
+    with MockIO('--bash-autocomplete', '"sub --parameter=H"') as mockio:
+        cli_parameters().run()
+        assert mockio.output() == '--parameter=HDMI\n'
+
+
+def test_autocomplete_pos_arguments_choice():
+    def cli_parameters():
+        return CliBuilder(with_defaults=False).has(
+            subcommand('sub').has(
+                argument('pos', choices=['abc', 'def']),
+            ),
+        )
+    with MockIO('--bash-autocomplete', '"sub pos "') as mockio:
+        cli_parameters().run()
+        assert 'abc\n' in mockio.output()
+        assert 'def' in mockio.output()
+    with MockIO('--bash-autocomplete', '"sub pos a"') as mockio:
+        cli_parameters().run()
+        assert 'abc\n' in mockio.output()
+        assert 'def' not in mockio.output()
+
+
+def test_autocomplete_command_last_word_space():
+    with MockIO('--bash-autocomplete', 'app info age') as mockio:
+        CliBuilder(with_defaults=False).has(
+            subcommand('info').has(
+                subcommand('age'),
+            ),
+        ).run()
+        assert 'age\n' in mockio.output()

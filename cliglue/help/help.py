@@ -25,27 +25,29 @@ def print_help(rules: List[CliRule], app_name: str, version: str, help: str, sub
 
 
 def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str]) -> List[str]:
+    available_subcommands = filter_rules(rules, SubcommandRule)
     try:
         run_context: Optional[RunContext] = Parser(rules, dry=True).parse_args(subargs)
         all_rules: List[CliRule] = run_context.active_rules
-        activate_subcommands = run_context.active_subcommands
-        precommands: List[str] = [_subcommand_short_name(rule) for rule in activate_subcommands]
+        active_subcommands: List[SubcommandRule] = run_context.active_subcommands
+        precommands: List[str] = [_subcommand_short_name(rule) for rule in active_subcommands]
+        if active_subcommands:
+            available_subcommands = active_subcommands[-1].subrules
     except CliError:
         all_rules: List[CliRule] = rules
         precommands: List[str] = []
 
-    return generate_subcommand_help(rules, all_rules, app_name, version, help, precommands)
+    return generate_subcommand_help(all_rules, app_name, version, help, precommands, available_subcommands)
 
 
 def generate_subcommand_help(
-        subrules: List[CliRule],
         all_rules: List[CliRule],
         app_name: str,
         version: str,
         help: str,
         precommands: List[str],
+        subcommands: List[SubcommandRule],
 ) -> List[str]:
-    command_rules = filter_rules(subrules, SubcommandRule)
     flags = filter_rules(all_rules, FlagRule)
     parameters = filter_rules(all_rules, ParameterRule)
     primary_options = filter_rules(all_rules, PrimaryOptionRule)
@@ -53,7 +55,7 @@ def generate_subcommand_help(
     all_args = filter_rules(all_rules, AllArgumentsRule)
 
     options: List[_OptionHelp] = _generate_options_helps(all_rules)
-    commands: List[_OptionHelp] = _generate_commands_helps(command_rules)
+    commands: List[_OptionHelp] = _generate_commands_helps(subcommands)
 
     out = []
     # App info

@@ -1,5 +1,5 @@
 from cliglue.builder import *
-from tests.asserts import MockIO, assert_system_exit
+from tests.asserts import MockIO
 
 
 def build_builder() -> CliBuilder:
@@ -46,14 +46,14 @@ def build_builder() -> CliBuilder:
 
 
 def test_default_print_help_empty():
-    with MockIO() as mockio:
-        CliBuilder().run()
+    with MockIO('--help') as mockio:
+        CliBuilder(with_defaults=True).run()
         assert 'Usage' in mockio.output()
 
 
 def test_root_help():
-    with MockIO() as mockio:
-        build_builder().print_help([])
+    with MockIO('--help') as mockio:
+        build_builder().run()
         assert 'helpgen v1.0.0' in mockio.output()
         assert 'Usage:' in mockio.output()
         assert 'Options:' in mockio.output()
@@ -67,3 +67,28 @@ def test_root_help():
 
         assert 'git remote rename|set-url' in mockio.output()
         assert 'change remote\'s name' in mockio.output()
+
+
+def test_subcommand_help():
+    with MockIO('git', '--help') as mockio:
+        build_builder().run()
+        assert 'Usage:' in mockio.output()
+        assert 'git [COMMAND]' in mockio.output()
+        assert 'xrandr' not in mockio.output()
+
+
+def test_3rd_level_help():
+    with MockIO('git', 'push', '--help') as mockio:
+        CliBuilder().has(
+            subcommand('git').has(
+                subcommand('push').has(
+                    subcommand('remote'),
+                ),
+                subcommand('bad')
+            ),
+            subcommand('bad')
+        ).run()
+        assert 'Usage:' in mockio.output()
+        assert 'git push [COMMAND]' in mockio.output()
+        assert 'remote' in mockio.output()
+        assert 'bad' not in mockio.output()
