@@ -78,6 +78,7 @@ class CliBuilder(object):
                  run: Action = None,
                  with_defaults: bool = True,
                  help_onerror: bool = True,
+                 reraise_error: bool = False,
                  ):
         self.__name: str = name
         self.__version: str = version
@@ -88,6 +89,7 @@ class CliBuilder(object):
             self.has(default_action(run))
 
         self.__help_onerror: bool = help_onerror
+        self.__reraise_error: bool = reraise_error
         if with_defaults:
             self.__add_default_rules()
 
@@ -108,10 +110,8 @@ class CliBuilder(object):
             error(f'Syntax error: {e}')
             if self.__help_onerror:
                 self.print_help([])
-            raise e
-        except CliError as e:
-            error(f'CLI error: {e}')
-            raise e
+            if self.__reraise_error:
+                raise e
 
     def print_help(self, sucommands: List[str]):
         print_help(self.__subrules, self.__name, self.__version, self.__help, sucommands)

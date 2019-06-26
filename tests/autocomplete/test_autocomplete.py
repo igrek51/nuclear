@@ -181,3 +181,13 @@ def test_autocomplete_command_last_word_space():
             ),
         ).run()
         assert 'age\n' in mockio.output()
+
+
+def test_doubled_proposals():
+    with MockIO('--bash-autocomplete', 'app --version ') as mockio:
+        CliBuilder().run()
+        assert '-h\n' in mockio.output()
+        assert '--help\n' in mockio.output()
+        assert '--version\n' in mockio.output()
+        assert '--bash-install\n' in mockio.output()
+        assert '--bash-autocomplete\n' in mockio.output()

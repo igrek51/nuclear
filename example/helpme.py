@@ -1,3 +1,4 @@
+#!/usr/bin/env python3
 from cliglue import types
 from cliglue.builder import *
 
