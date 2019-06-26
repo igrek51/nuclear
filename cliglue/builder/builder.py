@@ -113,19 +113,18 @@ class CliBuilder(object):
             error(f'CLI error: {e}')
             raise e
 
-    def print_help(self, subargs: List[str]):
-        print_help(self.__subrules, self.__name, self.__version, self.__help, subargs)
+    def print_help(self, sucommands: List[str]):
+        print_help(self.__subrules, self.__name, self.__version, self.__help, sucommands)
 
     def bash_autocomplete(self, cmdline: str):
         bash_autocomplete(self.__subrules, cmdline)
 
     def __add_default_rules(self):
         def __print_root_help():
-            # TODO inject subcommands even on default action
             self.print_help([])
 
-        def __print_subcommand_help(subargs: List[str]):
-            self.print_help(subargs)
+        def __print_subcommand_help(sucommands: List[str]):
+            self.print_help(sucommands)
 
         def __print_version():
             print_version(self.__name, self.__version)
@@ -138,7 +137,7 @@ class CliBuilder(object):
 
         self.has(
             primary_option('-h', '--help', run=__print_subcommand_help, help='Display this help and exit').has(
-                all_arguments('subargs'),
+                all_arguments('sucommands'),
             ),
             primary_option('--version', run=__print_version, help='Print version information and exit'),
             primary_option('--bash-install', run=__bash_install,

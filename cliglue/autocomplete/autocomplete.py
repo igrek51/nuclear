@@ -27,12 +27,12 @@ def bash_install(app_name: str):
     else:
         script_path: str = script_real_path()
         info(f'creating link: {usr_bin_executable} -> {script_path}')
-        shell(f'ln -s {script_path} {usr_bin_executable}')
+        shell(f'sudo ln -s {script_path} {usr_bin_executable}')
     script_name: str = '/etc/bash_completion.d/autocomplete_%s.sh' % app_name
     app_hash: int = hash(app_name) % (10 ** 8)
     function_name: str = '_autocomplete_%s' % app_hash  # should be unique across bash env
     # bash autocompletion install
-    shell(f"""cat <<'EOF' > {script_name}
+    shell(f"""cat << 'EOF' | sudo tee {script_name}
 #!/bin/bash
 {function_name}() {{
 COMPREPLY=( $({app_name} --bash-autocomplete ${{COMP_LINE}}) )
@@ -89,7 +89,7 @@ def _find_available_completions(rules: List[CliRule], args: List[str], current_w
             if current_word in active_subcommands[-1].keywords:
                 return [current_word]
 
-    except CliError as e:
+    except CliError:
         all_rules: List[CliRule] = rules
 
     flags = filter_rules(all_rules, FlagRule)

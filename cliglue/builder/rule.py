@@ -69,6 +69,7 @@ class PositionalArgumentRule(HelpRule, ValueRule):
     pass
 
 
+# TODO parse allarguments with types the same as the positional ones
 @dataclass
 class AllArgumentsRule(CliRule):
     name: str

@@ -188,7 +188,7 @@ class Parser(object):
             warn(f'unrecognized arguments: {" ".join(args)}')
 
     def _check_required_arguments(self):
-        if self.__action_triggered or self.__dry:
+        if self.__dry:
             return
 
         for rule in self._rules(ParameterRule):
@@ -202,7 +202,7 @@ class Parser(object):
                 if not self.__vars[rule.name]:
                     raise CliSyntaxError(f'required positional argument "{rule.name}" is not given')
 
-        if self.__parent:
+        if self.__parent and not self.__action_triggered:
             self.__parent._check_required_arguments()
 
     TKeywordRule = TypeVar('TKeywordRule', bound=KeywordRule)

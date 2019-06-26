@@ -73,15 +73,8 @@ def generate_subcommand_help(
     if flags or parameters or primary_options:
         usage_syntax += ' [OPTIONS]'
 
-    for rule in pos_arguments:
-        var_name = _argument_var_name(rule)
-        if rule.required:
-            usage_syntax += f' {var_name}'
-        else:
-            usage_syntax += f' [{var_name}]'
-
-    for rule in all_args:
-        usage_syntax += f' [{rule.name}...]'
+    usage_syntax += usage_positional_arguments(pos_arguments)
+    usage_syntax += usage_all_arguments(all_args)
 
     out.append(f'Usage:\n  {usage_syntax}')
 
@@ -165,6 +158,10 @@ def _generate_commands_helps(rules: List[CliRule], parent: _OptionHelp = None) -
 
 def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp) -> _OptionHelp:
     cmd = _subcommand_prefix(parent) + '|'.join(sorted_keywords(rule.keywords))
+    pos_args = filter_rules(rule.subrules, PositionalArgumentRule)
+    all_args = filter_rules(rule.subrules, AllArgumentsRule)
+    cmd += usage_positional_arguments(pos_args)
+    cmd += usage_all_arguments(all_args)
     return _OptionHelp(cmd, rule.help, parent)
 
 
@@ -175,8 +172,11 @@ def _subcommand_prefix(helper: _OptionHelp) -> str:
 
 
 def _primary_option_help(rule: PrimaryOptionRule) -> _OptionHelp:
-    # TODO print argument of option
     cmd = ', '.join(sorted_keywords(rule.keywords))
+    pos_args = filter_rules(rule.subrules, PositionalArgumentRule)
+    all_args = filter_rules(rule.subrules, AllArgumentsRule)
+    cmd += usage_positional_arguments(pos_args)
+    cmd += usage_all_arguments(all_args)
     return _OptionHelp(cmd, rule.help)
 
 
@@ -210,3 +210,24 @@ def _subcommand_short_name(rule: SubcommandRule) -> str:
 def sorted_keywords(keywords: Set[str]) -> List[str]:
     # shortest keywords first, then alphabetically
     return sorted(keywords, key=lambda k: (len(k), k))
+
+
+def display_positional_argument(rule: PositionalArgumentRule) -> str:
+    var_name = _argument_var_name(rule)
+    if rule.required:
+        return f' {var_name}'
+    else:
+        return f' [{var_name}]'
+
+
+def display_all_arguments(rule: AllArgumentsRule) -> str:
+    arg_name = rule.name.upper()
+    return f' [{arg_name}...]'
+
+
+def usage_positional_arguments(rules: List[PositionalArgumentRule]) -> str:
+    return ''.join([display_positional_argument(rule) for rule in rules])
+
+
+def usage_all_arguments(rules: List[AllArgumentsRule]) -> str:
+    return ''.join([display_all_arguments(rule) for rule in rules])
