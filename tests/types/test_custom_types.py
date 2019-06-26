@@ -1,7 +1,7 @@
 import datetime
 
 from cliglue.builder import *
-from cliglue.types import existing_file
+from cliglue.types.filesystem import existing_file
 from cliglue.types.time import datetime_format
 from tests.asserts import MockIO, assert_cli_error
 

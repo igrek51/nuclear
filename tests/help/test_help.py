@@ -1,5 +1,6 @@
 from cliglue.builder import *
-from tests.asserts import MockIO
+from cliglue.parser.error import CliSyntaxError
+from tests.asserts import MockIO, assert_error
 
 
 def build_builder() -> CliBuilder:
@@ -92,3 +93,18 @@ def test_3rd_level_help():
         assert 'git push [COMMAND]' in mockio.output()
         assert 'remote' in mockio.output()
         assert 'bad' not in mockio.output()
+
+
+def test_print_help_on_syntax_error():
+    with MockIO('--param') as mockio:
+        cli = CliBuilder(help_onerror=True, reraise_error=True).has(
+            parameter('param'),
+        )
+        assert_error(lambda: cli.run(), error_type=CliSyntaxError)
+        assert 'Usage:' in mockio.output()
+
+
+def test_default_help_when_no_arguments():
+    with MockIO('') as mockio:
+        CliBuilder().run()
+        assert 'Usage:' in mockio.output()

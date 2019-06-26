@@ -1,20 +1,18 @@
 #!/usr/bin/env python3
-from cliglue import types
-from cliglue.builder import *
+from cliglue import CliBuilder, argument, parameter, flag
 
 
-def say_hello(name: str, surname: str, age: int, force: bool):
-    print(f'Hello {name} {surname} ({age})')
-    if force:
-        print('May the Force be with you!')
+def say_hello(name: str, reverse: bool, repeat: int):
+    if reverse:
+        name = name[::-1]
+    print(f'Hello {name}.' * repeat)
 
 
 def main():
-    CliBuilder('multiapp', run=say_hello).has(
+    CliBuilder('hello-app', run=say_hello).has(
         argument('name'),
-        argument('surname', required=False, default='Idle'),
-        parameter('age', type=int),
-        flag('force'),
+        flag('reverse'),
+        parameter('repeat', type=int, default=1),
     ).run()
 
 

@@ -61,7 +61,7 @@ def generate_subcommand_help(
     # App info
     app_info = app_help_info(app_name, help, version)
     if app_info:
-        out.append(app_info)
+        out.append(app_info + '\n')
 
     # Usage
     app_bin_prefix = ' '.join([sys.argv[0]] + precommands)
@@ -90,18 +90,25 @@ def generate_subcommand_help(
     return out
 
 
-def app_help_info(app_name, help, version):
-    if app_name:
-        app_info: str = app_name
-        if version:
-            version = _normalized_version(version)
-            app_info += f' {version}'
-        if help:
-            app_info += f' - {help}'
-        return f'{app_info}\n'
+def app_help_info(app_name: str, help: str, version: str) -> Optional[str]:
+    info = app_name_version(app_name, version)
     if help:
-        return f'{help}\n'
-    return None
+        if info:
+            info += ' - '
+        info += help
+    return info
+
+
+def app_name_version(app_name, version):
+    info = ''
+    if app_name:
+        info += app_name
+    if version:
+        version = _normalized_version(version)
+        if info:
+            info += ' '
+        info += version
+    return info
 
 
 def __helpers_output(commands, out):
@@ -115,11 +122,7 @@ def __helpers_output(commands, out):
 
 
 def print_version(app_name: str, version: str):
-    if version:
-        version = _normalized_version(version)
-        print(f'{app_name} {version}')
-    else:
-        print(app_name)
+    print(app_name_version(app_name, version))
 
 
 def _normalized_version(version: str) -> str:

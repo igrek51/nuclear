@@ -257,6 +257,9 @@ cd glue
 ./pytest23.sh
 ```
 
+# Requirements
+- Install Python 3.6+
+
 ## Install develop package
 ```bash
 sudo python3 setup.py develop

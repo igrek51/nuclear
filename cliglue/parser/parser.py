@@ -23,6 +23,14 @@ class Parser(object):
                  dry: bool = False,
                  subcommand: Optional[SubcommandRule] = None,
                  ):
+        """
+        Command line arguments parser
+        :param rules: list of rules defined for the base level of parser
+        :param run: default action to invoke when it's triggered
+        :param parent: parent parser for sub-parser on the deeper level
+        :param dry: whether dry run should be invoked. Dry run does not trigger any action.
+        :param subcommand: A subcommand rule from which this parser is derived
+        """
         self.__run: Action = run
         self.__rules: List[CliRule] = rules
         self.__subcommand: SubcommandRule = subcommand
@@ -76,6 +84,12 @@ class Parser(object):
         return filter_rules(self.__rules, *types)
 
     def parse_args(self, args_list: List[str]) -> Optional[RunContext]:
+        """
+        Parse arguments list, read all flags, parameters and run triggered actions
+        :param args_list:
+        :return: run context containing all the details of triggered actions
+        and particular state of parser (matched commands)
+        """
         args = ArgsQue(args_list[:])
         run_context: Optional[RunContext] = self._parse_args_queue(args)
         self._check_superfluous_args(args)

@@ -1,27 +1,24 @@
 import sys
 from io import StringIO
+from typing import Type
 
 import mock
 
 from cliglue.parser.error import CliError
 
 
-def assert_error(action, expected_error=None):
+def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str = None):
     try:
         action()
         assert False
-    except RuntimeError as e:
-        if expected_error:
-            assert expected_error in str(e)
+    except error_type as e:
+        assert isinstance(e, error_type)
+        if expected_msg:
+            assert expected_msg in str(e)
 
 
-def assert_cli_error(action, expected_error=None):
-    try:
-        action()
-        assert False
-    except CliError as e:
-        if expected_error:
-            assert expected_error in str(e)
+def assert_cli_error(action, expected_error: str = None):
+    assert_error(action, CliError, expected_error)
 
 
 def assert_system_exit(action):

@@ -1,16 +1,11 @@
 #!/usr/bin/env python3
-from cliglue import types
-from cliglue.builder import *
-
-
-def say_hello(name: str, surname: str, force: bool):
-    print('Hello {} {}'.format(name, surname))
-    if force:
-        print('May the Force be with you!')
+from cliglue import CliBuilder, argument, parameter, flag, subcommand, all_arguments
+from cliglue.types.filesystem import existing_directory
+from cliglue.types.filesystem import existing_file
 
 
 def main():
-    CliBuilder('helpgen', version='1.0.0', run=say_hello).has(
+    CliBuilder('helpgen', version='1.0.0').has(
         subcommand('git').has(
             subcommand('help', help='shows help'),
             subcommand('push').has(
@@ -31,12 +26,9 @@ def main():
                 ),
                 flag('force', '-f', help='ignore warnings'),
             ),
-            parameter('--work-tree', type=types.existing_directory, default='.'),
-            parameter('--config-file', type=types.existing_file),
+            parameter('--work-tree', type=existing_directory, default='.'),
+            parameter('--config-file', type=existing_file),
             parameter('--count', type=int),
-            primary_option('-c').has(
-                argument('key-value'),
-            ),
         ),
         subcommand('xrandr').has(
             parameter('output', required=True, choices=['HDMI', 'eDP1']),
@@ -48,10 +40,7 @@ def main():
                 parameter('-u', name='user'),
                 all_arguments(name='cmd', joined_with=' '),
             ),
-            primary_option('--help', '-h'),
         ),
-        argument('name'),
-        argument('surname', required=False, default=''),
         flag('force'),
     ).run()
 

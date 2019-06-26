@@ -27,4 +27,4 @@ def test_input_required():
 
 def test_fatal():
     assert_error(lambda: fatal('fatality'))
-    assert_error(lambda: fatal('fatality'), 'fatality')
+    assert_error(lambda: fatal('fatality'), expected_msg='fatality')

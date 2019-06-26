@@ -1,5 +1,5 @@
-from cliglue import types
 from cliglue.builder import *
+from cliglue.types.filesystem import *
 from tests.parser.actions import *
 
 
@@ -18,8 +18,8 @@ def test_multilevel_commands_usage():
                 argument('branch', choices=list_devices, type=str),
                 flag('force', '-f'),
             ),
-            parameter('--work-tree', type=types.existing_directory, default='.'),
-            parameter('--config-file', type=types.existing_file),
+            parameter('--work-tree', type=existing_directory, default='.'),
+            parameter('--config-file', type=existing_file),
             parameter('--count', type=int),
             primary_option('-c', run=action_print).has(
                 argument('key-value'),

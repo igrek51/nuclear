@@ -1,5 +1,6 @@
+from cliglue.args.container import ArgsContainer
 from cliglue.builder import *
-from tests.asserts import MockIO
+from tests.asserts import MockIO, assert_error
 
 
 def test_args_container_by_attr():
@@ -38,3 +39,25 @@ def test_args_container_by_dict_name():
             parameter('named-param', name='nnn'),
         ).run()
         assert mockio.stripped_output() == 'pval pval pval pval True True words words mmm'
+
+
+def test_args_container_error_on_nonexisting():
+    def get_notexisting(args):
+        assert_error(lambda: print(args['no_attr']), KeyError)
+        assert_error(lambda: print(args.no_such_attr), AttributeError)
+
+    with MockIO('-f'):
+        CliBuilder(run=get_notexisting).has(
+            flag('f'),
+        ).run()
+
+
+def test_shadowed_args_container_var():
+    def print_it(args: ArgsContainer):
+        print(args.f)
+
+    with MockIO() as mockio:
+        CliBuilder(run=print_it).has(
+            flag('f'),
+        ).run()
+        assert mockio.output() == 'False\n'

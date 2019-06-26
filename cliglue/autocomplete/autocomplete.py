@@ -155,8 +155,4 @@ def generate_value_choices(rule: ValueRule) -> List[Any]:
         return rule.choices
     else:
         (args, _, _, _, _, _, _) = inspect.getfullargspec(rule.choices)
-        if args:
-            # TODO generate choices based on the current arguments
-            return []
-        else:
-            return rule.choices()
+        return rule.choices()

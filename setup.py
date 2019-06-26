@@ -5,13 +5,13 @@ with open("README.md", "r") as fh:
 
 setuptools.setup(
     name="cliglue",
-    version="0.0.1",
+    version="0.2.0",
     author="igrek51",
     author_email="igrek51.dev@gmail.com",
     description="",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/igrek51/glue",
+    url="https://github.com/igrek51/cliglue",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",
