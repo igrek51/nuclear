@@ -11,7 +11,7 @@ from cliglue.parser.context import RunContext
 from cliglue.parser.rule_process import normalize_keywords, TCliRule, filter_rules
 from cliglue.utils.output import warn
 from .error import CliDefinitionError, CliSyntaxError
-from .keyword import names_from_keywords
+from .keyword import names_from_keywords, name_from_keyword
 from .param import match_param, parse_argument_value, parameter_display_name
 
 
@@ -70,7 +70,7 @@ class Parser(object):
                 self.__vars[name] = rule.default
 
         for rule in self._rules(PositionalArgumentRule):
-            self.__vars[rule.name] = rule.default
+            self.__vars[name_from_keyword(rule.name)] = rule.default
 
     def _rules(self, *types: Type[TCliRule]) -> List[TCliRule]:
         return filter_rules(self.__rules, *types)
@@ -152,7 +152,7 @@ class Parser(object):
 
     def _parse_positional_argument(self, rule: PositionalArgumentRule, arg: str):
         try:
-            self.__vars[rule.name] = parse_argument_value(rule, arg)
+            self.__vars[name_from_keyword(rule.name)] = parse_argument_value(rule, arg)
         except ValueError as e:
             raise CliSyntaxError(f'parsing positional argument "{rule.name}"') from e
 
@@ -199,7 +199,7 @@ class Parser(object):
 
         for rule in self._rules(PositionalArgumentRule):
             if rule.required:
-                if not self.__vars[rule.name]:
+                if not self.__vars[name_from_keyword(rule.name)]:
                     raise CliSyntaxError(f'required positional argument "{rule.name}" is not given')
 
         if self.__parent and not self.__action_triggered:

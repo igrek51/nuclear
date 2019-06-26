@@ -5,13 +5,13 @@ import shlex
 from typing import List, Optional, Any
 
 from cliglue.builder.rule import ValueRule, CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
-    PositionalArgumentRule, AllArgumentsRule, KeywordRule
+    PositionalArgumentRule, AllArgumentsRule
 from cliglue.parser.context import RunContext
 from cliglue.parser.error import CliError
 from cliglue.parser.parser import Parser
 from cliglue.parser.rule_process import filter_rules
 from cliglue.utils.files import script_real_path
-from cliglue.utils.output import warn, info
+from cliglue.utils.output import warn, info, fatal
 from cliglue.utils.shell import shell
 
 
@@ -21,6 +21,10 @@ def bash_install(app_name: str):
     and Creates bash autocompletion script
     """
     # creating /usr/bin/ link
+    print(script_real_path())
+
+    assert False
+
     usr_bin_executable: str = '/usr/bin/%s' % app_name
     if os.path.isfile(usr_bin_executable):
         warn(f'file {usr_bin_executable} already exists - skipping.')

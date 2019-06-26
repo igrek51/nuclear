@@ -26,8 +26,7 @@ def test_workdir():
 
 
 def test_script_real_dir():
-    real_dir_expected = os.path.join(get_workdir(), 'cliglue/utils')
-    assert script_real_dir() == real_dir_expected
+    assert 'dist-packages' in script_real_dir()
 
 
 def test_script_real_path():
