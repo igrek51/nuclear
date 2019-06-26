@@ -32,7 +32,7 @@ def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, 
         active_subcommands: List[SubcommandRule] = run_context.active_subcommands
         precommands: List[str] = [_subcommand_short_name(rule) for rule in active_subcommands]
         if active_subcommands:
-            available_subcommands = active_subcommands[-1].subrules
+            available_subcommands = filter_rules(active_subcommands[-1].subrules, SubcommandRule)
     except CliError:
         all_rules: List[CliRule] = rules
         precommands: List[str] = []
@@ -175,6 +175,7 @@ def _subcommand_prefix(helper: _OptionHelp) -> str:
 
 
 def _primary_option_help(rule: PrimaryOptionRule) -> _OptionHelp:
+    # TODO print argument of option
     cmd = ', '.join(sorted_keywords(rule.keywords))
     return _OptionHelp(cmd, rule.help)
 

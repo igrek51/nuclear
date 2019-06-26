@@ -82,11 +82,17 @@ class Parser(object):
         return run_context
 
     def _parse_args_queue(self, args: ArgsQue) -> Optional[RunContext]:
-        self._parse_flags(args)
-        self._parse_params(args)
-        return self._parse_primary_oprions(args) or \
-            self._parse_subcommand(args) or \
-            self._parse_current_level(args)
+        try:
+            self._parse_flags(args)
+            self._parse_params(args)
+            return self._parse_primary_options(args) or \
+                self._parse_subcommand(args) or \
+                self._parse_current_level(args)
+        except CliSyntaxError as e:
+            if self.__dry:
+                return self._build_run_context(None)
+            else:
+                raise e
 
     def _parse_current_level(self, args):
         self._parse_positional_arguments(args)
@@ -121,7 +127,7 @@ class Parser(object):
             for name in names_from_keywords(rule.keywords):
                 self.__vars[name] = parsed_value
 
-    def _parse_primary_oprions(self, args: ArgsQue) -> Optional[RunContext]:
+    def _parse_primary_options(self, args: ArgsQue) -> Optional[RunContext]:
         for arg in args:
             rule: PrimaryOptionRule = self._find_rule(PrimaryOptionRule, arg)
             if rule:
@@ -221,7 +227,7 @@ class Parser(object):
             warn(f"can't inject argument '{arg}': name not found")
             return None
 
-    def _build_run_context(self, action: Action) -> RunContext:
+    def _build_run_context(self, action: Optional[Action]) -> RunContext:
         args_container = ArgsContainer(self.__vars)
         active_subcommands = self._active_subcommands()
         active_rules = self._active_rules()
