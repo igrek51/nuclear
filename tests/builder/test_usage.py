@@ -1,4 +1,4 @@
-from cliglue.builder import *
+from cliglue import *
 from cliglue.types.filesystem import *
 from tests.parser.actions import *
 

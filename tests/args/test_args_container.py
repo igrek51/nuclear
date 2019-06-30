@@ -1,5 +1,5 @@
+from cliglue import *
 from cliglue.args.container import ArgsContainer
-from cliglue.builder import *
 from tests.asserts import MockIO, assert_error
 
 

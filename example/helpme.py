@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
 from cliglue import CliBuilder, argument, parameter, flag, subcommand, all_arguments
-from cliglue.types.filesystem import existing_directory
-from cliglue.types.filesystem import existing_file
+from cliglue.types.filesystem import existing_directory, existing_file
 
 
 def main():

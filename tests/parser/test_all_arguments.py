@@ -1,6 +1,6 @@
 from typing import List
 
-from cliglue.builder import *
+from cliglue import *
 from tests.asserts import MockIO
 
 

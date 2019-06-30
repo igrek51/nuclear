@@ -1,4 +1,4 @@
-from cliglue.builder import *
+from cliglue import *
 from cliglue.parser.error import CliDefinitionError
 from tests.asserts import assert_error
 

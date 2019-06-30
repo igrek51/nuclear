@@ -1,4 +1,4 @@
-from cliglue.builder import *
+from cliglue import *
 from cliglue.parser.error import CliSyntaxError
 from tests.asserts import MockIO, assert_error
 

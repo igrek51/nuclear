@@ -1,138 +1,14 @@
 import sys
-from typing import Any, List, Optional
+from typing import List, Optional
 
 from cliglue.autocomplete.autocomplete import bash_install, bash_autocomplete
 from cliglue.help.help import print_version, print_help
 from cliglue.parser.error import CliSyntaxError, CliDefinitionError
 from cliglue.parser.parser import Parser
 from cliglue.utils.output import error
-from .rule import SubcommandRule, PrimaryOptionRule, ParameterRule, PositionalArgumentRule, AllArgumentsRule, \
-    DefaultActionRule, FlagRule, CliRule
-from .typedef import Action, ChoiceProvider, TypeOrParser
-
-
-def subcommand(
-        *keywords: str,
-        run: Optional[Action] = None,
-        help: str = None,
-) -> SubcommandRule:
-    """
-    Create Subcommand rule specification.
-    Subcommand is a keyword which narrows down the context and can execute an action.
-    Subcommands may have multiple levels and may build a tree.
-    It's similar to 'git' syntax: 'git remote rename ...'
-    :param keywords: keyword arguments which trigger subcommand
-    :param run: optional action to be invoked when subcommand is matched
-    :param help: description of the subcommand
-    :return: new subcommand rule specification
-    """
-    return SubcommandRule(help, set(keywords), run)
-
-
-def flag(
-        *keywords: str,
-        help: str = None,
-) -> FlagRule:
-    """
-    Create flag rule specification.
-    Flag is a boolean parameter which is toggled by single argument
-    :param keywords: keyword arguments which enables flag when they occur.
-    Flag keywords may be passed using direct format: '-f' or '--flag',
-    as well as by name: 'f' or 'flag', which will be evaluated to '-f' or '--flag'.
-    Single character flags will get single hyphen prefix (-f),
-    longer flag names will get double hyphen prefix (--flag)
-    :param help: description of the flag
-    :return: new flag rule specification
-    """
-    return FlagRule(set(keywords), help)
-
-
-def parameter(
-        *keywords: str,
-        name: str = None,
-        help: str = None,
-        required: bool = False,
-        default: Any = None,
-        type: TypeOrParser = str,
-        choices: ChoiceProvider = None,
-) -> ParameterRule:
-    """
-    Create parameter rule specification.
-    Parameter is a named value, which will be injected to triggered action by its name
-    TODO
-    :param keywords:
-    :param name:
-    :param help:
-    :param required:
-    :param default:
-    :param type:
-    :param choices:
-    :return: new parameter rule specification
-    """
-    return ParameterRule(set(keywords), name, required, default, type, choices, help)
-
-
-def primary_option(
-        *keywords: str,
-        run: Action = None,
-        help: str = None,
-) -> PrimaryOptionRule:
-    """
-    TODO
-    :param keywords:
-    :param run:
-    :param help:
-    :return: new primary option rule specification
-    """
-    return PrimaryOptionRule(help, set(keywords), run)
-
-
-def argument(
-        name: str,
-        help: str = None,
-        required: bool = True,
-        default: Any = None,
-        type: TypeOrParser = str,
-        choices: ChoiceProvider = None,
-) -> PositionalArgumentRule:
-    """
-    TODO
-
-    :param name:
-    :param help:
-    :param required:
-    :param default:
-    :param type:
-    :param choices:
-    :return: new positional argument rule specification
-    """
-    return PositionalArgumentRule(name, required, default, type, choices, help)
-
-
-def all_arguments(
-        name: str,
-        joined_with: Optional[str] = None,
-) -> AllArgumentsRule:
-    """
-    TODO
-
-    :param name:
-    :param joined_with:
-    :return: new all remaining arguments rule specification
-    """
-    return AllArgumentsRule(name, joined_with)
-
-
-def default_action(
-        run: Action = None,
-) -> DefaultActionRule:
-    """
-    TODO
-
-    :param run:
-    :return: new default action specification
-    """
-    return DefaultActionRule(run)
+from .rule import DefaultActionRule, CliRule
+from .rule_factory import default_action, primary_option, all_arguments, argument
+from .typedef import Action
 
 
 class CliBuilder(object):

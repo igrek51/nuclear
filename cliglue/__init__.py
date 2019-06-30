@@ -1,4 +1,4 @@
-from .builder import subcommand, flag, parameter, primary_option, argument, all_arguments, default_action, \
-    CliBuilder
+from .builder.builder import CliBuilder
+from .builder.rule_factory import subcommand, flag, parameter, primary_option, argument, all_arguments, default_action
 
 name = "cliglue"
