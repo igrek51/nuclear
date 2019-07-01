@@ -45,11 +45,14 @@ class PrimaryOptionRule(ParentRule, HelpRule):
     pass
 
 
+# TODO combining short versions: -tulpn
+# TODO multiple occurrences: -vvv
 @dataclass
 class FlagRule(HelpRule, KeywordRule):
     pass
 
 
+# TODO validate value is in choices if given
 @dataclass
 class ValueRule(CliRule):
     name: Optional[str] = None
@@ -58,6 +61,8 @@ class ValueRule(CliRule):
     type: TypeOrParser = Any
     choices: ChoiceProvider = None
 
+
+# TODO Dict value
 
 @dataclass
 class ParameterRule(HelpRule, ValueRule, KeywordRule):

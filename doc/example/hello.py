@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, parameter, flag
+from cliglue import CliBuilder, argument, flag, parameter
 
 
 def say_hello(name: str, reverse: bool, repeat: int):
