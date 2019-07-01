@@ -25,10 +25,6 @@ def test_workdir():
     set_workdir(workdir)
 
 
-def test_script_real_dir():
-    assert 'dist-packages' in script_real_dir()
-
-
 def test_script_real_path():
     assert '/pytest.py' in script_real_path()
 
