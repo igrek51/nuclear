@@ -1,5 +1,9 @@
 # cliglue
+
+[![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
+
 **cliglue** is a declarative parser for command line arguments in Python.
+It's a glue between CLI shell arguments and functions being invoked.
 
 It parses shell arguments and automatically triggers matched action based on the defined Command-Line Interface rules.
 It binds particular actions to commands and CLI parameters to injected function parameters.
