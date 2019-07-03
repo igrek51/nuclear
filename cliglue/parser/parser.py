@@ -70,15 +70,18 @@ class Parser(object):
 
     def _init_vars(self):
         for rule in self._rules(FlagRule):
-            for name in names_from_keywords(rule.keywords):
-                self.__vars[name] = False
+            for keyword in rule.keywords:
+                self._set_var(keyword, False)
 
         for rule in self._rules(ParameterRule):
-            for name in names_from_keywords(rule.keywords):
-                self.__vars[name] = rule.default
+            for keyword in rule.keywords:
+                self._set_var(keyword, rule.default)
 
         for rule in self._rules(PositionalArgumentRule):
-            self.__vars[name_from_keyword(rule.name)] = rule.default
+            self._set_var(rule.name, rule.default)
+
+    def _set_var(self, name: str, value):
+        self.__vars[name_from_keyword(name)] = value
 
     def _rules(self, *types: Type[TCliRule]) -> List[TCliRule]:
         return filter_rules(self.__rules, *types)
@@ -119,8 +122,8 @@ class Parser(object):
             rule: FlagRule = self._find_rule(FlagRule, arg)
             if rule:
                 args.pop_current()
-                for name in names_from_keywords(rule.keywords):
-                    self.__vars[name] = True
+                for keyword in rule.keywords:
+                    self._set_var(keyword, True)
 
     def _parse_params(self, args: ArgsQue):
         for arg in args:
@@ -136,10 +139,10 @@ class Parser(object):
             param_name = parameter_display_name(rule)
             raise CliSyntaxError(f'parsing parameter "{param_name}"') from e
         if rule.name:
-            self.__vars[rule.name] = parsed_value
+            self._set_var(rule.name, parsed_value)
         else:
             for name in names_from_keywords(rule.keywords):
-                self.__vars[name] = parsed_value
+                self._set_var(name, parsed_value)
 
     def _parse_primary_options(self, args: ArgsQue) -> Optional[RunContext]:
         for arg in args:
@@ -164,20 +167,27 @@ class Parser(object):
         for arg, rule in zip(args.reset(), self._rules(PositionalArgumentRule)):
             self._parse_positional_argument(rule, args.pop_current())
 
+        if self.__parent and not self.__action_triggered:
+            self.__parent._parse_positional_arguments(args)
+
     def _parse_positional_argument(self, rule: PositionalArgumentRule, arg: str):
         try:
-            self.__vars[name_from_keyword(rule.name)] = parse_argument_value(rule, arg)
+            self._set_var(rule.name, parse_argument_value(rule, arg))
         except ValueError as e:
             raise CliSyntaxError(f'parsing positional argument "{rule.name}"') from e
 
     def _parse_remaining_arguments(self, args: ArgsQue):
-        for rule in self._rules(AllArgumentsRule):
-            remaining_args = args.pop_all()
-            if rule.joined_with:
-                value = rule.joined_with.join(remaining_args)
-            else:
-                value = remaining_args
-            self.__vars[rule.name] = value
+        all_args_rules = self._rules(AllArgumentsRule)
+        if all_args_rules:
+            for rule in all_args_rules:
+                remaining_args = args.pop_all()
+                if rule.joined_with:
+                    value = rule.joined_with.join(remaining_args)
+                else:
+                    value = remaining_args
+                self._set_var(rule.name, value)
+        elif self.__parent:
+            self.__parent._parse_remaining_arguments(args)
 
     def _run_default_action(self) -> Optional[RunContext]:
         if self.__dry:
@@ -193,7 +203,7 @@ class Parser(object):
             if not args:
                 action()
             else:
-                kwargs = self._inject_args(args, annotations)
+                kwargs = self._inject_args(args, action, annotations)
                 action(**kwargs)
         return self._build_run_context(action)
 
@@ -227,18 +237,18 @@ class Parser(object):
                 if keyword in rule.keywords:
                     return rule
 
-    def _inject_args(self, args: List[str], annotations: Mapping[str, Any]) -> Dict[str, Any]:
-        return {arg: self._inject_arg(arg, annotations) for arg in args}
+    def _inject_args(self, args: List[str], action: Action, annotations: Mapping[str, Any]) -> Dict[str, Any]:
+        return {arg: self._inject_arg(arg, action, annotations) for arg in args}
 
-    def _inject_arg(self, arg: str, annotations: Mapping[str, Any]) -> Any:
+    def _inject_arg(self, arg: str, action: Action, annotations: Mapping[str, Any]) -> Any:
         if arg in self.__vars:
             return self.__vars[arg]
         elif self.__parent:
-            return self.__parent._inject_arg(arg, annotations)
+            return self.__parent._inject_arg(arg, action, annotations)
         elif is_args_container_name(arg, annotations):
             return ArgsContainer(self.__vars)
         else:
-            warn(f"can't inject argument '{arg}': name not found")
+            warn(f"can't inject argument '{arg}' to function '{action.__name__}': name not found")
             return None
 
     def _build_run_context(self, action: Optional[Action]) -> RunContext:

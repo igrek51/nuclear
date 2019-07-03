@@ -222,6 +222,8 @@ foo@bar:~$ completers-demo --mode 640x480 --output [Tab][Tab]
 eDP-1   HDMI-1
 ```
 
+TODO more examples
+
 ## How does it work?
 - You define all required CLI rules for your program in a declarative tree.
 - User provides command-line arguments when running program in a shell

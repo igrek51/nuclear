@@ -57,3 +57,14 @@ def test_adding_flag_by_short_name():
             flag('f'),
         ).run()
         assert mockio.output() == 'force: True\n'
+
+
+def test_dashed_param_name():
+    def print_flag(skip_it: bool):
+        print(f'skip_it: {skip_it}')
+
+    with MockIO('--skip-it') as mockio:
+        CliBuilder(run=print_flag).has(
+            flag('skip-it'),
+        ).run()
+        assert mockio.output() == 'skip_it: True\n'

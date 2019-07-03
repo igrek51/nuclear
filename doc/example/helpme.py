@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, parameter, flag, subcommand, all_arguments
+from cliglue import CliBuilder, argument, parameter, flag, subcommand, arguments
 from cliglue.types.filesystem import existing_directory, existing_file
 
 
@@ -37,7 +37,7 @@ def main():
             subcommand('exec').has(
                 flag('--it'),
                 parameter('-u', name='user'),
-                all_arguments(name='cmd', joined_with=' '),
+                arguments(name='cmd', joined_with=' '),
             ),
         ),
         flag('force'),

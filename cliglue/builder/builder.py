@@ -7,7 +7,7 @@ from cliglue.parser.error import CliSyntaxError, CliDefinitionError
 from cliglue.parser.parser import Parser
 from cliglue.utils.output import error
 from .rule import DefaultActionRule, CliRule
-from .rule_factory import default_action, primary_option, all_arguments, argument
+from .rule_factory import default_action, primary_option, arguments, argument
 from .typedef import Action
 
 
@@ -110,7 +110,7 @@ class CliBuilder(object):
 
         self.has(
             primary_option('-h', '--help', run=__print_subcommand_help, help='Display this help and exit').has(
-                all_arguments('sucommands'),
+                arguments('sucommands'),
             ),
             primary_option('--bash-install', run=__bash_install,
                            help='Install script as a bash binary and add autocompletion links').has(
@@ -118,7 +118,7 @@ class CliBuilder(object):
             ),
             primary_option('--bash-autocomplete', run=__bash_autocomplete,
                            help='Return matching autocompletion proposals').has(
-                all_arguments('cmdline', joined_with=' '),
+                arguments('cmdline', joined_with=' '),
             ),
         )
 

@@ -36,7 +36,7 @@ def build_builder() -> CliBuilder:
             subcommand('exec').has(
                 flag('--it'),
                 parameter('-u', name='user'),
-                all_arguments(name='cmd', joined_with=' '),
+                arguments(name='cmd', joined_with=' '),
             ),
             primary_option('--help', '-h'),
         ),

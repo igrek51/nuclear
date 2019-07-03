@@ -38,7 +38,7 @@ def bash_install(app_name: str):
         shell(f'sudo ln -s {script_path} {usr_bin_executable}')
 
     # bash autocompletion install
-    script_path: str = f'/etc/bash_completion.d/autocomplete_{app_name}.sh'
+    script_path: str = f'/etc/bash_completion.d/cliglue_{app_name}.sh'
     app_hash: int = hash(app_name) % (10 ** 8)
     function_name: str = f'_autocomplete_{app_hash}'  # should be unique across bash env
     shell(f"""cat << 'EOF' | sudo tee {script_path}
@@ -52,6 +52,7 @@ EOF
     info(f'Autocompleter has been installed in {script_path}. Please restart your shell.')
 
 
+# TODO not only the last argument may be focused on
 def bash_autocomplete(rules: List[CliRule], cmdline: str):
     filtered = find_matching_completions(cmdline, rules)
     print('\n'.join(filtered))

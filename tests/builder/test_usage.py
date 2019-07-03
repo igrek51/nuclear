@@ -40,7 +40,7 @@ def test_multilevel_commands_usage():
             subcommand('exec', run=action_print).has(
                 flag('--it'),
                 parameter('-u', name='user'),
-                all_arguments(name='cmd', joined_with=' '),
+                arguments(name='cmd', joined_with=' '),
             ),
             primary_option('--help', '-h', run=action_print),
         ),

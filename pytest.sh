@@ -2,7 +2,7 @@
 set -euo pipefail
 
 MODULE_NAME=cliglue
-PYTHON_INTERPRETER=python3.6
+PYTHON_INTERPRETER="${PYTHON_INTERPRETER:-python3}"
 
 TEST_PATH="${1:-tests/}"
 

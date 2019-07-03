@@ -124,7 +124,7 @@ def argument(
     return PositionalArgumentRule(name, required, default, type, choices, help)
 
 
-def all_arguments(
+def arguments(
         name: str,
         joined_with: Optional[str] = None,
 ) -> AllArgumentsRule:
