@@ -12,19 +12,20 @@ You don't need to write the "glue" code for binding & parsing parameters every t
 So it makes writing console aplications faster and simpler.
 
 ## Features
-- Auto-generated help and usage (`--help`)
-- Shell autocompletion (getting most relevant hints on hitting `Tab`)
-- Multilevel sub-commands (e.g. `git remote add ...` syntax)
-- Named parameters: supporting both `--name value` and `--name=value`
-- Flags: supporting both short (`-f`) and long (`--force`)
-- Positional arguments (e.g. `git push <origin> <master>`)
+- [Auto-generated help and usage](doc/help.md) (`--help`)
+- [Shell autocompletion](doc/autocompletion.md) (getting most relevant hints on hitting `Tab`)
+- [Multilevel sub-commands](doc/subcommands.md) (e.g. `git remote add ...` syntax)
+- [Named parameters](doc/parameters.md): supporting both `--name value` and `--name=value`
+- [Flags](doc/flags.md): supporting both short (`-f`) and long (`--force`)
+- [Positional arguments](doc/positional-args.md) (e.g. `git push <origin> <master>`)
 - Invoking matched action function & providing corresponding parameters
-- Custom type validators / parsers
-- Custom auto-completers (providers of possible values)
-- Typed values (int, time, date, file, etc.)
+- [Custom type validators / parsers](doc/data-types.md)
+- [Custom auto-completers](doc/autocompletion.md) (providers of possible values)
+- [Parameters validation, handling syntax errors](doc/errors.md)
+- [Typed values](doc/data-types.md) (int, time, date, file, etc.)
 - Default values for optional arguments
-- Standard options enabled by default (`--help`, `--version`)
-- Parameters validation, handling syntax errors
+- [Standard options](doc/builder.md) enabled by default (`--help`, `--version`)
+- [Declarative CLI builder](doc/complex-usage.md)
 
 ## Quick start
 Let's create simple command-line application using `cliglue`.
@@ -83,9 +84,9 @@ Let's trace what is happening here:
 - `parameter('repeat', type=int, default=1)` binds `--repeat` keyword to a parameter named `repeat`, which type is `int` and its default value is `1`.
 
 Finally, invoking `.run()` does all the magic.
-It gets system arguments list and starts to process them.
+It gets system arguments list, starts to process them and invokes relevant action.
 
-### Help
+### Help / Usage
 `CliBuilder` has some basic options added by default, like `--help` or `--version`.
 Thus, you can check the usage by running application with `--help` flag:
 ```console
@@ -135,6 +136,72 @@ foo@bar:~$ ./hello.py world --repeat=2 --reverse
 Hello dlrow.Hello dlrow.
 ```
 
+## How does it work?
+1. You define all required CLI rules for your program in a declarative tree.
+2. User provides command-line arguments when running program in a shell.
+3. `cliglue` parses and validates all the parameters, flags, sub-commands, positional arguments, etc.
+4. `cliglue` finds the most relevant action and invokes it.
+5. When invoking a function, `cliglue` injects all its needed parameters based on the previously defined & parsed values.
+
+You only need to bind the keywords to the rules and `cliglue` will handle all the rest for you.
+
+## `cliglue` vs `argparse`
+Why `cliglue`, since we already have Python `argparse`? Here are some subjective advantages of `cliglue`:
+- declarative way of CLI logic in one place
+- autocompletion out of the box
+- easier way of building multilevel sub-commands
+- automatic action binding & injecting arguments, no need to pass `args` to functions manually
+- simpler & concise CLI building
+- CLI definition code as a clear documentation
+
+## Installation
+### Prerequisites
+Install Python 3.6 (or newer) with pip
+#### on Ubuntu
+```console
+sudo apt install python3.6 python3-pip
+```
+#### on Centos
+```console
+sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
+```
+#### on Debian 9 (stretch)
+Unfortunately, current official Debian distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
+```console
+wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
+tar xvf Python-3.6.9.tgz
+cd Python-3.6.3
+./configure --enable-optimizations --with-ensurepip=install
+make -j8
+sudo make altinstall
+```
+### Install package using pip
+Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
+```console
+sudo pip3 install cliglue
+```
+Or using explicit python version:
+```console
+python3.6 -m pip install cliglue
+```
+### Install package in develop mode
+Clone repo and install dependencies:
+```bash
+pip3 install -r requirements.txt
+```
+Then install package in develop mode in order to make any changes for your own:
+```bash
+python3 setup.py develop
+```
+
+## Testing
+Running tests:
+```bash
+pip3 install -r requirements.txt -r requirements-test.txt
+./pytest.sh
+```
+
+
 ## More examples
 
 ### Sub-commands
@@ -147,7 +214,7 @@ from cliglue import CliBuilder, subcommand
 
 
 def main():
-    CliBuilder('subcommands-demo').has(
+    CliBuilder('subcommands-demo', run=lambda: print('default action')).has(
         subcommand('remote', run=lambda: print('action remote')).has(
             subcommand('push', run=lambda: print('action remote push')),
             subcommand('rename', run=lambda: print('action remote rename')),
@@ -160,15 +227,17 @@ def main():
 if __name__ == '__main__':
     main()
 ```
-Usage is self-describing:
+Usage is quite self-describing:
 ```console
 foo@bar:~$ ./subcommands.py remote
 action remote
 foo@bar:~$ ./subcommands.py remote push
 action remote push
-foo@bar:~$ python3.6 subcommands.py branch
+foo@bar:~$ ./subcommands.py branch
 action branch
 foo@bar:~$ ./subcommands.py
+default action
+foo@bar:~$ ./subcommands.py --help
 subcommands-demo
 
 Usage:
@@ -184,7 +253,7 @@ Commands:
   remote push  
   remote rename
   checkout      - Switch branches
-  b2|branch     - List branches
+  branch        - List branches
 
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
@@ -259,74 +328,4 @@ foo@bar:~$ completers-demo --mode 640x480
 
 foo@bar:~$ completers-demo --mode 640x480 --output [Tab][Tab]
 eDP-1   HDMI-1
-```
-
-TODO more examples
-
-## How does it work?
-- You define all required CLI rules for your program in a declarative tree.
-- User provides command-line arguments when running program in a shell
-- `cliglue` parses and validates all the parameters, flags, sub-commands, positional arguments, etc.
-- `cliglue` finds the most relevant action and invokes it
-- When invoking a function, `cliglue` injects all its needed parameters based on the previously defined & parsed values.
-
-You only need to bind the keywords to the rules and `cliglue` will handle all the rest for you.
-
-## `cliglue` vs `argparse`
-Why `cliglue`, since we already have Python `argparse`? Here are some subjective advantages of `cliglue`:
-- declarative way of CLI logic in one place
-- autocompletion out of the box
-- easier way of building multilevel sub-commands
-- automatic action binding & injecting arguments, no need to pass `args` to functions manually
-- simpler & concise CLI building
-- CLI definition code as a clear documentation
-
-
-## Installation
-### Prerequisites
-Install Python 3.6 (or newer) with pip
-#### on Ubuntu
-```console
-sudo apt install python3.6 python3-pip
-```
-#### on Centos
-```console
-sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
-```
-#### on Debian 9 (stretch)
-Unfortunately, current official Debian distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
-```console
-wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
-tar xvf Python-3.6.9.tgz
-cd Python-3.6.3
-./configure --enable-optimizations --with-ensurepip=install
-make -j8
-sudo make altinstall
-```
-
-### Install package using pip
-Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
-```console
-sudo pip3 install cliglue
-```
-Or using explicit python version:
-```console
-python3.6 -m pip install cliglue
-```
-
-### Install package in develop mode
-Clone repo and install dependencies:
-```bash
-pip3 install -r requirements.txt
-```
-Then install package in develop mode:
-```bash
-python3 setup.py develop
-```
-
-## Testing
-Running tests:
-```bash
-pip3 install -r requirements.txt -r requirements-test.txt
-./pytest.sh
 ```

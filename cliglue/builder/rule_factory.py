@@ -80,23 +80,6 @@ def parameter(
     return ParameterRule(set(keywords), name, required, default, type, choices, help)
 
 
-def primary_option(
-        *keywords: str,
-        run: Action = None,
-        help: str = None,
-) -> PrimaryOptionRule:
-    """
-    Create Primary option rule specification.
-    Primary option is a keyword which instantly triggers an action when it's detected,
-    e.g. '--help', '--version'. It runs only specified action and stops further analyzing.
-    :param keywords: keyword arguments, any of them triggers action from primary option
-    :param run: action to be invoked when primary option is matched
-    :param help: description of the primary option displayed in help output
-    :return: new primary option rule specification
-    """
-    return PrimaryOptionRule(help, set(keywords), run)
-
-
 def argument(
         name: str,
         help: str = None,
@@ -154,3 +137,20 @@ def default_action(
     :return: new default action specification
     """
     return DefaultActionRule(run)
+
+
+def primary_option(
+        *keywords: str,
+        run: Action = None,
+        help: str = None,
+) -> PrimaryOptionRule:
+    """
+    Create Primary option rule specification.
+    Primary option is a keyword which instantly triggers an action when it's detected,
+    e.g. '--help', '--version'. It runs only specified action and stops further analyzing.
+    :param keywords: keyword arguments, any of them triggers action from primary option
+    :param run: action to be invoked when primary option is matched
+    :param help: description of the primary option displayed in help output
+    :return: new primary option rule specification
+    """
+    return PrimaryOptionRule(help, set(keywords), run)

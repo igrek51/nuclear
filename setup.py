@@ -23,5 +23,5 @@ setuptools.setup(
     ],
     install_requires=install_requires,
     license='MIT',
-    python_requires='>3.6.0',
+    python_requires='>=3.6.0',
 )
