@@ -157,16 +157,16 @@ Why `cliglue`, since we already have Python `argparse`? Here are some subjective
 ### Prerequisites
 Install Python 3.6 (or newer) with pip
 #### on Ubuntu
-```console
+```bash
 sudo apt install python3.6 python3-pip
 ```
 #### on Centos
-```console
+```bash
 sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
 ```
 #### on Debian 9 (stretch)
 Unfortunately, current official Debian distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
-```console
+```bash
 wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
 tar xvf Python-3.6.9.tgz
 cd Python-3.6.3
@@ -176,11 +176,11 @@ sudo make altinstall
 ```
 ### Install package using pip
 Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
-```console
+```bash
 sudo pip3 install cliglue
 ```
 Or using explicit python version:
-```console
+```bash
 python3.6 -m pip install cliglue
 ```
 ### Install package in develop mode
