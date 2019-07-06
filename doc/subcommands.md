@@ -51,3 +51,21 @@ Commands:
 
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
+
+
+TODO
+```python
+"""
+    Create Subcommand rule specification.
+    Subcommand is a keyword which narrows down the context and can execute an action.
+    Subcommands may have multiple levels and may build a tree.
+    It's similar to 'git' syntax: 'git remote rename ...'
+    Subcommand can have more subrules which are activated only when corresponding subcommand is active.
+    Subrules can be added using 'has' method.
+    :param keywords: keyword arguments which any of them triggers a subcommand
+    :param run: optional action to be invoked when subcommand is matched
+    :param help: description of the subcommand displayed in help output
+    :return: new subcommand rule specification
+    """
+```
+    
