@@ -1,24 +1,24 @@
-# cliglue - Binding glue for CLI
+# cliglue - glue for CLI
 
 [![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
 [![PyPI version](https://badge.fury.io/py/cliglue.png)](https://badge.fury.io/py/cliglue)
 
 `cliglue` is a declarative parser for command line interfaces in Python.
-It's a glue between CLI shell arguments and functions being invoked.
+It's a binding glue between CLI shell arguments and functions being invoked.
 
 `cliglue` parses and validates command line arguments provided by user when running console application.
 Then it automatically triggers matched action, based on the declared Command-Line Interface rules, injecting all needed parameters.
-You don't need to write the 'glue' code for binding & parsing parameters every time.
+You don't need to write the "glue" code for binding & parsing parameters every time.
 So it makes writing console aplications faster and simpler.
 
 ## Features
-- Auto-generated help and usage message (`--help`)
-- Generated shell autocompletion (getting most relevant hints on hitting `Tab`)
-- Multilevel sub-commands (e.g. `git remote add ...`)
-- Named parameters - supporting both `--name value` and `--name=value`
-- Flags - supporting both short (`-f`) and long (`--force`)
+- Auto-generated help and usage (`--help`)
+- Shell autocompletion (getting most relevant hints on hitting `Tab`)
+- Multilevel sub-commands (e.g. `git remote add ...` syntax)
+- Named parameters: supporting both `--name value` and `--name=value`
+- Flags: supporting both short (`-f`) and long (`--force`)
 - Positional arguments (e.g. `git push <origin> <master>`)
-- Invoking matched action function with parameters injected
+- Invoking matched action function & providing corresponding parameters
 - Custom type validators / parsers
 - Custom auto-completers (providers of possible values)
 - Typed values (int, time, date, file, etc.)
@@ -35,9 +35,19 @@ def say_hello(name: str, reverse: bool, repeat: int):
         name = name[::-1]
     print(f'Hello {name}.' * repeat)
 ```
-and we want it to be run with different parameters provided by user in a terminal shell.
-
-We need a glue which binds it with a CLI:
+and we need a glue which binds it with a CLI.
+We want it to be run with different parameters provided by user to the terminal shell in a manner:
+`./hello.py WORLD --reverse --repeat=1`.
+We've identified one positional argument, a flag and a numerical parameter.
+So our CLI definition may be declared using `cliglue`:
+```python
+CliBuilder('hello-app', run=say_hello).has(
+    argument('name'),
+    flag('reverse'),
+    parameter('repeat', type=int, default=1),
+)
+```
+Getting all together, we've binded our function with a CLI definition:
 
 **hello.py**:
 ```python
@@ -64,20 +74,20 @@ if __name__ == '__main__':
 ```
 
 Let's trace what is happening here:
-- `CliBuilder` is used to build CLI tree for application.
-- `'hello-app'` is a name for that console application to be displayed in help output.
-- `run=say_hello` sets default action for the application. Now a function `say_hello` is binded as a main action.
+- `CliBuilder` is used to build CLI tree for entire application.
+- `'hello-app'` is a name for that application to be displayed in help output.
+- `run=say_hello` sets default action for the application. Now a function `say_hello` is binded as a main action and will be invoked if no other action is matched.
 - `.has(...)` allows to embed other rules inside that builder.
-- `argument('name')` adds positional argument. From now, first argument (after binary name) will be recognized as `'name'` variable.
-- `flag('reverse')` binds '--reverse' keyword to a flag named 'reverse'. So as it may be used later on.
-- `parameter('repeat', type=int, default=1)` binds '--repeat' keyword to a parameter named 'repeat', which type is `int` and its default value is `1`.
+- `argument('name')` declares positional argument. From now, first CLI argument (after binary name) will be recognized as `name` variable.
+- `flag('reverse')` binds `--reverse` keyword to a flag named `reverse`. So as it may be used later on.
+- `parameter('repeat', type=int, default=1)` binds `--repeat` keyword to a parameter named `repeat`, which type is `int` and its default value is `1`.
 
 Finally, invoking `.run()` does all the magic.
 It gets system arguments list and starts to process them.
 
 ### Help
 `CliBuilder` has some basic options added by default, like `--help` or `--version`.
-You can check the usage by running application with `--help` flag:
+Thus, you can check the usage by running application with `--help` flag:
 ```console
 foo@bar:~$ ./hello.py --help
 hello-app
@@ -93,33 +103,33 @@ Options:
   --repeat REPEAT                 
 ```
 
-Notice there are already rules being displayed, which we declared before:
+Notice there are already rules being displayed, which were declared before:
 - positional argument `name`: `./hello.py [OPTIONS] NAME`
 - flag `reverse`: `--reverse`
 - parameter `repeat`: `--repeat REPEAT`
 
 ### Injecting parameters
 
-So when we execute our application with one argument provided, we get:
+Now when we execute our application with one argument provided, we get:
 ```console
 foo@bar:~$ ./hello.py world
 Hello world.
 ```
-and it is matched to `name` argument.
+Note that `world` was matched to `name` argument.
 We've binded `say_hello` as a default action, so it has been invoked with particular parameters:
 ```python
 say_hello(name='world', reverse=False, repeat=1)
 ```
-- `name` positional argument has been assigned a `'world'` value.
-- `reverse` flag was not given, so it's `False` by default.
-- `repeat` parameter was not given either, so it was set to its default value `1`.
+- positional argument `name` has been assigned a `'world'` value.
+- flag `reverse` was not given, so it's `False` by default.
+- parameter `repeat` was not given either, so it was set to its default value `1`.
 
-Let's provide all of the parameters, then we get:
+Let's provide all of the parameters explicitly, then we get:
 ```console
 foo@bar:~$ ./hello.py --reverse world --repeat 2
 Hello dlrow.Hello dlrow.
 ```
-Or we can do the same with different syntax:
+Or we can do the same in a different way:
 ```console
 foo@bar:~$ ./hello.py world --repeat=2 --reverse
 Hello dlrow.Hello dlrow.
@@ -137,8 +147,8 @@ from cliglue import CliBuilder, subcommand
 
 
 def main():
-    CliBuilder('subcommands').has(
-        subcommand('remote').has(
+    CliBuilder('subcommands-demo').has(
+        subcommand('remote', run=lambda: print('action remote')).has(
             subcommand('push', run=lambda: print('action remote push')),
             subcommand('rename', run=lambda: print('action remote rename')),
         ),
@@ -150,10 +160,33 @@ def main():
 if __name__ == '__main__':
     main()
 ```
-Usage:
+Usage is self-describing:
 ```console
+foo@bar:~$ ./subcommands.py remote
+action remote
 foo@bar:~$ ./subcommands.py remote push
 action remote push
+foo@bar:~$ python3.6 subcommands.py branch
+action branch
+foo@bar:~$ ./subcommands.py
+subcommands-demo
+
+Usage:
+  ./subcommands.py [COMMAND] [OPTIONS]
+
+Options:
+  -h, --help [SUBCOMMANDS...]      - Display this help and exit
+  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
+  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
+
+Commands:
+  remote        - List remotes
+  remote push  
+  remote rename
+  checkout      - Switch branches
+  b2|branch     - List branches
+
+Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
 
 ### Auto-completion
@@ -166,10 +199,11 @@ import re
 from typing import List
 
 from cliglue import CliBuilder, parameter, default_action
-from cliglue.utils.shell import shell_output
+from cliglue.utils.shell import shell, shell_output
 
 
 def list_screens() -> List[str]:
+    """Return list of available screen names in a system"""
     xrandr = shell_output('xrandr 2>/dev/null')
     regex_matcher = re.compile(r'^([a-zA-Z0-9\-]+) connected(.*)')
     return [regex_matcher.sub('\\1', line)
@@ -177,11 +211,15 @@ def list_screens() -> List[str]:
             if regex_matcher.match(line)]
 
 
+def adjust_screen(output: str, mode: str):
+    shell(f'xrandr --output {output} --mode {mode}')
+
+
 def main():
     CliBuilder('completers-demo').has(
-        parameter('output', choices=list_screens),
-        parameter('mode', choices=['640x480', '800x480', '800x600']),
-        default_action(lambda: print('\n'.join(list_screens()))),
+        parameter('output', choices=list_screens, required=True),
+        parameter('mode', choices=['640x480', '800x480', '800x600'], required=True),
+        default_action(adjust_screen),
     ).run()
 
 
@@ -201,7 +239,7 @@ complete -F _autocomplete_98246661 completers-demo
 [info]  Autocompleter has been installed in /etc/bash_completion.d/autocomplete_completers-demo.sh. Please restart your shell.
 ```
 Now, we have `completers-demo` application installed in `/usr/bin/` (symbolic link to the current script) and bash completion script installed as well.
-We can hit `Tab` key to complete command when typing:
+We can hit `[Tab]` key to complete command when typing. Here are some completions examples:
 ```console
 foo@bar:~$ completers-d[Tab]
 foo@bar:~$ completers-demo
@@ -236,31 +274,32 @@ You only need to bind the keywords to the rules and `cliglue` will handle all th
 
 ## `cliglue` vs `argparse`
 Why `cliglue`, since we already have Python `argparse`? Here are some subjective advantages of `cliglue`:
-- declarative way of CLI logic
-- autocompletion
+- declarative way of CLI logic in one place
+- autocompletion out of the box
 - easier way of building multilevel sub-commands
-- easier & simpler CLI building and documenting it
-- auto action binding & injecting arguments, no need to pass `args` to functions manually
+- automatic action binding & injecting arguments, no need to pass `args` to functions manually
+- simpler & concise CLI building
+- CLI definition code as a clear documentation
 
 
 ## Installation
-
-### Requirements
-Install Python 3.6 (or newer)
-#### Ubuntu
+### Prerequisites
+Install Python 3.6 (or newer) with pip
+#### on Ubuntu
 ```console
-sudo apt install python3.6
+sudo apt install python3.6 python3-pip
 ```
-#### Centos
+#### on Centos
 ```console
 sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
 ```
-#### Debian
+#### on Debian 9 (stretch)
+Unfortunately, current official Debian distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
 ```console
 wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
 tar xvf Python-3.6.9.tgz
 cd Python-3.6.3
-./configure --enable-optimizations
+./configure --enable-optimizations --with-ensurepip=install
 make -j8
 sudo make altinstall
 ```
@@ -268,8 +307,11 @@ sudo make altinstall
 ### Install package using pip
 Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
 ```console
-# apt install python3-pip # for Debian
-# pip3 install cliglue
+sudo pip3 install cliglue
+```
+Or using explicit python version:
+```console
+python3.6 -m pip install cliglue
 ```
 
 ### Install package in develop mode
