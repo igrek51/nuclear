@@ -81,8 +81,8 @@ class CliBuilder(object):
             if self.__reraise_error:
                 raise e
 
-    def print_help(self, sucommands: List[str]):
-        print_help(self.__subrules, self.__name, self.__version, self.__help, sucommands)
+    def print_help(self, subcommands: List[str]):
+        print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands)
 
     def __bash_autocomplete(self, cmdline: str):
         bash_autocomplete(self.__subrules, cmdline)
@@ -91,8 +91,8 @@ class CliBuilder(object):
         def __print_root_help():
             self.print_help([])
 
-        def __print_subcommand_help(sucommands: List[str]):
-            self.print_help(sucommands)
+        def __print_subcommand_help(subcommands: List[str]):
+            self.print_help(subcommands)
 
         def __print_version():
             print_version(self.__name, self.__version)
@@ -110,7 +110,7 @@ class CliBuilder(object):
 
         self.has(
             primary_option('-h', '--help', run=__print_subcommand_help, help='Display this help and exit').has(
-                arguments('sucommands'),
+                arguments('subcommands'),
             ),
             primary_option('--bash-install', run=__bash_install,
                            help='Install script as a bash binary and add autocompletion links').has(
