@@ -3,6 +3,9 @@ import setuptools
 with open("README.md", "r") as fh:
     long_description = fh.read()
 
+with open("requirements.txt", "r") as fh:
+    install_requires = fh.read().splitlines()
+
 setuptools.setup(
     name="cliglue",
     version="0.2.1",
@@ -14,13 +17,11 @@ setuptools.setup(
     url="https://github.com/igrek51/cliglue",
     packages=setuptools.find_packages(),
     classifiers=[
-        "Programming Language :: Python :: 3.6",
+        "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
         "Operating System :: OS Independent",
     ],
-    install_requires=[
-        'dataclasses',
-    ],
+    install_requires=install_requires,
     license='MIT',
     python_requires='>3.6.0',
 )
