@@ -53,8 +53,7 @@ Let's trace what is happening here:
 - `argument('name')` declares positional argument. From now, first CLI argument (after binary name) will be recognized as `name` variable.
 - `flag('reverse')` binds `--reverse` keyword to a flag named `reverse`. So as it may be used later on.
 - `parameter('repeat', type=int, default=1)` binds `--repeat` keyword to a parameter named `repeat`, which type is `int` and its default value is `1`.
-
-Finally, invoking `.run()` does all the magic.
+- Finally, invoking `.run()` does all the magic.
 It gets system arguments list, starts to process them and invokes corresponding action.
 
 ### Help / Usage
