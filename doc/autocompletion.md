@@ -1,5 +1,7 @@
 ### Auto-completion
-Defining choices may help in auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
+Defining possible choices may help in auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
+
+Auto-completion also works by default to all known keywords based on the declared subcommands and options.
 
 **completers.py**:
 ```python

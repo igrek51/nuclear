@@ -1,5 +1,4 @@
 # cliglue - glue for CLI
-
 [![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
 [![PyPI version](https://badge.fury.io/py/cliglue.png)](https://badge.fury.io/py/cliglue)
 
@@ -36,7 +35,7 @@ def say_hello(name: str, reverse: bool, repeat: int):
         name = name[::-1]
     print(f'Hello {name}.' * repeat)
 ```
-and we need a glue which binds it with a CLI.
+and we need a glue which binds it with a CLI (Command-Line Interface).
 We want it to be run with different parameters provided by user to the terminal shell in a manner:
 `./hello.py WORLD --reverse --repeat=1`.
 We've identified one positional argument, a flag and a numerical parameter.
@@ -109,7 +108,6 @@ Notice there are already rules being displayed, which were declared before:
 - parameter `repeat`: `--repeat REPEAT`
 
 ### Injecting parameters
-
 Now when we execute our application with one argument provided, we get:
 ```console
 foo@bar:~$ ./hello.py world
@@ -139,23 +137,39 @@ Hello dlrow.Hello dlrow.
 1. You define all required CLI rules for your program in a declarative tree.
 2. User provides command-line arguments when running program in a shell.
 3. `cliglue` parses and validates all the parameters, flags, sub-commands, positional arguments, etc.
-4. `cliglue` finds the most relevant action and invokes it.
+4. `cliglue` finds the most relevant action (starting from the most specific) and invokes it.
 5. When invoking a function, `cliglue` injects all its needed parameters based on the previously defined & parsed values.
 
 You only need to bind the keywords to the rules and `cliglue` will handle all the rest for you.
 
 ## `cliglue` vs `argparse`
-Why `cliglue`, since we already have Python `argparse`? Here are some subjective advantages of `cliglue`:
-- declarative way of CLI logic in one place
-- autocompletion out of the box
-- easier way of building multilevel sub-commands
-- automatic action binding & injecting arguments, no need to pass `args` to functions manually
-- simpler & concise CLI building
-- CLI definition code as a clear documentation
+Why to use `cliglue`, since we already have Python `argparse`? Here are some subjective advantages of `cliglue`:
+- declarative way of CLI logic in one place,
+- autocompletion out of the box,
+- easier way of building multilevel sub-commands,
+- automatic action binding & injecting arguments, no need to pass `args` to functions manually,
+- CLI logic separated from the application logic, 
+- simpler & concise CLI building,
+- CLI definition code as a clear documentation.
 
 ## Installation
 ### Prerequisites
-Install Python 3.6 (or newer) with pip
+- Python 3.6 (or newer)
+- pip
+#### on Debian 10 (buster)
+```bash
+sudo apt install python3.7 python3-pip
+```
+#### on Debian 9 (stretch)
+Unfortunately, Debian stretch distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
+```bash
+wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
+tar xvf Python-3.6.9.tgz
+cd Python-3.6.9
+./configure --enable-optimizations --with-ensurepip=install
+make -j8
+sudo make altinstall
+```
 #### on Ubuntu
 ```bash
 sudo apt install python3.6 python3-pip
@@ -164,20 +178,11 @@ sudo apt install python3.6 python3-pip
 ```bash
 sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
 ```
-#### on Debian 9 (stretch)
-Unfortunately, current official Debian distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
-```bash
-wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
-tar xvf Python-3.6.9.tgz
-cd Python-3.6.3
-./configure --enable-optimizations --with-ensurepip=install
-make -j8
-sudo make altinstall
-```
+
 ### Install package using pip
 Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
 ```bash
-sudo pip3 install cliglue
+pip3 install cliglue
 ```
 Or using explicit python version:
 ```bash
