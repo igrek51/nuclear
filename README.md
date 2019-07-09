@@ -155,7 +155,8 @@ Why `cliglue`, since we already have Python `argparse`? Here are some subjective
 
 ## Installation
 ### Prerequisites
-Install Python 3.6 (or newer) with pip
+- Python 3.6 (or newer)
+- pip
 #### on Ubuntu
 ```bash
 sudo apt install python3.6 python3-pip
@@ -165,15 +166,20 @@ sudo apt install python3.6 python3-pip
 sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
 ```
 #### on Debian 9 (stretch)
-Unfortunately, current official Debian distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
+Unfortunately, Debian stretch distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
 ```bash
 wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
 tar xvf Python-3.6.9.tgz
-cd Python-3.6.3
+cd Python-3.6.9
 ./configure --enable-optimizations --with-ensurepip=install
 make -j8
 sudo make altinstall
 ```
+#### on Debian 10 (buster)
+```bash
+sudo apt install python3.7 python3-pip
+```
+
 ### Install package using pip
 Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
 ```bash
