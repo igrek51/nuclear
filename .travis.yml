@@ -5,7 +5,7 @@ python:
   - "3.7"
 
 install:
-  - pip install -r requirements.txt -r requirements-test.txt
+  - pip install -r requirements.txt -r requirements-dev.txt
 
 script:
   - python3 setup.py develop

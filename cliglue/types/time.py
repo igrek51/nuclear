@@ -14,6 +14,8 @@ def datetime_format(*formats: str) -> Callable[[str], datetime]:
 
 
 def today_format(*formats: str) -> Callable[[str], datetime]:
+    """format: %Y-%m-%d %H:%M:%S"""
+
     def parser(arg: str):
         today: date = datetime.now().date()
         parsed_time: time = _parse_date_formats(arg, *formats).time()

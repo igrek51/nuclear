@@ -65,7 +65,7 @@ def parameter(
     as well as by name: 'p' or 'param', which will be evaluated to '-p' or '--param'.
     Single character parameter will get single hyphen prefix (-p),
     longer parameter names will get double hyphen prefix (--param)
-    :param name: explicit paramter name (can be used, when it's different from any keyword)
+    :param name: explicit internal paramter name (can be used, when it's different from any keyword)
     :param help: description of the parameter displayed in help output
     :param required: whether parameter is required.
     If it's required but it's not given, the syntax error will be raised.
@@ -92,7 +92,7 @@ def argument(
     Create positional argument rule specification.
     Positional argument is an unnamed param
     which is recognized by its position in the command line arguments list.
-    :param name: argument name, which will be used to reference argument value
+    :param name: internal argument name, which will be used to reference argument value
     :param help: description of the argument displayed in help output
     :param required: whether positional argument is required.
     If it's required but it's not given, the syntax error will be raised.
@@ -115,7 +115,7 @@ def arguments(
     Create 'All remaining arguments' rule specification.
     It allows to retrieve all CLI argumetns, which were not matched before.
     All matched arguments will be extracted to a list of arguments or a string (depending on joined_with parameter)
-    :param name: variable name, which will be used to reference matched arguments list
+    :param name: internal variable name, which will be used to reference matched arguments list
     :param joined_with: optional string joiner for arguments.
     If it's set, all matched arguments will be joined to string with that joiner.
     It it's not given, matched arguments will be passed as list of strings.

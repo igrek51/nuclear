@@ -1,5 +1,67 @@
-### Sub-commands
-Commands may build a multilevel tree with nested sub-commands (similar to `git`, `nmcli` or `ip` syntax).
+# Sub-commands
+Commands may form a multilevel tree with nested sub-commands.
+
+Sub-commands syntax is commonly known:
+- `git remote rename ...`,
+- `docker container ls`,
+- `nmcli device wifi list`,
+- `ip address show`.
+
+Sub-commands split the CLI into many nested CLI levels, forming a tree.
+They decide where to direct the parser, which seeks for a most relevant action to invoke.
+
+Sub-commands create a nested levels of sub-parsers, which not only may have different actions but also contains different CLI rules, such as named parameters, flags or other sub-commands, which are only enabled when parent command is enabled as well.
+Subcommand can have more subrules which are activated only when corresponding subcommand is active.
+So subcommand is just a keyword which narrows down the context.
+
+## Sub-commands specification
+In order to create subcommand rule specification, use:
+```python
+from cliglue import subcommand
+
+subcommand(
+        *keywords: str,
+        run: Optional[Action] = None,
+        help: str = None,
+)
+```
+
+`keywords` - possible keyword arguments which any of them triggers a subcommand
+
+`run` - optional action to be invoked when subcommand is matched
+
+`help` - description of the parameter displayed in help output
+
+## Nesting sub-commands
+With sub-commands, you can nest other CLI rules.
+They will be active only when corresponding subcommand is active.
+
+Subrules can be nested using `.has(*subrules: CliRule)` method.
+It returns itself for further building, so it can be used just like `CliBuilder`:
+```python
+from cliglue import CliBuilder, argument, subcommand
+
+CliBuilder().has(
+    subcommand('nmcli').has(
+        subcommand('device').has(
+            subcommand('wifi').has(
+                subcommand('list'),
+            ),
+        ),
+    ),
+    subcommand('ip').has(
+        subcommand('address', 'a').has(
+            subcommand('show'),
+            subcommand('del').has(
+                argument('interface'),
+            ),
+        ),
+    ),
+)
+```
+In that manner, the formatted code above is composing a visual tree, which is clear.
+
+## Example
 
 **subcommands.py**:
 ```python
@@ -52,20 +114,4 @@ Commands:
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
 
-
-TODO
-```python
-"""
-    Create Subcommand rule specification.
-    Subcommand is a keyword which narrows down the context and can execute an action.
-    Subcommands may have multiple levels and may build a tree.
-    It's similar to 'git' syntax: 'git remote rename ...'
-    Subcommand can have more subrules which are activated only when corresponding subcommand is active.
-    Subrules can be added using 'has' method.
-    :param keywords: keyword arguments which any of them triggers a subcommand
-    :param run: optional action to be invoked when subcommand is matched
-    :param help: description of the subcommand displayed in help output
-    :return: new subcommand rule specification
-    """
-```
-    
+See [sub-commands tests](../tests/parser/test_subcommand.py) as a specification.

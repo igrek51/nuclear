@@ -36,4 +36,4 @@ foo@bar:~$ ./example.py
 False
 ``` 
 
-See [flag tests](../tests/parser/test_flag.py) as a precise specification.
+See [flag tests](../tests/parser/test_flag.py) as a specification.

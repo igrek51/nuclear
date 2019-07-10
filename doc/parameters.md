@@ -3,6 +3,9 @@ Parameter is a named value, which will be injected to triggered action by its na
 There are supported both manners for setting parameter value:
 `--parameter-name value` or `--parameter-name=value`
 
+Named parameters may appear anywhere in CLI arguments list: at the beginning or at the end, or even before positional arguments.
+As long as they are matched as named parameters, they will not be recognized as positional arguments.
+
 The parameters may be later referenced by its name or keywords
 (in lowercase format without hyphen prefix and with underscores instead of dashes,
 e.g. `--paramater-name` will be injected as `parameter_name`)
@@ -63,4 +66,4 @@ foo@bar:~$ ./example.py
 None
 ``` 
 
-See [parameter tests](../tests/parser/test_param.py) as a precise specification.
+See [parameter tests](../tests/parser/test_param.py) as a specification.

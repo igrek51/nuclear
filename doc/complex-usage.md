@@ -1,5 +1,7 @@
 # Complex CLI builder tree
 
+Here's an example of more complex CLI definition tree:
+
 **multiapp.py**:
 ```python
 #!/usr/bin/env python3
@@ -67,7 +69,6 @@ def docker_exec(user: int, container_name: str, cmd: str):
 if __name__ == '__main__':
     main()
 ```
-
 
 Usage:
 ```console

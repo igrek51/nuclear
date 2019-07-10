@@ -1,5 +1,9 @@
 ### Auto-completion
-Defining choices may help in auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
+Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
+
+Auto-completion is enabled by default to all known keywords based on the declared subcommands and options.
+
+Defining possible choices may help in auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
 
 **completers.py**:
 ```python
@@ -70,12 +74,25 @@ foo@bar:~$ completers-demo --mode 640x480 --output [Tab][Tab]
 eDP-1   HDMI-1
 ```
 
+## Custom completers
+You can provide your custom auto-completers (providers of possible values) to the `choices` parameter.
 
-# TODO
-Shell autocompletion](doc/autocompletion.md) (getting most relevant hints on hitting `Tab`)
-
-Custom auto-completers (providers of possible values)
-
+The example is the function which returns a list of available screens:
+```python
+def list_screens() -> List[str]:
+    """Return list of available screen names in a system"""
+    xrandr = shell_output('xrandr 2>/dev/null')
+    regex_matcher = re.compile(r'^([a-zA-Z0-9\-]+) connected(.*)')
+    return [regex_matcher.sub('\\1', line)
+            for line in xrandr.splitlines()
+            if regex_matcher.match(line)]
+```
+You can use it to validate and propose available choices for parameter or positional argument:
+```python
+CliBuilder().has(
+    parameter('output', choices=list_screens, required=True),
+)
+```
 
 ## Installing Autocompletion
 In order to enable the autocompletion, there must be a specific script in `/etc/bash_completion.d/`.
@@ -88,8 +105,11 @@ so as you can run your app with `sample-app` command instead of `./sample_app.py
 
 Now you can type `sample-app` and hit `Tab` to see what are the possible commands and options.
 
-If you type `sample-app --he`, it will automatically fill the only possible option (`--help`).
+If you type `sample-app --he`, it will automatically fill the only possible option: `--help`.
 
-Sometimes, we need to make some modifications in our code,
+Sometimes, you need to make some modifications in your code,
 but after these modifications you will NOT need to reinstall autocompletion again.
-You had to do it only once.
+You had to do it only once, because autocompletion script only redirects its query and run `sample_app.py`:
+```console
+sample-app --bash-autocomplete "sample-app --he"
+```
