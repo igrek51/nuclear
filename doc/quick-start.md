@@ -7,7 +7,7 @@ def say_hello(name: str, reverse: bool, repeat: int):
         name = name[::-1]
     print(f'Hello {name}.' * repeat)
 ```
-and we need a glue which binds it with a CLI.
+and we need a glue which binds it with a CLI (Command-Line Interface).
 We want it to be run with different parameters provided by user to the terminal shell in a manner:
 `./hello.py WORLD --reverse --repeat=1`.
 We've identified one positional argument, a flag and a numerical parameter.
@@ -54,7 +54,7 @@ Let's trace what is happening here:
 - `flag('reverse')` binds `--reverse` keyword to a flag named `reverse`. So as it may be used later on.
 - `parameter('repeat', type=int, default=1)` binds `--repeat` keyword to a parameter named `repeat`, which type is `int` and its default value is `1`.
 - Finally, invoking `.run()` does all the magic.
-It gets system arguments list, starts to process them and invokes corresponding action.
+It gets system arguments list, starts to process them and invokes relevant action.
 
 ### Help / Usage
 `CliBuilder` has some basic options added by default, like `--help` or `--version`.
@@ -80,7 +80,6 @@ Notice there are already rules being displayed, which were declared before:
 - parameter `repeat`: `--repeat REPEAT`
 
 ### Injecting parameters
-
 Now when we execute our application with one argument provided, we get:
 ```console
 foo@bar:~$ ./hello.py world
@@ -105,3 +104,4 @@ Or we can do the same in a different way:
 foo@bar:~$ ./hello.py world --repeat=2 --reverse
 Hello dlrow.Hello dlrow.
 ```
+

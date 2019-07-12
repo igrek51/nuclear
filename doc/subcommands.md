@@ -61,8 +61,7 @@ CliBuilder().has(
 ```
 In that manner, the formatted code above is composing a visual tree, which is clear.
 
-## Example
-
+## Sub-commands example
 **subcommands.py**:
 ```python
 #!/usr/bin/env python3

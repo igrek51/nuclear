@@ -156,7 +156,7 @@ Why to use `cliglue`, since we already have Python `argparse`? Here are some sub
 TODO
 
 ## Installation
-### Prerequisites
+### Step 1. Prerequisites
 - Python 3.6 (or newer)
 - pip
 #### on Debian 10 (buster)
@@ -164,7 +164,7 @@ TODO
 sudo apt install python3.7 python3-pip
 ```
 #### on Debian 9 (stretch)
-Unfortunately, Debian stretch distribution does not have Python 3.6 in its repositories, but it can be compiled from the source:
+Unfortunately, Debian stretch distribution does not have Python 3.6+ in its repositories, but it can be compiled from the source:
 ```bash
 wget https://www.python.org/ftp/python/3.6.9/Python-3.6.9.tgz
 tar xvf Python-3.6.9.tgz
@@ -182,7 +182,7 @@ sudo apt install python3.6 python3-pip
 sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
 ```
 
-### Install package using pip
+### Step 2. Install package using pip
 Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
 ```bash
 pip3 install cliglue
@@ -192,12 +192,9 @@ Or using explicit python version:
 python3.6 -m pip install cliglue
 ```
 ### Install package in develop mode
-Clone repo and install dependencies:
+You can install package in develop mode in order to make any changes for your own:
 ```bash
 pip3 install -r requirements.txt
-```
-Then install package in develop mode in order to make any changes for your own:
-```bash
 python3 setup.py develop
 ```
 
@@ -208,143 +205,3 @@ pip3 install -r requirements.txt -r requirements-dev.txt
 ./pytest.sh
 ```
 
-
-## More examples
-
-### Sub-commands
-Commands may build a multilevel tree with nested sub-commands (similar to `git`, `nmcli` or `ip` syntax).
-
-**subcommands.py**:
-```python
-#!/usr/bin/env python3
-from cliglue import CliBuilder, subcommand
-
-
-def main():
-    CliBuilder('subcommands-demo', run=lambda: print('default action')).has(
-        subcommand('remote', run=lambda: print('action remote')).has(
-            subcommand('push', run=lambda: print('action remote push')),
-            subcommand('rename', run=lambda: print('action remote rename')),
-        ),
-        subcommand('checkout', run=lambda: print('action checkout')),
-        subcommand('branch', run=lambda: print('action branch')),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
-```
-Usage is quite self-describing:
-```console
-foo@bar:~$ ./subcommands.py remote
-action remote
-foo@bar:~$ ./subcommands.py remote push
-action remote push
-foo@bar:~$ ./subcommands.py branch
-action branch
-foo@bar:~$ ./subcommands.py
-default action
-foo@bar:~$ ./subcommands.py --help
-subcommands-demo
-
-Usage:
-  ./subcommands.py [COMMAND] [OPTIONS]
-
-Options:
-  -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
-
-Commands:
-  remote        - List remotes
-  remote push  
-  remote rename
-  checkout      - Switch branches
-  branch        - List branches
-
-Run "./subcommands.py COMMAND --help" for more information on a command.
-```
-
-### Auto-completion
-Auto-completion is enabled by default to all known keywords based on the declared subcommands and options.
-
-Defining possible choices may help in auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
-
-**completers.py**:
-```python
-#!/usr/bin/env python3
-import re
-from typing import List
-
-from cliglue import CliBuilder, parameter, default_action
-from cliglue.utils.shell import shell, shell_output
-
-
-def list_screens() -> List[str]:
-    """Return list of available screen names in a system"""
-    xrandr = shell_output('xrandr 2>/dev/null')
-    regex_matcher = re.compile(r'^([a-zA-Z0-9\-]+) connected(.*)')
-    return [regex_matcher.sub('\\1', line)
-            for line in xrandr.splitlines()
-            if regex_matcher.match(line)]
-
-
-def adjust_screen(output: str, mode: str):
-    shell(f'xrandr --output {output} --mode {mode}')
-
-
-def main():
-    CliBuilder('completers-demo').has(
-        parameter('output', choices=list_screens, required=True),
-        parameter('mode', choices=['640x480', '800x480', '800x600'], required=True),
-        default_action(adjust_screen),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
-```
-
-In order to enable auto-completion, you need to install some extension to bash. Fortunately `cliglue` has built-in tools to do that:
-```console
-foo@bar:~$ sudo ./completers.py --bash-install completers-demo
-[info]  creating link: /usr/bin/completers-demo -> ~/cliglue/doc/example/completers.py
-#!/bin/bash
-_autocomplete_98246661() {
-COMPREPLY=( $(completers-demo --bash-autocomplete "${COMP_LINE}") )
-}
-complete -F _autocomplete_98246661 completers-demo
-[info]  Autocompleter has been installed in /etc/bash_completion.d/autocomplete_completers-demo.sh. Please restart your shell.
-```
-Now, we have `completers-demo` application installed in `/usr/bin/` (symbolic link to the current script) and bash completion script installed as well.
-We can hit `[Tab]` key to complete command when typing. Here are some completions examples:
-```console
-foo@bar:~$ completers-d[Tab]
-foo@bar:~$ completers-demo
-
-foo@bar:~$ completers-demo [Tab][Tab]
---bash-autocomplete  -h                   --mode               --output
---bash-install       --help               --mode=              --output=
-
-foo@bar:~$ completers-demo --mo[Tab]
-foo@bar:~$ completers-demo --mode
-
-foo@bar:~$ completers-demo --mode [Tab][Tab]
-640x480  800x480  800x600
-
-foo@bar:~$ completers-demo --mode 640[Tab]
-foo@bar:~$ completers-demo --mode 640x480
-
-foo@bar:~$ completers-demo --mode 640x480 --output [Tab][Tab]
-eDP-1   HDMI-1
-```
-
-### Flags
-```python
-#!/usr/bin/env python3
-from cliglue import CliBuilder, flag
-
-CliBuilder(run=lambda force: print(force)).has(
-    flag('force', 'f'),
-)
-```

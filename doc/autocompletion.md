@@ -3,7 +3,7 @@ Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
 
 Auto-completion is enabled by default to all known keywords based on the declared subcommands and options.
 
-Defining possible choices may help in auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
+Defining possible choices may imporove auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
 
 **completers.py**:
 ```python
