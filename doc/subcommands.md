@@ -1,4 +1,4 @@
-# Sub-commands
+## Sub-commands
 Commands may form a multilevel tree with nested sub-commands.
 
 Sub-commands syntax is commonly known:
@@ -14,7 +14,7 @@ Sub-commands create a nested levels of sub-parsers, which not only may have diff
 Subcommand can have more subrules which are activated only when corresponding subcommand is active.
 So subcommand is just a keyword which narrows down the context.
 
-## Sub-commands specification
+### Sub-commands specification
 In order to create subcommand rule specification, use:
 ```python
 from cliglue import subcommand
@@ -32,7 +32,7 @@ subcommand(
 
 `help` - description of the parameter displayed in help output
 
-## Nesting sub-commands
+### Nesting sub-commands
 With sub-commands, you can nest other CLI rules.
 They will be active only when corresponding subcommand is active.
 
@@ -61,7 +61,7 @@ CliBuilder().has(
 ```
 In that manner, the formatted code above is composing a visual tree, which is clear.
 
-## Sub-commands example
+### Sub-commands example
 **subcommands.py**:
 ```python
 #!/usr/bin/env python3
@@ -113,4 +113,5 @@ Commands:
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
 
-See [sub-commands tests](../tests/parser/test_subcommand.py) as a specification.
+See [sub-commands tests](../tests/parser/test_subcommand.py) for specification.
+

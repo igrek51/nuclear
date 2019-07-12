@@ -1,4 +1,4 @@
-# Named parameters
+## Named parameters
 Parameter is a named value, which will be injected to triggered action by its name.
 There are supported both manners for setting parameter value:
 `--parameter-name value` or `--parameter-name=value`
@@ -66,4 +66,5 @@ foo@bar:~$ ./example.py
 None
 ``` 
 
-See [parameter tests](../tests/parser/test_param.py) as a specification.
+See [parameter tests](../tests/parser/test_param.py) for specification.
+

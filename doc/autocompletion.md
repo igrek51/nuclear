@@ -1,4 +1,4 @@
-### Auto-completion
+## Auto-completion
 Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
 
 Auto-completion is enabled by default to all known keywords based on the declared subcommands and options.
@@ -74,7 +74,7 @@ foo@bar:~$ completers-demo --mode 640x480 --output [Tab][Tab]
 eDP-1   HDMI-1
 ```
 
-## Custom completers
+### Custom completers
 You can provide your custom auto-completers (providers of possible values) to the `choices` parameter.
 
 The example is the function which returns a list of available screens:
@@ -94,7 +94,7 @@ CliBuilder().has(
 )
 ```
 
-## Installing Autocompletion
+### Installing Autocompletion
 In order to enable the autocompletion, there must be a specific script in `/etc/bash_completion.d/`.
 With `cliglue` you just need to run:
 ```console
@@ -113,3 +113,4 @@ You had to do it only once, because autocompletion script only redirects its que
 ```console
 sample-app --bash-autocomplete "sample-app --he"
 ```
+

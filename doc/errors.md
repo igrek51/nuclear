@@ -1,7 +1,7 @@
-# Errors handling
+## Errors handling
 `cliglue` validates passed CLI arguments on running `CliBuilder.run()`
 
-## Handling syntax errors - CliSyntaxError
+### Handling syntax errors - CliSyntaxError
 In case of syntax error, `CliBuilder.run()` raises `CliSyntaxError`, it's when:
 - parameter value is missing: `--param-name` without next argument
 - required parameter is not given
@@ -15,7 +15,7 @@ Then only the error log will be displayed in console stdout.
 
 `help_onerror` parameter decides wheter help output should be displayed on syntax error.
 
-### Example
+#### Erros handling example
 ```python
 #!/usr/bin/env python3.6
 from cliglue import CliBuilder, argument
@@ -30,13 +30,13 @@ foo@bar:~$ ./pos-args.py
 [ERROR] Syntax error: required positional argument "remote" is not given
 ```
 
-## CliDefinitionError
+### CliDefinitionError
 In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError`. It's e.g. when:
 - positional argument or parameter is set to required and has default value set (it doesn't make any sense)
 - positional argument is placed after all remaining arguments
 - all remaining arguments rule is defined more than once
 
-### Example
+#### Wrong CLI Definition example
 ```python
 #!/usr/bin/env python3.6
 from cliglue import CliBuilder, argument
@@ -64,3 +64,4 @@ Traceback (most recent call last):
     raise CliDefinitionError('argument value may be either required or have the default value')
 cliglue.parser.error.CliDefinitionError: argument value may be either required or have the default value
 ```
+

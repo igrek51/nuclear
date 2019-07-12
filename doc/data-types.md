@@ -1,5 +1,5 @@
-# Data types
-`cliglu` supports typed values for parameters or positional arguments.
+## Data types
+`cliglue` supports typed values for parameters or positional arguments.
 By default, all values have string types.
 It can be changed by defining `type` parameter.
 
@@ -9,7 +9,7 @@ There are 2 possible `type` values:
 In both cases, the internal variable value is calculated by invoking `type(str_value)`.
 When argument value has invalid format, there is syntax error raised. 
 
-## Basic types (int, float, etc.)
+### Basic types (int, float, etc.)
 ```python
 #!/usr/bin/env python3.6
 from cliglue import CliBuilder, argument
@@ -46,10 +46,10 @@ Options:
   --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 ```
 
-## Built-in data types
+### Built-in data types
 `cliglue` has built-in parsers / validators for some types
 
-### Filesystem types
+#### Filesystem types
 - `cliglue.types.filesystem.existing_file` validates if given string is an existing regular file (not a directory).
 After validation, the value is internally stored as `str`.
 ```python
@@ -66,7 +66,7 @@ from cliglue.types.filesystem import existing_directory
 argument('file', type=existing_directory)
 ```
 
-### Datetime types
+#### Datetime types
 - `cliglue.types.time.iso_date` parses / validates given string as a date in ISO format: `%Y-%m-%d`.
 After validation, the value is internally stored as `datetime.datetime`.
 ```python
@@ -168,8 +168,8 @@ foo@bar:~$ ./example.py 12:42
 2019-07-13 12:15:00
 ```
 
-## Custom type validators / parsers
-You can define custom parser function.
+### Custom type parsers
+You can define custom parser/validator function.
 It should take one `str` argument and return expected value type.
 
 ```python
@@ -200,3 +200,4 @@ CliBuilder(run=print_it).has(
 foo@bar:~$ ./example.py Eric-33
 Person(name='Eric', age=33)
 ```
+

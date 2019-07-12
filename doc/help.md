@@ -1,5 +1,4 @@
-# Auto-generated help
-
+## Auto-generated help
 `cliglue` auto-generates help and usage output based on the defined CLI rules.
 
 Let's say we have quite complex CLI definition:
@@ -71,7 +70,7 @@ Commands:
 Run "multiapp.py COMMAND --help" for more information on a command.
 ```
 
-## Sub-commands help
+### Sub-commands help
 We can also check the usage for a selected sub-command only:
 ```console
 foo@bar:~$ python3 multiapp.py git --help
@@ -99,9 +98,10 @@ Commands:
 Run "multiapp.py git COMMAND --help" for more information on a command.
 ```
 
-# version check
+### version check
 Use `--version` in order to show your application version:
 ```console
 foo@bar:~$ python3 multiapp.py --version
 multiapp v1.0.0
 ```
+

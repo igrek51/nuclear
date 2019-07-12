@@ -1,5 +1,4 @@
-# CliBuilder
-
+## CliBuilder
 `CliBuilder` is a main class of `cliglue` package which allows to build CLI definition.
 It's a builder for Command Line Interface specification.
 After that, you can invoke `.run()` method in order to parse provided arguments and invoke particular actions.
@@ -8,7 +7,7 @@ Empty CliBuilder has standard options enabled by default:
 - `--help` - displaying usage and help
 - `--version` - displaying application version number (if it has been defined)
 
-## Creating CliBuilder
+### Creating CliBuilder
 In this step you can create new `CliBuilder` and set a custom configuration for it.
  The constructor is as follows:
 ```python
@@ -44,7 +43,7 @@ Defaults options are:
 `reraise_error` - wheter syntax error should not be caught but reraised instead.
 Enabling this causes stack trace to be flooded to the user.
 
-## Declaring CLI rules
+### Declaring CLI rules
 The next step is to declare CLI rules for `CliBuilder` using `.has()` method
 
 `has(*subrules: CliRule) -> 'CliBuilder'` method receives a CLI rules in its parameters and returns the `CliBuilder` itself for further building.
@@ -74,7 +73,7 @@ CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
 )
 ```
 
-## Running CLI arguments through parser
+### Running CLI arguments through parser
 The final step is calling `.run()` on `CliBuilder`.
 It parses all the CLI arguments passed to application.
 Then it invokes triggered action which were defined before.
@@ -87,3 +86,4 @@ from cliglue import CliBuilder
 CliBuilder().run()
 ```
 just prints the standard help output, because it's the default action for an empty builder if no arguments are provided.
+

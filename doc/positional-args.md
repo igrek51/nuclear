@@ -1,8 +1,8 @@
-# Positional arguments
+## Positional arguments
 Positional argument is an unnamed parameter, which is recognized only by its position on their order in command line arguments list.
 For example first two arguments (except flags and named parameters) may be detected as positional arguments and matched to corresponding variables.
 
-## Single positional arguments
+### Single positional arguments
 Let's assume we have CLI syntax: `git push <origin> <master>`.
 `git` is application binary name of course, `push` is a sub-command, which have 2 positional arguments: `origin` and `master`.
 
@@ -36,7 +36,7 @@ Then argument value is evaluated by passing the string argument value to that fu
 `choices` - Explicit list of available choices for the argument value
 or reference to a function which will be invoked to retrieve such possible values list.
 
-### Example
+#### Example
 **pos-args.py**:
 ```python
 #!/usr/bin/env python3.6
@@ -91,7 +91,7 @@ remote: origin, argument: develop
 
 See [positional arguments tests](../tests/parser/test_positional_argument.py) as a specification.
 
-## Multiple positional arguments
+### Multiple positional arguments
 `cliglue` allows to match all remaining (not already matched) arguments.
 It can be useful when using syntax like `docker cmd`:
 ```docker run cmd ubuntu /bin/bash -c /script.sh```
@@ -119,7 +119,7 @@ If it's set, all matched arguments will be joined to string with that joiner.
 It it's not given, matched arguments will be passed as list of strings.
 This value (string or list) can be accessed by specified name, when it's being injected to a function.
 
-### Example
+#### Example
 **all-args.py**:
 ```python
 #!/usr/bin/env python3.6
@@ -166,4 +166,5 @@ foo@bar:~$ ./all-args.py run "/bin/bash -c script.sh"
 cmd: /bin/bash -c script.sh
 ```
 
-See [all arguments tests](../tests/parser/test_all_arguments.py) as a specification.
+See [all arguments tests](../tests/parser/test_all_arguments.py) for specification.
+
