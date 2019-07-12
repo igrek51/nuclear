@@ -8,7 +8,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cliglue",
-    version="0.2.3",
+    version="0.2.4",
     author="igrek51",
     author_email="igrek51.dev@gmail.com",
     description="Declarative parser for command line interfaces",
