@@ -11,7 +11,7 @@ When argument value has invalid format, there is syntax error raised.
 
 ### Basic types (int, float, etc.)
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
 def print_it(count: int):
@@ -92,7 +92,7 @@ argument('datetime', type=iso_datetime)
 ```
 Example:
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 from cliglue.types.time import iso_datetime
 from datetime import datetime
@@ -125,7 +125,7 @@ The first successfully parsed datetime is returned.
 After that, the value is internally stored as `datetime.datetime`.
 
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 from cliglue.types.time import datetime_format
 from datetime import datetime
@@ -151,7 +151,7 @@ The first successfully parsed datetime is returned.
 After that, the value is internally stored as `datetime.datetime`.
 
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 from cliglue.types.time import today_format
 from datetime import datetime
@@ -173,7 +173,7 @@ You can define custom parser/validator function.
 It should take one `str` argument and return expected value type.
 
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 import re
 from dataclasses import dataclass
 from cliglue import CliBuilder, argument

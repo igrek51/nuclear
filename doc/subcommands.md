@@ -1,16 +1,15 @@
 ## Sub-commands
 Commands may form a multilevel tree with nested sub-commands.
-
-Sub-commands syntax is commonly known:
-- `git remote rename ...`,
-- `docker container ls`,
-- `nmcli device wifi list`,
-- `ip address show`.
+Sub-commands syntax is commonly known, e.g.:
+- `git remote rename ...`
+- `docker container ls`
+- `nmcli device wifi list`
+- `ip address show`
 
 Sub-commands split the CLI into many nested CLI levels, forming a tree.
-They decide where to direct the parser, which seeks for a most relevant action to invoke.
+They decide where to direct the parser, which seeks for a most relevant action to invoke and decides which rules are active.
 
-Sub-commands create a nested levels of sub-parsers, which not only may have different actions but also contains different CLI rules, such as named parameters, flags or other sub-commands, which are only enabled when parent command is enabled as well.
+Sub-commands create nested levels of sub-parsers, which not only may have different actions but also contains different CLI rules, such as named parameters, flags or other sub-commands, which are only enabled when parent command is enabled as well.
 Subcommand can have more subrules which are activated only when corresponding subcommand is active.
 So subcommand is just a keyword which narrows down the context.
 
@@ -61,26 +60,19 @@ CliBuilder().has(
 ```
 In that manner, the formatted code above is composing a visual tree, which is clear.
 
-### Sub-commands example
-**subcommands.py**:
+### Sub-commands example: subcommands.py
 ```python
 #!/usr/bin/env python3
 from cliglue import CliBuilder, subcommand
 
-
-def main():
-    CliBuilder('subcommands-demo', run=lambda: print('default action')).has(
-        subcommand('remote', run=lambda: print('action remote')).has(
-            subcommand('push', run=lambda: print('action remote push')),
-            subcommand('rename', run=lambda: print('action remote rename')),
-        ),
-        subcommand('checkout', run=lambda: print('action checkout')),
-        subcommand('branch', run=lambda: print('action branch')),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('subcommands-demo', run=lambda: print('default action')).has(
+    subcommand('remote', run=lambda: print('action remote')).has(
+        subcommand('push', run=lambda: print('action remote push')),
+        subcommand('rename', run=lambda: print('action remote rename')),
+    ),
+    subcommand('checkout', run=lambda: print('action checkout')),
+    subcommand('branch', run=lambda: print('action branch')),
+).run()
 ```
 Usage is quite self-describing:
 ```console

@@ -1,7 +1,7 @@
 ## Auto-completion
 Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
 
-Auto-completion is enabled by default to all known keywords based on the declared subcommands and options.
+Auto-completion provided by `cliglue` is enabled by default to all known keywords based on the declared subcommands and options.
 
 Defining possible choices may imporove auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
 
@@ -28,16 +28,11 @@ def adjust_screen(output: str, mode: str):
     shell(f'xrandr --output {output} --mode {mode}')
 
 
-def main():
-    CliBuilder('completers-demo').has(
-        parameter('output', choices=list_screens, required=True),
-        parameter('mode', choices=['640x480', '800x480', '800x600'], required=True),
-        default_action(adjust_screen),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('completers-demo').has(
+    parameter('output', choices=list_screens, required=True),
+    parameter('mode', choices=['640x480', '800x480', '800x600'], required=True),
+    default_action(adjust_screen),
+).run()
 ```
 
 In order to enable auto-completion, you need to install some extension to bash. Fortunately `cliglue` has built-in tools to do that:
@@ -113,4 +108,16 @@ You had to do it only once, because autocompletion script only redirects its que
 ```console
 sample-app --bash-autocomplete "sample-app --he"
 ```
+
+### How does auto-completion work?
+1. While typing a command in `bash`, you hit `Tab` key. (`your-app.py cmd[TAB]`)
+2. `bash` looks for an autocompletion script in `/etc/bash_completion.d/`.
+There should be a script installed for your command after running `--bash-install` on your application.
+So when it's found, this script is called by bash.
+3. The autocompletion script redirects to your application, running it with `--bash-autocomplete` option, namely script runs `your-app.py --bash-autocomplete "cmd"`, asking it for returning the most relevant command proposals.
+Notice that in that manner, the autocompletion algorithm is being run always in up-to-date version.
+4. `your-app.py` has `--bash-autocomplete` option enabled by default so it starts to analyze which keyword from your CLI definition is the most relevant to the currently typed word (`cmd`).
+5. `your-app.py` returns a list of proposals to the `bash`.
+6. `bash` shows you these results.
+If there's only one matching proposal, the currently typed word is automatically filled.
 

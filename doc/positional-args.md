@@ -36,10 +36,9 @@ Then argument value is evaluated by passing the string argument value to that fu
 `choices` - Explicit list of available choices for the argument value
 or reference to a function which will be invoked to retrieve such possible values list.
 
-#### Example
-**pos-args.py**:
+#### Example: pos-args.py
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
 
@@ -47,15 +46,10 @@ def print_args(remote: str, branch: str):
     print(f'remote: {remote}, argument: {branch}')
 
 
-def main():
-    CliBuilder('pos-args', run=print_args).has(
-        argument('remote', help='remote name', type=str, choices=['origin', 'local']),
-        argument('branch', help='branch name', required=False, default='master'),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('pos-args', run=print_args).has(
+    argument('remote', help='remote name', type=str, choices=['origin', 'local']),
+    argument('branch', help='branch name', required=False, default='master'),
+).run()
 ```
 Usage:
 ```console
@@ -119,10 +113,9 @@ If it's set, all matched arguments will be joined to string with that joiner.
 It it's not given, matched arguments will be passed as list of strings.
 This value (string or list) can be accessed by specified name, when it's being injected to a function.
 
-#### Example
-**all-args.py**:
+#### Example: all-args.py
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, arguments, subcommand
 
 
@@ -130,16 +123,11 @@ def run_cmd(cmd: str):
     print(f'cmd: {cmd}')
 
 
-def main():
-    CliBuilder('all-args').has(
-        subcommand('run', run=run_cmd).has(
-            arguments('cmd', joined_with=' '),
-        ),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('all-args').has(
+    subcommand('run', run=run_cmd).has(
+        arguments('cmd', joined_with=' '),
+    ),
+).run()
 ```
 Usage:
 ```console

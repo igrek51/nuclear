@@ -16,13 +16,17 @@ cd Python-3.6.9
 make -j8
 sudo make altinstall
 ```
-#### on Ubuntu
+#### on Ubuntu 18
 ```bash
 sudo apt install python3.6 python3-pip
 ```
-#### on Centos
+#### on Centos 7
 ```bash
 sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
+```
+#### on Fedora
+```bash
+sudo dnf install python36
 ```
 
 ### Step 2. Install package using pip

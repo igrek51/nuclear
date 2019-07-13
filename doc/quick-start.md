@@ -19,30 +19,23 @@ CliBuilder('hello-app', run=say_hello).has(
     parameter('repeat', type=int, default=1),
 )
 ```
-Getting all together, we've binded our function with a CLI definition:
+Getting all together, we've binded our function with a Command-Line Interface:
 
 **hello.py**:
 ```python
 #!/usr/bin/env python3
 from cliglue import CliBuilder, argument, flag, parameter
 
-
 def say_hello(name: str, reverse: bool, repeat: int):
     if reverse:
         name = name[::-1]
     print(f'Hello {name}.' * repeat)
 
-
-def main():
-    CliBuilder('hello-app', run=say_hello).has(
-        argument('name'),
-        flag('reverse'),
-        parameter('repeat', type=int, default=1),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('hello-app', run=say_hello).has(
+    argument('name'),
+    flag('reverse'),
+    parameter('repeat', type=int, default=1),
+).run()
 ```
 
 Let's trace what is happening here:

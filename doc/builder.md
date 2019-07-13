@@ -7,7 +7,7 @@ Empty CliBuilder has standard options enabled by default:
 - `--help` - displaying usage and help
 - `--version` - displaying application version number (if it has been defined)
 
-### Creating CliBuilder
+### Step 1. Creating CliBuilder
 In this step you can create new `CliBuilder` and set a custom configuration for it.
  The constructor is as follows:
 ```python
@@ -43,7 +43,7 @@ Defaults options are:
 `reraise_error` - wheter syntax error should not be caught but reraised instead.
 Enabling this causes stack trace to be flooded to the user.
 
-### Declaring CLI rules
+### Step 2. Declaring CLI rules
 The next step is to declare CLI rules for `CliBuilder` using `.has()` method
 
 `has(*subrules: CliRule) -> 'CliBuilder'` method receives a CLI rules in its parameters and returns the `CliBuilder` itself for further building.
@@ -73,13 +73,13 @@ CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
 )
 ```
 
-### Running CLI arguments through parser
+### Step 3. Running CLI arguments through parser
 The final step is calling `.run()` on `CliBuilder`.
 It parses all the CLI arguments passed to application.
 Then it invokes triggered action which were defined before.
 If actions need some parameters, they will be injected based on the parsed arguments.
 
-Running:
+Running empty builder:
 ```python
 from cliglue import CliBuilder
 

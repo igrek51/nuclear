@@ -47,30 +47,23 @@ CliBuilder('hello-app', run=say_hello).has(
     parameter('repeat', type=int, default=1),
 )
 ```
-Getting all together, we've binded our function with a CLI definition:
+Getting all together, we've binded our function with a Command-Line Interface:
 
 **hello.py**:
 ```python
 #!/usr/bin/env python3
 from cliglue import CliBuilder, argument, flag, parameter
 
-
 def say_hello(name: str, reverse: bool, repeat: int):
     if reverse:
         name = name[::-1]
     print(f'Hello {name}.' * repeat)
 
-
-def main():
-    CliBuilder('hello-app', run=say_hello).has(
-        argument('name'),
-        flag('reverse'),
-        parameter('repeat', type=int, default=1),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('hello-app', run=say_hello).has(
+    argument('name'),
+    flag('reverse'),
+    parameter('repeat', type=int, default=1),
+).run()
 ```
 
 Let's trace what is happening here:
@@ -173,13 +166,17 @@ cd Python-3.6.9
 make -j8
 sudo make altinstall
 ```
-#### on Ubuntu
+#### on Ubuntu 18
 ```bash
 sudo apt install python3.6 python3-pip
 ```
-#### on Centos
+#### on Centos 7
 ```bash
 sudo yum install -y python36u python36u-libs python36u-devel python36u-pip
+```
+#### on Fedora
+```bash
+sudo dnf install python36
 ```
 
 ### Step 2. Install package using pip
@@ -214,7 +211,7 @@ Empty CliBuilder has standard options enabled by default:
 - `--help` - displaying usage and help
 - `--version` - displaying application version number (if it has been defined)
 
-### Creating CliBuilder
+### Step 1. Creating CliBuilder
 In this step you can create new `CliBuilder` and set a custom configuration for it.
  The constructor is as follows:
 ```python
@@ -250,7 +247,7 @@ Defaults options are:
 `reraise_error` - wheter syntax error should not be caught but reraised instead.
 Enabling this causes stack trace to be flooded to the user.
 
-### Declaring CLI rules
+### Step 2. Declaring CLI rules
 The next step is to declare CLI rules for `CliBuilder` using `.has()` method
 
 `has(*subrules: CliRule) -> 'CliBuilder'` method receives a CLI rules in its parameters and returns the `CliBuilder` itself for further building.
@@ -280,13 +277,13 @@ CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
 )
 ```
 
-### Running CLI arguments through parser
+### Step 3. Running CLI arguments through parser
 The final step is calling `.run()` on `CliBuilder`.
 It parses all the CLI arguments passed to application.
 Then it invokes triggered action which were defined before.
 If actions need some parameters, they will be injected based on the parsed arguments.
 
-Running:
+Running empty builder:
 ```python
 from cliglue import CliBuilder
 
@@ -296,17 +293,16 @@ just prints the standard help output, because it's the default action for an emp
 
 ## Sub-commands
 Commands may form a multilevel tree with nested sub-commands.
-
-Sub-commands syntax is commonly known:
-- `git remote rename ...`,
-- `docker container ls`,
-- `nmcli device wifi list`,
-- `ip address show`.
+Sub-commands syntax is commonly known, e.g.:
+- `git remote rename ...`
+- `docker container ls`
+- `nmcli device wifi list`
+- `ip address show`
 
 Sub-commands split the CLI into many nested CLI levels, forming a tree.
-They decide where to direct the parser, which seeks for a most relevant action to invoke.
+They decide where to direct the parser, which seeks for a most relevant action to invoke and decides which rules are active.
 
-Sub-commands create a nested levels of sub-parsers, which not only may have different actions but also contains different CLI rules, such as named parameters, flags or other sub-commands, which are only enabled when parent command is enabled as well.
+Sub-commands create nested levels of sub-parsers, which not only may have different actions but also contains different CLI rules, such as named parameters, flags or other sub-commands, which are only enabled when parent command is enabled as well.
 Subcommand can have more subrules which are activated only when corresponding subcommand is active.
 So subcommand is just a keyword which narrows down the context.
 
@@ -357,26 +353,19 @@ CliBuilder().has(
 ```
 In that manner, the formatted code above is composing a visual tree, which is clear.
 
-### Sub-commands example
-**subcommands.py**:
+### Sub-commands example: subcommands.py
 ```python
 #!/usr/bin/env python3
 from cliglue import CliBuilder, subcommand
 
-
-def main():
-    CliBuilder('subcommands-demo', run=lambda: print('default action')).has(
-        subcommand('remote', run=lambda: print('action remote')).has(
-            subcommand('push', run=lambda: print('action remote push')),
-            subcommand('rename', run=lambda: print('action remote rename')),
-        ),
-        subcommand('checkout', run=lambda: print('action checkout')),
-        subcommand('branch', run=lambda: print('action branch')),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('subcommands-demo', run=lambda: print('default action')).has(
+    subcommand('remote', run=lambda: print('action remote')).has(
+        subcommand('push', run=lambda: print('action remote push')),
+        subcommand('rename', run=lambda: print('action remote rename')),
+    ),
+    subcommand('checkout', run=lambda: print('action checkout')),
+    subcommand('branch', run=lambda: print('action branch')),
+).run()
 ```
 Usage is quite self-describing:
 ```console
@@ -559,10 +548,9 @@ Then argument value is evaluated by passing the string argument value to that fu
 `choices` - Explicit list of available choices for the argument value
 or reference to a function which will be invoked to retrieve such possible values list.
 
-#### Example
-**pos-args.py**:
+#### Example: pos-args.py
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
 
@@ -570,15 +558,10 @@ def print_args(remote: str, branch: str):
     print(f'remote: {remote}, argument: {branch}')
 
 
-def main():
-    CliBuilder('pos-args', run=print_args).has(
-        argument('remote', help='remote name', type=str, choices=['origin', 'local']),
-        argument('branch', help='branch name', required=False, default='master'),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('pos-args', run=print_args).has(
+    argument('remote', help='remote name', type=str, choices=['origin', 'local']),
+    argument('branch', help='branch name', required=False, default='master'),
+).run()
 ```
 Usage:
 ```console
@@ -642,10 +625,9 @@ If it's set, all matched arguments will be joined to string with that joiner.
 It it's not given, matched arguments will be passed as list of strings.
 This value (string or list) can be accessed by specified name, when it's being injected to a function.
 
-#### Example
-**all-args.py**:
+#### Example: all-args.py
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, arguments, subcommand
 
 
@@ -653,16 +635,11 @@ def run_cmd(cmd: str):
     print(f'cmd: {cmd}')
 
 
-def main():
-    CliBuilder('all-args').has(
-        subcommand('run', run=run_cmd).has(
-            arguments('cmd', joined_with=' '),
-        ),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('all-args').has(
+    subcommand('run', run=run_cmd).has(
+        arguments('cmd', joined_with=' '),
+    ),
+).run()
 ```
 Usage:
 ```console
@@ -694,7 +671,7 @@ See [all arguments tests](../tests/parser/test_all_arguments.py) for specificati
 ## Auto-completion
 Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
 
-Auto-completion is enabled by default to all known keywords based on the declared subcommands and options.
+Auto-completion provided by `cliglue` is enabled by default to all known keywords based on the declared subcommands and options.
 
 Defining possible choices may imporove auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
 
@@ -721,16 +698,11 @@ def adjust_screen(output: str, mode: str):
     shell(f'xrandr --output {output} --mode {mode}')
 
 
-def main():
-    CliBuilder('completers-demo').has(
-        parameter('output', choices=list_screens, required=True),
-        parameter('mode', choices=['640x480', '800x480', '800x600'], required=True),
-        default_action(adjust_screen),
-    ).run()
-
-
-if __name__ == '__main__':
-    main()
+CliBuilder('completers-demo').has(
+    parameter('output', choices=list_screens, required=True),
+    parameter('mode', choices=['640x480', '800x480', '800x600'], required=True),
+    default_action(adjust_screen),
+).run()
 ```
 
 In order to enable auto-completion, you need to install some extension to bash. Fortunately `cliglue` has built-in tools to do that:
@@ -806,6 +778,18 @@ You had to do it only once, because autocompletion script only redirects its que
 ```console
 sample-app --bash-autocomplete "sample-app --he"
 ```
+
+### How does auto-completion work?
+1. While typing a command in `bash`, you hit `Tab` key. (`your-app.py cmd[TAB]`)
+2. `bash` looks for an autocompletion script in `/etc/bash_completion.d/`.
+There should be a script installed for your command after running `--bash-install` on your application.
+So when it's found, this script is called by bash.
+3. The autocompletion script redirects to your application, running it with `--bash-autocomplete` option, namely script runs `your-app.py --bash-autocomplete "cmd"`, asking it for returning the most relevant command proposals.
+Notice that in that manner, the autocompletion algorithm is being run always in up-to-date version.
+4. `your-app.py` has `--bash-autocomplete` option enabled by default so it starts to analyze which keyword from your CLI definition is the most relevant to the currently typed word (`cmd`).
+5. `your-app.py` returns a list of proposals to the `bash`.
+6. `bash` shows you these results.
+If there's only one matching proposal, the currently typed word is automatically filled.
 
 ## Auto-generated help
 `cliglue` auto-generates help and usage output based on the defined CLI rules.
@@ -927,7 +911,7 @@ When argument value has invalid format, there is syntax error raised.
 
 ### Basic types (int, float, etc.)
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
 def print_it(count: int):
@@ -1008,7 +992,7 @@ argument('datetime', type=iso_datetime)
 ```
 Example:
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 from cliglue.types.time import iso_datetime
 from datetime import datetime
@@ -1041,7 +1025,7 @@ The first successfully parsed datetime is returned.
 After that, the value is internally stored as `datetime.datetime`.
 
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 from cliglue.types.time import datetime_format
 from datetime import datetime
@@ -1067,7 +1051,7 @@ The first successfully parsed datetime is returned.
 After that, the value is internally stored as `datetime.datetime`.
 
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 from cliglue.types.time import today_format
 from datetime import datetime
@@ -1089,7 +1073,7 @@ You can define custom parser/validator function.
 It should take one `str` argument and return expected value type.
 
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 import re
 from dataclasses import dataclass
 from cliglue import CliBuilder, argument
@@ -1136,7 +1120,7 @@ Then only the error log will be displayed in console stdout.
 
 #### Erros handling example
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
 CliBuilder(help_onerror=False).has(
@@ -1157,7 +1141,7 @@ In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError
 
 #### Wrong CLI Definition example
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
 CliBuilder().has(

@@ -17,7 +17,7 @@ Then only the error log will be displayed in console stdout.
 
 #### Erros handling example
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
 CliBuilder(help_onerror=False).has(
@@ -38,7 +38,7 @@ In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError
 
 #### Wrong CLI Definition example
 ```python
-#!/usr/bin/env python3.6
+#!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
 CliBuilder().has(
