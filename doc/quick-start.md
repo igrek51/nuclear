@@ -98,3 +98,7 @@ foo@bar:~$ ./hello.py world --repeat=2 --reverse
 Hello dlrow.Hello dlrow.
 ```
 
+When you are writing function for your action and you need to access some of the variables (flags, parameters, arguments, etc.),
+just simply add a parameter to the function with a name same as the variable you need.
+Then, the proper value will be injected by `cliglue`.
+

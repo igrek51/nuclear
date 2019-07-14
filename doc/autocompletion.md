@@ -117,7 +117,8 @@ So when it's found, this script is called by bash.
 3. The autocompletion script redirects to your application, running it with `--bash-autocomplete` option, namely script runs `your-app.py --bash-autocomplete "cmd"`, asking it for returning the most relevant command proposals.
 Notice that in that manner, the autocompletion algorithm is being run always in up-to-date version.
 4. `your-app.py` has `--bash-autocomplete` option enabled by default so it starts to analyze which keyword from your CLI definition is the most relevant to the currently typed word (`cmd`).
-5. `your-app.py` returns a list of proposals to the `bash`.
-6. `bash` shows you these results.
+5. If you defined custom completers functions, they will be invoked right now (if needed) in order to get up-to-date proposals and analyze them as well. 
+6. `your-app.py` returns a list of proposals to the `bash`.
+7. `bash` shows you these results.
 If there's only one matching proposal, the currently typed word is automatically filled.
 

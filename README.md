@@ -126,6 +126,10 @@ foo@bar:~$ ./hello.py world --repeat=2 --reverse
 Hello dlrow.Hello dlrow.
 ```
 
+When you are writing function for your action and you need to access some of the variables (flags, parameters, arguments, etc.),
+just simply add a parameter to the function with a name same as the variable you need.
+Then, the proper value will be injected by `cliglue`.
+
 ## How does it work?
 1. You define all required CLI rules for your program in a declarative tree.
 2. User provides command-line arguments when running program in a shell.
@@ -142,12 +146,12 @@ Why to use `cliglue`, since we already have Python `argparse`? Here are some sub
 - easier way of building multilevel sub-commands,
 - automatic action binding & injecting arguments, no need to pass `args` to functions manually,
 - CLI logic separated from the application logic, 
-- simpler & concise CLI building,
+- simpler & concise CLI building - when reading the code, it's easier to distinguish particular CLI rules between them (i.e. flags from positional arguments, parameters or sub-commands),
 - CLI definition code as a clear documentation.
 
 ### Migrating from `argparse` to `cliglue`
-TODO
-
+TODO 
+TODO referencing by function reference, not string name
 ## Installation
 ### Step 1. Prerequisites
 - Python 3.6 (or newer)
@@ -787,8 +791,9 @@ So when it's found, this script is called by bash.
 3. The autocompletion script redirects to your application, running it with `--bash-autocomplete` option, namely script runs `your-app.py --bash-autocomplete "cmd"`, asking it for returning the most relevant command proposals.
 Notice that in that manner, the autocompletion algorithm is being run always in up-to-date version.
 4. `your-app.py` has `--bash-autocomplete` option enabled by default so it starts to analyze which keyword from your CLI definition is the most relevant to the currently typed word (`cmd`).
-5. `your-app.py` returns a list of proposals to the `bash`.
-6. `bash` shows you these results.
+5. If you defined custom completers functions, they will be invoked right now (if needed) in order to get up-to-date proposals and analyze them as well. 
+6. `your-app.py` returns a list of proposals to the `bash`.
+7. `bash` shows you these results.
 If there's only one matching proposal, the currently typed word is automatically filled.
 
 ## Auto-generated help
