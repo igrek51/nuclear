@@ -6,7 +6,7 @@ from cliglue import CliBuilder, argument, arguments, flag, parameter, subcommand
 
 
 def main():
-    CliBuilder('hello-app', run=say_hello).has(
+    CliBuilder('hello-app', version='1.0.0', help='welcome', run=say_hello).has(
         flag('--force', '-f', help='a flag'),
         parameter('repeat', 'r', help='how many times', type=int, required=False, default=1, choices=[1, 2, 3, 5, 8]),
         argument('name', help='description', required=False, default='world', type=str, choices=['monty', 'python']),
