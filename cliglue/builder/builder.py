@@ -117,7 +117,8 @@ class CliBuilder(object):
                 arguments('subcommands'),
             ),
             primary_option('--bash-install', run=__bash_install,
-                           help='Install script as a bash binary and add autocompletion links').has(
+                           help='Install this program in bash to be executable from anywhere. '
+                                'It adds autocompletion links as well.').has(
                 argument('app-name', help='binary name'),
             ),
             primary_option('--bash-autocomplete', run=__bash_autocomplete,

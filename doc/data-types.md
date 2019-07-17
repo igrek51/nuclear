@@ -32,8 +32,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 foo@bar:~$ ./example.py
 [ERROR] Syntax error: required positional argument "count" is not given
@@ -42,8 +40,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 ```
 
 ### Built-in data types
@@ -112,8 +108,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 foo@bar:~$ ./example.py "2019-07-13 20:00:05"
 2019-07-13 20:00:05

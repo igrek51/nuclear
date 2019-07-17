@@ -89,8 +89,6 @@ Usage:
 
 Options:
   -h, --help [SUCOMMANDS...]       - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
   --reverse                       
   --repeat REPEAT                 
 ```
@@ -152,6 +150,7 @@ Why to use `cliglue`, since we already have Python `argparse`? Here are some sub
 ### Migrating from `argparse` to `cliglue`
 TODO 
 TODO referencing by function reference, not string name
+
 ## Installation
 ### Step 1. Prerequisites
 - Python 3.6 (or newer)
@@ -229,6 +228,7 @@ CliBuilder(
            with_defaults: bool = True,
            help_onerror: bool = True,
            reraise_error: bool = False,
+           hide_internal: bool = True,
 )
  ```
 `name` - name of the application for which the CLI is built
@@ -250,6 +250,8 @@ Defaults options are:
 
 `reraise_error` - wheter syntax error should not be caught but reraised instead.
 Enabling this causes stack trace to be flooded to the user.
+
+`hide_internal` - wheter internal options (`--bash-install`, `--bash-autocomplete`) should be hidden on help output.
 
 ### Step 2. Declaring CLI rules
 The next step is to declare CLI rules for `CliBuilder` using `.has()` method
@@ -389,8 +391,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 Commands:
   remote        - List remotes
@@ -577,8 +577,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 foo@bar:~$ ./pos-args.py
 [ERROR] Syntax error: required positional argument "remote" is not given
@@ -589,8 +587,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 foo@bar:~$ ./pos-args.py origin
 remote: origin, argument: master
@@ -655,8 +651,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 Commands:
   run [CMD...]
@@ -883,8 +877,6 @@ Options:
   --work-tree WORK_TREE            - working directory
   --version                        - Print version information and exit
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 Commands:
   push REMOTE [BRANCH]                      
@@ -937,8 +929,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 foo@bar:~$ ./example.py
 [ERROR] Syntax error: required positional argument "count" is not given
@@ -947,8 +937,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 ```
 
 ### Built-in data types
@@ -1017,8 +1005,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 foo@bar:~$ ./example.py "2019-07-13 20:00:05"
 2019-07-13 20:00:05
@@ -1213,7 +1199,7 @@ from cliglue.types.time import iso_datetime
 
 def main():
     CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
-               with_defaults=True, help_onerror=False, reraise_error=True).has(
+               with_defaults=True, help_onerror=False, reraise_error=True, hide_internal=True).has(
         subcommand('git').has(
             subcommand('push', run=git_push).has(
                 argument('remote'),

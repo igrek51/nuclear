@@ -46,6 +46,10 @@ def build_builder() -> CliBuilder:
     )
 
 
+def noop():
+    pass
+
+
 def test_default_print_help_empty():
     with MockIO('--help') as mockio:
         CliBuilder(with_defaults=True).run()
@@ -80,13 +84,13 @@ def test_subcommand_help():
 def test_3rd_level_help():
     with MockIO('git', 'push', '--help') as mockio:
         CliBuilder().has(
-            subcommand('git').has(
-                subcommand('push').has(
-                    subcommand('remote'),
+            subcommand('git', run=noop).has(
+                subcommand('push', run=noop).has(
+                    subcommand('remote', run=noop),
                 ),
-                subcommand('bad')
+                subcommand('bad', run=noop)
             ),
-            subcommand('bad')
+            subcommand('bad', run=noop)
         ).run()
         assert 'Usage:' in mockio.output()
         assert 'git push [COMMAND]' in mockio.output()
@@ -118,3 +122,25 @@ def test_hiding_internal_options():
         CliBuilder(hide_internal=False).run()
         assert '--bash-install' in mockio.output()
         assert '--bash-autocomplete' in mockio.output()
+
+
+def test_omit_empty_subcommands():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            subcommand('show-help', help='shows help'),
+            subcommand('push', run=lambda: print('push')),
+            subcommand('noop'),
+            subcommand('dooo').has(
+                subcommand('nothing'),
+            ),
+            subcommand('do2').has(
+                subcommand('it', run=lambda: print('do2 it')),
+            ),
+        ).run()
+        assert 'show-help' in mockio.output()
+        assert 'push' in mockio.output()
+        assert 'noop' not in mockio.output()
+        assert 'dooo' not in mockio.output()
+        assert 'nothing' not in mockio.output()
+        assert 'do2  ' not in mockio.output()
+        assert 'do2 it' in mockio.output()

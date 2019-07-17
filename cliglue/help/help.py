@@ -155,20 +155,25 @@ def _generate_option_help(rule: CliRule, hide_internal: bool) -> Optional[_Optio
         return _parameter_help(rule)
 
 
-def _generate_commands_helps(rules: List[CliRule], parent: _OptionHelp = None) -> List[_OptionHelp]:
+def _generate_commands_helps(rules: List[CliRule], parent: _OptionHelp = None, subrules: List[CliRule] = None
+                             ) -> List[_OptionHelp]:
     commands: List[_OptionHelp] = []
+    if not subrules:
+        subrules = []
     for rule in rules:
         if isinstance(rule, SubcommandRule):
-            helper = _subcommand_help(rule, parent)
-            commands.append(helper)
-            commands.extend(_generate_commands_helps(rule.subrules, helper))
+            subsubrules = subrules + rule.subrules
+            helper = _subcommand_help(rule, parent, subsubrules)
+            if rule.run or rule.help:
+                commands.append(helper)
+            commands.extend(_generate_commands_helps(rule.subrules, helper, subsubrules))
     return commands
 
 
-def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp) -> _OptionHelp:
+def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp, subrules: List[CliRule]) -> _OptionHelp:
+    pos_args = filter_rules(subrules, PositionalArgumentRule)
+    all_args = filter_rules(subrules, AllArgumentsRule)
     cmd = _subcommand_prefix(parent) + '|'.join(sorted_keywords(rule.keywords))
-    pos_args = filter_rules(rule.subrules, PositionalArgumentRule)
-    all_args = filter_rules(rule.subrules, AllArgumentsRule)
     cmd += usage_positional_arguments(pos_args)
     cmd += usage_all_arguments(all_args)
     return _OptionHelp(cmd, rule.help, parent)

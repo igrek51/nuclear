@@ -61,8 +61,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 foo@bar:~$ ./pos-args.py
 [ERROR] Syntax error: required positional argument "remote" is not given
@@ -73,8 +71,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 foo@bar:~$ ./pos-args.py origin
 remote: origin, argument: master
@@ -139,8 +135,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 Commands:
   run [CMD...]

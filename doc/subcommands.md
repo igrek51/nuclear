@@ -92,8 +92,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 Commands:
   remote        - List remotes

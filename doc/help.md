@@ -85,8 +85,6 @@ Options:
   --work-tree WORK_TREE            - working directory
   --version                        - Print version information and exit
   -h, --help [SUBCOMMANDS...]      - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 Commands:
   push REMOTE [BRANCH]                      
