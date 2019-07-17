@@ -20,6 +20,7 @@ class CliBuilder(object):
                  with_defaults: bool = True,
                  help_onerror: bool = True,
                  reraise_error: bool = False,
+                 hide_internal: bool = True,
                  ):
         """
         A builder for Command Line Interface specification
@@ -36,6 +37,8 @@ class CliBuilder(object):
         :param help_onerror: wheter help output should be displayed on syntax error
         :param reraise_error: wheter syntax error should not be caught but reraised instead.
         Enabling this causes stack trace to be flooded to the user.
+        :param hide_internal: wheter internal options (--bash-install, --bash-autocomplete)
+        should be hidden on help output.
         """
         self.__name: str = name
         self.__version: str = version
@@ -47,6 +50,7 @@ class CliBuilder(object):
 
         self.__help_onerror: bool = help_onerror
         self.__reraise_error: bool = reraise_error
+        self.__hide_internal: bool = hide_internal
         if with_defaults:
             self.__add_default_rules()
 
@@ -82,7 +86,7 @@ class CliBuilder(object):
                 raise e
 
     def print_help(self, subcommands: List[str]):
-        print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands)
+        print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands, self.__hide_internal)
 
     def __bash_autocomplete(self, cmdline: str):
         bash_autocomplete(self.__subrules, cmdline)

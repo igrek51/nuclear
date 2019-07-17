@@ -19,12 +19,16 @@ class _OptionHelp(object):
     parent: '_OptionHelp' = None
 
 
-def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str]):
-    helps = generate_help(rules, app_name, version, help, subargs)
+internal_options = {'--bash-install', '--bash-autocomplete'}
+
+
+def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str], hide_internal: bool):
+    helps = generate_help(rules, app_name, version, help, subargs, hide_internal)
     print('\n'.join(helps))
 
 
-def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str]) -> List[str]:
+def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str],
+                  hide_internal: bool) -> List[str]:
     available_subcommands = filter_rules(rules, SubcommandRule)
     try:
         run_context: Optional[RunContext] = Parser(rules, dry=True).parse_args(subargs)
@@ -37,7 +41,8 @@ def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, 
         all_rules: List[CliRule] = rules
         precommands: List[str] = []
 
-    return generate_subcommand_help(all_rules, app_name, version, help, precommands, available_subcommands)
+    return generate_subcommand_help(all_rules, app_name, version, help, precommands, available_subcommands,
+                                    hide_internal)
 
 
 def generate_subcommand_help(
@@ -47,6 +52,7 @@ def generate_subcommand_help(
         help: str,
         precommands: List[str],
         subcommands: List[SubcommandRule],
+        hide_internal: bool,
 ) -> List[str]:
     flags = filter_rules(all_rules, FlagRule)
     parameters = filter_rules(all_rules, ParameterRule)
@@ -54,7 +60,7 @@ def generate_subcommand_help(
     pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
     all_args = filter_rules(all_rules, AllArgumentsRule)
 
-    options: List[_OptionHelp] = _generate_options_helps(all_rules)
+    options: List[_OptionHelp] = _generate_options_helps(all_rules, hide_internal)
     commands: List[_OptionHelp] = _generate_commands_helps(subcommands)
 
     out = []
@@ -135,14 +141,14 @@ def _max_name_width(helps: List[_OptionHelp]) -> int:
     return max(map(lambda h: len(h.cmd), helps))
 
 
-def _generate_options_helps(rules: List[CliRule]) -> List[_OptionHelp]:
+def _generate_options_helps(rules: List[CliRule], hide_internal: bool) -> List[_OptionHelp]:
     # filter non-empty
-    return list(filter(lambda o: o, [_generate_option_help(rule) for rule in rules]))
+    return list(filter(lambda o: o, [_generate_option_help(rule, hide_internal) for rule in rules]))
 
 
-def _generate_option_help(rule: CliRule) -> Optional[_OptionHelp]:
+def _generate_option_help(rule: CliRule, hide_internal: bool) -> Optional[_OptionHelp]:
     if isinstance(rule, PrimaryOptionRule):
-        return _primary_option_help(rule)
+        return _primary_option_help(rule, hide_internal)
     elif isinstance(rule, FlagRule):
         return _flag_help(rule)
     elif isinstance(rule, ParameterRule):
@@ -174,7 +180,11 @@ def _subcommand_prefix(helper: _OptionHelp) -> str:
     return helper.cmd + ' '
 
 
-def _primary_option_help(rule: PrimaryOptionRule) -> _OptionHelp:
+def _primary_option_help(rule: PrimaryOptionRule, hide_internal: bool) -> Optional[_OptionHelp]:
+    if hide_internal:
+        for keyword in rule.keywords:
+            if keyword in internal_options:
+                return None
     cmd = ', '.join(sorted_keywords(rule.keywords))
     pos_args = filter_rules(rule.subrules, PositionalArgumentRule)
     all_args = filter_rules(rule.subrules, AllArgumentsRule)

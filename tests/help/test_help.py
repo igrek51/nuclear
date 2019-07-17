@@ -63,7 +63,6 @@ def test_root_help():
 
         assert '-h, --help' in mockio.output()
         assert 'Display this help and exit' in mockio.output()
-        assert '--bash-install' in mockio.output()
         assert '--version' in mockio.output()
 
         assert 'git remote rename|set-url' in mockio.output()
@@ -108,3 +107,14 @@ def test_default_help_when_no_arguments():
     with MockIO('') as mockio:
         CliBuilder().run()
         assert 'Usage:' in mockio.output()
+
+
+def test_hiding_internal_options():
+    with MockIO('--help') as mockio:
+        CliBuilder(hide_internal=True).run()
+        assert '--bash-install' not in mockio.output()
+        assert '--bash-autocomplete' not in mockio.output()
+    with MockIO('--help') as mockio:
+        CliBuilder(hide_internal=False).run()
+        assert '--bash-install' in mockio.output()
+        assert '--bash-autocomplete' in mockio.output()

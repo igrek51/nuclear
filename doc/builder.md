@@ -21,6 +21,7 @@ CliBuilder(
            with_defaults: bool = True,
            help_onerror: bool = True,
            reraise_error: bool = False,
+           hide_internal: bool = True,
 )
  ```
 `name` - name of the application for which the CLI is built
@@ -42,6 +43,8 @@ Defaults options are:
 
 `reraise_error` - wheter syntax error should not be caught but reraised instead.
 Enabling this causes stack trace to be flooded to the user.
+
+`hide_internal` - wheter internal options (`--bash-install`, `--bash-autocomplete`) should be hidden on help output.
 
 ### Step 2. Declaring CLI rules
 The next step is to declare CLI rules for `CliBuilder` using `.has()` method
