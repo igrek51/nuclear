@@ -1,3 +1,5 @@
+from typing import List
+
 from cliglue import *
 from tests.asserts import MockIO, assert_cli_error
 from tests.parser.actions import *
@@ -81,3 +83,20 @@ def test_missing_required_param():
             parameter('--param', required=True),
         )
         assert_cli_error(lambda: cli.run())
+
+
+def test_multi_parameters():
+    def sum_param(param: List[int]):
+        print(f'param: {sum(param)}')
+
+    with MockIO('--param', '800', '--param=42') as mockio:
+        CliBuilder(run=sum_param).has(
+            parameter('param', multiple=True, type=int),
+        ).run()
+        assert mockio.output() == 'param: 842\n'
+
+    with MockIO() as mockio:
+        CliBuilder(run=sum_param).has(
+            parameter('param', multiple=True, type=int),
+        ).run()
+        assert mockio.output() == 'param: 0\n'

@@ -78,7 +78,16 @@ class Parser(object):
 
         for rule in self._rules(ParameterRule):
             for keyword in rule.keywords:
-                self._set_var(keyword, rule.default)
+                if rule.multiple:
+                    if not rule.default:
+                        default_value = []
+                    elif not isinstance(rule.default, list):
+                        default_value = [rule.default]
+                    else:
+                        default_value = rule.default
+                    self._set_var(keyword, default_value)
+                else:
+                    self._set_var(keyword, rule.default)
 
         for rule in self._rules(PositionalArgumentRule):
             self._set_var(rule.name, rule.default)
@@ -127,8 +136,8 @@ class Parser(object):
                 args.pop_current()
                 for keyword in rule.keywords:
                     if rule.multiple:
-                        prevalue = self.__vars[name_from_keyword(keyword)]
-                        self._set_var(keyword, prevalue + 1)
+                        oldval = self.__vars[name_from_keyword(keyword)]
+                        self._set_var(keyword, oldval + 1)
                     else:
                         self._set_var(keyword, True)
 
@@ -146,10 +155,17 @@ class Parser(object):
             param_name = parameter_display_name(rule)
             raise CliSyntaxError(f'parsing parameter "{param_name}"') from e
         if rule.name:
-            self._set_var(rule.name, parsed_value)
+            self._set_param(rule, rule.name, parsed_value)
         else:
             for name in names_from_keywords(rule.keywords):
-                self._set_var(name, parsed_value)
+                self._set_param(rule, name, parsed_value)
+
+    def _set_param(self, rule, name, parsed_value):
+        if rule.multiple:
+            oldval: List = self.__vars[name_from_keyword(name)]
+            oldval.append(parsed_value)
+        else:
+            self._set_var(name, parsed_value)
 
     def _parse_primary_options(self, args: ArgsQue) -> Optional[RunContext]:
         for arg in args:

@@ -54,6 +54,7 @@ def parameter(
         default: Any = None,
         type: TypeOrParser = str,
         choices: ChoiceProvider = None,
+        multiple: bool = False,
 ) -> ParameterRule:
     """
     Create parameter rule specification.
@@ -78,9 +79,11 @@ def parameter(
     Then parameter value is evaluated by passing the string argument value to that function.
     :param choices: Explicit list of available choices for the parameter value
     or reference to a function which will be invoked to retrieve such possible values list.
+    :param multiple: whether parameter is allowed to occur many times.
+    Then parameter has list type and stores list of values
     :return: new parameter rule specification
     """
-    return ParameterRule(set(keywords), name, required, default, type, choices, help)
+    return ParameterRule(set(keywords), name, required, default, type, choices, help, multiple)
 
 
 def argument(

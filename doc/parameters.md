@@ -22,6 +22,7 @@ parameter(
         default: Any = None,
         type: TypeOrParser = str,
         choices: ChoiceProvider = None,
+        multiple: bool = False,
 )
 ```
 `keywords` keyword arguments which are matched to parameter.
@@ -46,7 +47,10 @@ Then parameter value is evaluated by passing the string argument value to that f
 `choices` is Explicit list of available choices for the parameter value
 or reference to a function which will be invoked to retrieve such possible values list
 
-Example:
+`multiple` - whether parameter is allowed to occur many times.
+Then parameter has list type and stores list of values
+
+Basic parameter example:
 ```python
 from cliglue import CliBuilder, parameter
 
@@ -54,7 +58,6 @@ CliBuilder(run=lambda param: print(param)).has(
     parameter('param', 'p'),
 ).run()
 ```
-Usage:
 ```console
 foo@bar:~$ ./example.py --param OK
 OK
@@ -64,6 +67,23 @@ foo@bar:~$ ./example.py -p OK
 OK
 foo@bar:~$ ./example.py
 None
+```
+
+### Multiple parameter occurrences
+Multiple occurences are also supported for parameters.
+When `multiple` is set to `True`, then the parameter value represents list of values and can be appended mutliple times.
+The value type is then `list`.
+```python
+def what_to_skip(skip: List[str]):
+    print(f'skipping: {skip}')
+
+CliBuilder(run=what_to_skip).has(
+    parameter('skip', multiple=True, type=str),
+).run()
+```
+```console
+foo@bar:~$ ./example.py --skip build --skip run
+skipping: ['build', 'run']
 ``` 
 
 See [parameter tests](../tests/parser/test_param.py) for specification.

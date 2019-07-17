@@ -65,7 +65,7 @@ class ValueRule(CliRule):
 
 @dataclass
 class ParameterRule(HelpRule, ValueRule, KeywordRule):
-    pass
+    multiple: bool = False
 
 
 @dataclass
