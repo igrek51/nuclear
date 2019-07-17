@@ -28,6 +28,7 @@ def subcommand(
 def flag(
         *keywords: str,
         help: str = None,
+        multiple: bool = False,
 ) -> FlagRule:
     """
     Create flag rule specification.
@@ -38,9 +39,11 @@ def flag(
     Single character flags will get single hyphen prefix (-f),
     longer flag names will get double hyphen prefix (--flag)
     :param help: description of the flag displayed in help output
+    :param multiple: whether flag is allowed to occur many times.
+    Then flag has int type and stores number of its occurrences
     :return: new flag rule specification
     """
-    return FlagRule(set(keywords), help)
+    return FlagRule(set(keywords), help, multiple)
 
 
 def parameter(

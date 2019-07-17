@@ -15,7 +15,7 @@ So it makes writing console aplications faster and simpler.
 - [Shell autocompletion](#auto-completion) (getting most relevant hints on hitting `Tab`)
 - [Multilevel sub-commands](#sub-commands) (e.g. `git remote add ...` syntax)
 - [Named parameters](#named-parameters): supporting both `--name value` and `--name=value`
-- [Flags](#flags): supporting both short (`-f`) and long (`--force`)
+- [Flags](#flags): supporting both short (`-f`) and long (`--force`), multiple flag occurrences
 - [Positional arguments](#positional-arguments) (e.g. `git push <origin> <master>`)
 - Invoking matched action function & providing corresponding parameters
 - [Custom type validators / parsers](#custom-type-parsers)
@@ -415,6 +415,7 @@ from cliglue import flag
 flag(
         *keywords: str,
         help: str = None,
+        multiple: bool = False,
 )
 ```
 `keywords` are arguments (one or many) which any of them enables flag when it occurs.
@@ -425,6 +426,9 @@ Single character flags will get single hyphen prefix (`-f`),
 longer flag names will get double hyphen prefix (`--flag`).
 
 `help` is description of the flag displayed in help output
+
+`multiple` - whether flag is allowed to occur many times.
+Then flag has int type and stores number of its occurrences
 
 Example:
 ```python
@@ -442,8 +446,15 @@ foo@bar:~$ ./example.py
 False
 ``` 
 
-See [flag tests](../tests/parser/test_flag.py) for specification.
+### Multiple flags occurrences
+Multiple occurences are also supported for flags. When `multiple` is set to True, then the flag value represents how many times it was set. The value type is then `int`, not `bool`.
+```python
+CliBuilder(run=lambda verbose: print(f'how many times: {verbose}')).has(
+    flag('verbose', 'v', multiple=True),
+).run()
+```
 
+See [flag tests](../tests/parser/test_flag.py) for specification.
 ## Named parameters
 Parameter is a named value, which will be injected to triggered action by its name.
 There are supported both manners for setting parameter value:

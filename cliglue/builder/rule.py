@@ -46,10 +46,9 @@ class PrimaryOptionRule(ParentRule, HelpRule):
 
 
 # TODO combining short versions: -tulpn
-# TODO multiple occurrences: -vvv
 @dataclass
 class FlagRule(HelpRule, KeywordRule):
-    pass
+    multiple: bool = False
 
 
 # TODO validate value is in choices if given

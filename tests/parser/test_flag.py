@@ -68,3 +68,20 @@ def test_dashed_param_name():
             flag('skip-it'),
         ).run()
         assert mockio.output() == 'skip_it: True\n'
+
+
+def test_multi_flag():
+    def print_flag(verbose: int, v: int):
+        print(f'verbose: {verbose} {v}')
+
+    with MockIO('-v', '--verbose', '-v') as mockio:
+        CliBuilder(run=print_flag).has(
+            flag('verbose', 'v', multiple=True),
+        ).run()
+        assert mockio.output() == 'verbose: 3 3\n'
+
+    with MockIO() as mockio:
+        CliBuilder(run=print_flag).has(
+            flag('verbose', 'v', multiple=True),
+        ).run()
+        assert mockio.output() == 'verbose: 0 0\n'

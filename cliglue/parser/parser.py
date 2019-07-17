@@ -71,7 +71,10 @@ class Parser(object):
     def _init_vars(self):
         for rule in self._rules(FlagRule):
             for keyword in rule.keywords:
-                self._set_var(keyword, False)
+                if rule.multiple:
+                    self._set_var(keyword, 0)
+                else:
+                    self._set_var(keyword, False)
 
         for rule in self._rules(ParameterRule):
             for keyword in rule.keywords:
@@ -123,7 +126,11 @@ class Parser(object):
             if rule:
                 args.pop_current()
                 for keyword in rule.keywords:
-                    self._set_var(keyword, True)
+                    if rule.multiple:
+                        prevalue = self.__vars[name_from_keyword(keyword)]
+                        self._set_var(keyword, prevalue + 1)
+                    else:
+                        self._set_var(keyword, True)
 
     def _parse_params(self, args: ArgsQue):
         for arg in args:
