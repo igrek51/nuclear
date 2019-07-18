@@ -148,5 +148,5 @@ foo@bar:~$ ./all-args.py run "/bin/bash -c script.sh"
 cmd: /bin/bash -c script.sh
 ```
 
-See [all arguments tests](../tests/parser/test_all_arguments.py) for specification.
+See [all arguments tests](../tests/parser/test_many_arguments.py) for specification.
 

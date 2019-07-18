@@ -4,7 +4,7 @@ from typing import List, Set, Optional
 from dataclasses import dataclass
 
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
-    PositionalArgumentRule, AllArgumentsRule
+    PositionalArgumentRule, ManyArgumentsRule
 from cliglue.parser.context import RunContext
 from cliglue.parser.error import CliError
 from cliglue.parser.keyword import names_from_keywords
@@ -58,7 +58,7 @@ def generate_subcommand_help(
     parameters = filter_rules(all_rules, ParameterRule)
     primary_options = filter_rules(all_rules, PrimaryOptionRule)
     pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
-    all_args = filter_rules(all_rules, AllArgumentsRule)
+    all_args = filter_rules(all_rules, ManyArgumentsRule)
 
     options: List[_OptionHelp] = _generate_options_helps(all_rules, hide_internal)
     commands: List[_OptionHelp] = _generate_commands_helps(subcommands)
@@ -172,7 +172,7 @@ def _generate_commands_helps(rules: List[CliRule], parent: _OptionHelp = None, s
 
 def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp, subrules: List[CliRule]) -> _OptionHelp:
     pos_args = filter_rules(subrules, PositionalArgumentRule)
-    all_args = filter_rules(subrules, AllArgumentsRule)
+    all_args = filter_rules(subrules, ManyArgumentsRule)
     cmd = _subcommand_prefix(parent) + '|'.join(sorted_keywords(rule.keywords))
     cmd += usage_positional_arguments(pos_args)
     cmd += usage_all_arguments(all_args)
@@ -192,7 +192,7 @@ def _primary_option_help(rule: PrimaryOptionRule, hide_internal: bool) -> Option
                 return None
     cmd = ', '.join(sorted_keywords(rule.keywords))
     pos_args = filter_rules(rule.subrules, PositionalArgumentRule)
-    all_args = filter_rules(rule.subrules, AllArgumentsRule)
+    all_args = filter_rules(rule.subrules, ManyArgumentsRule)
     cmd += usage_positional_arguments(pos_args)
     cmd += usage_all_arguments(all_args)
     return _OptionHelp(cmd, rule.help)
@@ -238,7 +238,7 @@ def display_positional_argument(rule: PositionalArgumentRule) -> str:
         return f' [{var_name}]'
 
 
-def display_all_arguments(rule: AllArgumentsRule) -> str:
+def display_all_arguments(rule: ManyArgumentsRule) -> str:
     arg_name = rule.name.upper()
     return f' [{arg_name}...]'
 
@@ -247,5 +247,5 @@ def usage_positional_arguments(rules: List[PositionalArgumentRule]) -> str:
     return ''.join([display_positional_argument(rule) for rule in rules])
 
 
-def usage_all_arguments(rules: List[AllArgumentsRule]) -> str:
+def usage_all_arguments(rules: List[ManyArgumentsRule]) -> str:
     return ''.join([display_all_arguments(rule) for rule in rules])

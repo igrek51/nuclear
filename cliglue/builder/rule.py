@@ -73,11 +73,15 @@ class PositionalArgumentRule(HelpRule, ValueRule):
     pass
 
 
-# TODO parse allarguments with types the same as the positional ones
 @dataclass
-class AllArgumentsRule(CliRule):
-    name: str
-    joined_with: str
+class ManyArgumentsRule(HelpRule):
+    name: Optional[str] = None
+    type: TypeOrParser = Any
+    choices: ChoiceProvider = None
+    count: Optional[int] = None
+    min_count: Optional[int] = None
+    max_count: Optional[int] = None
+    joined_with: Optional[str] = None
 
 
 TCliRule = TypeVar('TCliRule', bound=CliRule)

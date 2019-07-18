@@ -1,7 +1,7 @@
 from typing import List
 
 from cliglue import *
-from tests.asserts import MockIO
+from tests.asserts import MockIO, assert_cli_error
 
 
 def print_all_args(remainder: List[str]):
@@ -58,3 +58,44 @@ def test_all_argument_in_lower_subcommand():
             arguments('components'),
         ).run()
         assert mockio.output() == '1\n'
+
+
+def test_exact_many_arguments_count():
+    with MockIO():
+        cli = CliBuilder(reraise_error=True).has(
+            arguments('components', count=2),
+        )
+        assert_cli_error(lambda: cli.run())
+    with MockIO('all', '2', '3'):
+        cli = CliBuilder(reraise_error=True).has(
+            arguments('components', count=2),
+        )
+        assert_cli_error(lambda: cli.run())
+    with MockIO('all', '2'):
+        CliBuilder(reraise_error=True, run=lambda components: print(components)).has(
+            arguments('components', count=2),
+        ).run()
+
+
+def test_min_many_arguments_count():
+    with MockIO():
+        cli = CliBuilder(reraise_error=True).has(
+            arguments('components', min_count=1),
+        )
+        assert_cli_error(lambda: cli.run())
+    with MockIO('one'):
+        CliBuilder(reraise_error=True).has(
+            arguments('components', min_count=1),
+        ).run()
+
+
+def test_max_many_arguments_count():
+    with MockIO('one', 'two'):
+        cli = CliBuilder(reraise_error=True).has(
+            arguments('components', max_count=1),
+        )
+        assert_cli_error(lambda: cli.run())
+    with MockIO('one'):
+        CliBuilder(reraise_error=True).has(
+            arguments('components', max_count=1),
+        ).run()

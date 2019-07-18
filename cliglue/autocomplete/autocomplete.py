@@ -5,7 +5,7 @@ import shlex
 from typing import List, Optional, Any
 
 from cliglue.builder.rule import ValueRule, CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
-    PositionalArgumentRule, AllArgumentsRule
+    PositionalArgumentRule, ManyArgumentsRule
 from cliglue.parser.context import RunContext
 from cliglue.parser.error import CliError
 from cliglue.parser.parser import Parser
@@ -106,7 +106,7 @@ def _find_available_completions(rules: List[CliRule], args: List[str], current_w
     parameters = filter_rules(all_rules, ParameterRule)
     primary_options = filter_rules(all_rules, PrimaryOptionRule)
     pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
-    all_args = filter_rules(all_rules, AllArgumentsRule)
+    all_args = filter_rules(all_rules, ManyArgumentsRule)
 
     # "--param value" autocompletion
     previous: Optional[str] = args[-2] if len(args) > 1 else None

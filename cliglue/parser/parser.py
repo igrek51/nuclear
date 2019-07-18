@@ -5,7 +5,7 @@ from typing import Type, Any, List, TypeVar, Optional
 from cliglue.args.args_que import ArgsQue
 from cliglue.args.container import is_args_container_name, ArgsContainer
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, KeywordRule, \
-    DefaultActionRule, ValueRule, PositionalArgumentRule, AllArgumentsRule, SubcommandRule
+    DefaultActionRule, ValueRule, PositionalArgumentRule, ManyArgumentsRule, SubcommandRule
 from cliglue.builder.typedef import Action
 from cliglue.parser.context import RunContext
 from cliglue.parser.rule_process import normalize_keywords, TCliRule, filter_rules
@@ -56,17 +56,13 @@ class Parser(object):
             if rule.required and rule.default:
                 raise CliDefinitionError('argument value may be either required or have the default value')
 
-        pos_args = 0
-        all_args = 0
-        for rule in self._rules(PositionalArgumentRule, AllArgumentsRule):
+        many_args = 0
+        for rule in self._rules(PositionalArgumentRule, ManyArgumentsRule):
             if isinstance(rule, PositionalArgumentRule):
-                if all_args:
-                    raise CliDefinitionError('positional argument can\'t be placed after all remaining arguments')
-                pos_args += 1
-            elif isinstance(rule, AllArgumentsRule):
-                if all_args:
-                    raise CliDefinitionError('all remaining arguments rule can be defined once')
-                all_args += 1
+                if many_args:
+                    raise CliDefinitionError('positional argument can\'t be placed after many arguments rule')
+            elif isinstance(rule, ManyArgumentsRule):
+                many_args += 1
 
     def _init_vars(self):
         for rule in self._rules(FlagRule):
@@ -200,9 +196,9 @@ class Parser(object):
             raise CliSyntaxError(f'parsing positional argument "{rule.name}"') from e
 
     def _parse_remaining_arguments(self, args: ArgsQue):
-        all_args_rules = self._rules(AllArgumentsRule)
-        if all_args_rules:
-            for rule in all_args_rules:
+        many_args_rules = self._rules(ManyArgumentsRule)
+        if many_args_rules:
+            for rule in many_args_rules:
                 remaining_args = args.pop_all()
                 if rule.joined_with:
                     value = rule.joined_with.join(remaining_args)
@@ -248,6 +244,20 @@ class Parser(object):
             if rule.required:
                 if not self.__vars[name_from_keyword(rule.name)]:
                     raise CliSyntaxError(f'required positional argument "{rule.name}" is not given')
+
+        for rule in self._rules(ManyArgumentsRule):
+            given_count = len(self.__vars[name_from_keyword(rule.name)])
+            if rule.count:
+                if given_count != rule.count:
+                    raise CliSyntaxError(f'"{rule.count}" arguments are required, but "{given_count}" were given')
+            if rule.min_count:
+                if given_count < rule.min_count:
+                    raise CliSyntaxError(f'"{rule.min_count}" or more arguments are required,'
+                                         f' but only "{given_count}" were given')
+            if rule.max_count:
+                if given_count > rule.max_count:
+                    raise CliSyntaxError(f'maximum "{rule.max_count}" arguments are required,'
+                                         f' but "{given_count}" were given')
 
         if self.__parent and not self.__action_triggered:
             self.__parent._check_required_arguments()

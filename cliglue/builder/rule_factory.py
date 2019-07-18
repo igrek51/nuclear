@@ -1,13 +1,12 @@
-from typing import Any, Optional
+from typing import Union, Callable, Optional, List, Type, Any
 
-from .rule import SubcommandRule, PrimaryOptionRule, ParameterRule, PositionalArgumentRule, AllArgumentsRule, \
+from .rule import SubcommandRule, PrimaryOptionRule, ParameterRule, PositionalArgumentRule, ManyArgumentsRule, \
     DefaultActionRule, FlagRule
-from .typedef import Action, ChoiceProvider, TypeOrParser
 
 
 def subcommand(
         *keywords: str,
-        run: Optional[Action] = None,
+        run: Optional[Callable[..., None]] = None,
         help: str = None,
 ) -> SubcommandRule:
     """
@@ -52,8 +51,8 @@ def parameter(
         help: str = None,
         required: bool = False,
         default: Any = None,
-        type: TypeOrParser = str,
-        choices: ChoiceProvider = None,
+        type: Union[Type, Callable[[str], Any]] = str,
+        choices: Union[List[Any], Callable[..., List[Any]]] = None,
         multiple: bool = False,
 ) -> ParameterRule:
     """
@@ -91,8 +90,8 @@ def argument(
         help: str = None,
         required: bool = True,
         default: Any = None,
-        type: TypeOrParser = str,
-        choices: ChoiceProvider = None,
+        type: Union[Type, Callable[[str], Any]] = str,
+        choices: Union[List[Any], Callable[..., List[Any]]] = None,
 ) -> PositionalArgumentRule:
     """
     Create positional argument rule specification.
@@ -103,7 +102,7 @@ def argument(
     :param required: whether positional argument is required.
     If it's required but it's not given, the syntax error will be raised.
     :param default: default value for the argument, if it's not given (and it's not required)
-    :param type: type of argument value (e.g. str, int, float)
+    :param type: explicit type of argument value (e.g. str, int, float)
     Reference to a parser function may be provided here as well.
     Then argument value is evaluated by passing the string argument value to that function.
     :param choices: Explicit list of available choices for the argument value
@@ -112,27 +111,47 @@ def argument(
     """
     return PositionalArgumentRule(name, required, default, type, choices, help)
 
-
+# TODO parse types, autocomplete choices, many arguments rule with count set
 def arguments(
         name: str,
+        type: Union[Type, Callable[[str], Any]] = str,
+        choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        count: Optional[int] = None,
+        min_count: Optional[int] = None,
+        max_count: Optional[int] = None,
         joined_with: Optional[str] = None,
-) -> AllArgumentsRule:
+        help: str = None,
+) -> ManyArgumentsRule:
     """
-    Create 'All remaining arguments' rule specification.
-    It allows to retrieve all CLI argumetns, which were not matched before.
+    Create 'Multiple arguments' rule specification.
+    It allows to retrieve specific number of CLI argumetns or all remaining arguments,
+    which were not matched before.
     All matched arguments will be extracted to a list of arguments or a string (depending on joined_with parameter)
     :param name: internal variable name, which will be used to reference matched arguments list
+    :param type: explicit type of arguments values (e.g. str, int, float)
+    Reference to a parser function may be provided here as well.
+    Then argument value is evaluated by passing the string argument value to that function.
+    :param choices: Explicit list of available choices for the argument value
+    or reference to a function which will be invoked to retrieve such possible values list.
+    :param count: explicit number of arguments to retrieve.
+    If undefined, there is no validation for arguments count.
+    If you need particular number of arguments, you can use this count instead of setting min_count=max_count.
+    :param min_count: minimum number of arguments.
+    By default, there is no lower limit (it is 0).
+    :param max_count: maximum number of arguments.
+    If undefined, there is no upper limit for arguments count.
     :param joined_with: optional string joiner for arguments.
     If it's set, all matched arguments will be joined to string with that joiner.
     It it's not given, matched arguments will be passed as list of strings.
     This value (string or list) can be accessed by specified name, when it's being injected to a function.
+    :param help: description of the arguments displayed in help output
     :return: new all remaining arguments rule specification
     """
-    return AllArgumentsRule(name, joined_with)
+    return ManyArgumentsRule(help, name, type, choices, count, min_count, max_count, joined_with)
 
 
 def default_action(
-        run: Action = None,
+        run: Callable[..., None] = None,
 ) -> DefaultActionRule:
     """
     Sets default action for CLI Builder or subcommand.
@@ -147,7 +166,7 @@ def default_action(
 
 def primary_option(
         *keywords: str,
-        run: Action = None,
+        run: Callable[..., None] = None,
         help: str = None,
 ) -> PrimaryOptionRule:
     """

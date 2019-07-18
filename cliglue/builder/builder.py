@@ -1,5 +1,5 @@
 import sys
-from typing import List, Optional
+from typing import Callable, List, Optional
 
 from cliglue.autocomplete.autocomplete import bash_install, bash_autocomplete
 from cliglue.help.help import print_version, print_help
@@ -8,7 +8,6 @@ from cliglue.parser.parser import Parser
 from cliglue.utils.output import error
 from .rule import DefaultActionRule, CliRule
 from .rule_factory import default_action, primary_option, arguments, argument
-from .typedef import Action
 
 
 class CliBuilder(object):
@@ -16,7 +15,7 @@ class CliBuilder(object):
                  name: Optional[str] = None,
                  version: Optional[str] = None,
                  help: Optional[str] = None,
-                 run: Optional[Action] = None,
+                 run: Optional[Callable[..., None]] = None,
                  with_defaults: bool = True,
                  help_onerror: bool = True,
                  reraise_error: bool = False,
