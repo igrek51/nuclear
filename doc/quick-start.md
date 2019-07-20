@@ -1,16 +1,16 @@
 ## Quick start
 Let's create simple command-line application using `cliglue`.
-Let's assume we have a function as follows:
+Let's assume we already have a function as follows:
 ```python
 def say_hello(name: str, reverse: bool, repeat: int):
     if reverse:
         name = name[::-1]
     print(f'Hello {name}.' * repeat)
 ```
-and we need a glue which binds it with a CLI (Command-Line Interface).
+and we need a "glue" which binds it with a CLI (Command-Line Interface).
 We want it to be run with different parameters provided by user to the terminal shell in a manner:
 `./hello.py WORLD --reverse --repeat=1`.
-We've identified one positional argument, a flag and a numerical parameter.
+We've just identified one positional argument, one flag and one numerical parameter.
 So our CLI definition may be declared using `cliglue`:
 ```python
 CliBuilder('hello-app', run=say_hello).has(
@@ -39,10 +39,10 @@ CliBuilder('hello-app', run=say_hello).has(
 ```
 
 Let's trace what is happening here:
-- `CliBuilder` is used to build CLI tree for entire application.
+- `CliBuilder` builds CLI tree for entire application.
 - `'hello-app'` is a name for that application to be displayed in help output.
 - `run=say_hello` sets default action for the application. Now a function `say_hello` is binded as a main action and will be invoked if no other action is matched.
-- `.has(...)` allows to embed other rules inside that builder.
+- `.has(...)` allows to embed other rules inside that builder. Returns `CliBuilder` itself.
 - `argument('name')` declares positional argument. From now, first CLI argument (after binary name) will be recognized as `name` variable.
 - `flag('reverse')` binds `--reverse` keyword to a flag named `reverse`. So as it may be used later on.
 - `parameter('repeat', type=int, default=1)` binds `--repeat` keyword to a parameter named `repeat`, which type is `int` and its default value is `1`.
@@ -76,7 +76,7 @@ Now when we execute our application with one argument provided, we get:
 foo@bar:~$ ./hello.py world
 Hello world.
 ```
-Note that `world` was matched to `name` argument.
+Note that `world` has been recognized as `name` argument.
 We've binded `say_hello` as a default action, so it has been invoked with particular parameters:
 ```python
 say_hello(name='world', reverse=False, repeat=1)

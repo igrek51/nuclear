@@ -17,28 +17,27 @@ So it makes writing console aplications faster and simpler.
 - [Named parameters](#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
 - [Flags](#flags): supporting both short (`-f`) and long (`--force`), multiple flag occurrences
 - [Positional arguments](#positional-arguments) (e.g. `git push <origin> <master>`)
-- Invoking matched action function & providing corresponding parameters
+- [Invoking matched action function & injecting parameters](#injecting-parameters)
 - [Custom type validators / parsers](#custom-type-parsers)
 - [Custom auto-completers](#custom-completers) (providers of possible values)
 - [Handling syntax errors, parameters validation](#errors-handling)
 - [Typed values](#data-types) (int, time, date, file, etc.)
-- Default values for optional arguments
 - [Standard options](#clibuilder) enabled by default (`--help`, `--version`)
 - [Declarative CLI builder](#cli-rules-cheatsheet)
 
 ## Quick start
 Let's create simple command-line application using `cliglue`.
-Let's assume we have a function as follows:
+Let's assume we already have a function as follows:
 ```python
 def say_hello(name: str, reverse: bool, repeat: int):
     if reverse:
         name = name[::-1]
     print(f'Hello {name}.' * repeat)
 ```
-and we need a glue which binds it with a CLI (Command-Line Interface).
+and we need a "glue" which binds it with a CLI (Command-Line Interface).
 We want it to be run with different parameters provided by user to the terminal shell in a manner:
 `./hello.py WORLD --reverse --repeat=1`.
-We've identified one positional argument, a flag and a numerical parameter.
+We've just identified one positional argument, one flag and one numerical parameter.
 So our CLI definition may be declared using `cliglue`:
 ```python
 CliBuilder('hello-app', run=say_hello).has(
@@ -67,10 +66,10 @@ CliBuilder('hello-app', run=say_hello).has(
 ```
 
 Let's trace what is happening here:
-- `CliBuilder` is used to build CLI tree for entire application.
+- `CliBuilder` builds CLI tree for entire application.
 - `'hello-app'` is a name for that application to be displayed in help output.
 - `run=say_hello` sets default action for the application. Now a function `say_hello` is binded as a main action and will be invoked if no other action is matched.
-- `.has(...)` allows to embed other rules inside that builder.
+- `.has(...)` allows to embed other rules inside that builder. Returns `CliBuilder` itself.
 - `argument('name')` declares positional argument. From now, first CLI argument (after binary name) will be recognized as `name` variable.
 - `flag('reverse')` binds `--reverse` keyword to a flag named `reverse`. So as it may be used later on.
 - `parameter('repeat', type=int, default=1)` binds `--repeat` keyword to a parameter named `repeat`, which type is `int` and its default value is `1`.
@@ -104,7 +103,7 @@ Now when we execute our application with one argument provided, we get:
 foo@bar:~$ ./hello.py world
 Hello world.
 ```
-Note that `world` was matched to `name` argument.
+Note that `world` has been recognized as `name` argument.
 We've binded `say_hello` as a default action, so it has been invoked with particular parameters:
 ```python
 say_hello(name='world', reverse=False, repeat=1)
@@ -131,7 +130,7 @@ Then, the proper value will be injected by `cliglue`.
 ## How does it work?
 1. You define all required CLI rules for your program in a declarative tree.
 2. User provides command-line arguments when running program in a shell.
-3. `cliglue` parses and validates all the parameters, flags, sub-commands, positional arguments, etc.
+3. `cliglue` parses and validates all the parameters, flags, sub-commands, positional arguments, etc, and stores them internally.
 4. `cliglue` finds the most relevant action (starting from the most specific) and invokes it.
 5. When invoking a function, `cliglue` injects all its needed parameters based on the previously defined & parsed values.
 
@@ -695,7 +694,7 @@ foo@bar:~$ ./all-args.py run "/bin/bash -c script.sh"
 cmd: /bin/bash -c script.sh
 ```
 
-See [all arguments tests](../tests/parser/test_all_arguments.py) for specification.
+See [all arguments tests](../tests/parser/test_many_arguments.py) for specification.
 
 ## Auto-completion
 Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
