@@ -106,7 +106,7 @@ def _find_available_completions(rules: List[CliRule], args: List[str], current_w
     parameters = filter_rules(all_rules, ParameterRule)
     primary_options = filter_rules(all_rules, PrimaryOptionRule)
     pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
-    all_args = filter_rules(all_rules, ManyArgumentsRule)
+    many_args = filter_rules(all_rules, ManyArgumentsRule)
 
     # "--param value" autocompletion
     previous: Optional[str] = args[-2] if len(args) > 1 else None
@@ -143,6 +143,9 @@ def _find_available_completions(rules: List[CliRule], args: List[str], current_w
 
     # positional arguments
     for rule in pos_arguments:
+        possible_choices: List[str] = generate_value_choices(rule)
+        completions.extend(possible_choices)
+    for rule in many_args:
         possible_choices: List[str] = generate_value_choices(rule)
         completions.extend(possible_choices)
 

@@ -48,4 +48,4 @@ CliBuilder(run=lambda verbose: print(f'how many times: {verbose}')).has(
 ).run()
 ```
 
-See [flag tests](../tests/parser/test_flag.py) for specification.
+See [flag tests](tests/parser/test_flag.py) for more detailed use cases.

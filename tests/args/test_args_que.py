@@ -39,3 +39,15 @@ def test_removing_all():
     assert result == ['1', '2', '3']
     assert not args
     assert len(args) == 0
+
+
+def test_removing_inside_loop():
+    args = ArgsQue(['1', '2', '3', '4'])
+    result = []
+    for arg in args:
+        args.pop_current()
+        args.pop_current()
+        result += arg
+    assert result == ['1', '3']
+    assert not args
+    assert len(args) == 0

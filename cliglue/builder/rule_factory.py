@@ -82,7 +82,7 @@ def parameter(
     Then parameter has list type and stores list of values
     :return: new parameter rule specification
     """
-    return ParameterRule(set(keywords), name, required, default, type, choices, help, multiple)
+    return ParameterRule(set(keywords), name, type, choices, required, default, help, multiple)
 
 
 def argument(
@@ -109,9 +109,9 @@ def argument(
     or reference to a function which will be invoked to retrieve such possible values list.
     :return: new positional argument rule specification
     """
-    return PositionalArgumentRule(name, required, default, type, choices, help)
+    return PositionalArgumentRule(name, type, choices, required, default, help)
 
-# TODO parse types, autocomplete choices, many arguments rule with count set
+
 def arguments(
         name: str,
         type: Union[Type, Callable[[str], Any]] = str,
@@ -124,10 +124,9 @@ def arguments(
 ) -> ManyArgumentsRule:
     """
     Create 'Multiple arguments' rule specification.
-    It allows to retrieve specific number of CLI argumetns or all remaining arguments,
-    which were not matched before.
+    It allows to retrieve specific number of CLI argumetns or all remaining arguments.
     All matched arguments will be extracted to a list of arguments or a string (depending on joined_with parameter)
-    :param name: internal variable name, which will be used to reference matched arguments list
+    :param name: internal variable name, which will be used to reference matched arguments
     :param type: explicit type of arguments values (e.g. str, int, float)
     Reference to a parser function may be provided here as well.
     Then argument value is evaluated by passing the string argument value to that function.
@@ -145,9 +144,9 @@ def arguments(
     It it's not given, matched arguments will be passed as list of strings.
     This value (string or list) can be accessed by specified name, when it's being injected to a function.
     :param help: description of the arguments displayed in help output
-    :return: new all remaining arguments rule specification
+    :return: new many arguments rule specification
     """
-    return ManyArgumentsRule(help, name, type, choices, count, min_count, max_count, joined_with)
+    return ManyArgumentsRule(name, type, choices, help, count, min_count, max_count, joined_with)
 
 
 def default_action(

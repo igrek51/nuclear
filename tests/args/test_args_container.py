@@ -19,7 +19,7 @@ def test_args_container_by_attr():
             parameter('multi-ple-words'),
             parameter('named-param', name='nnn'),
         ).run()
-        assert mockio.stripped_output() == 'pval pval True words mmm'
+        assert mockio.stripped() == 'pval pval True words mmm'
 
 
 def test_args_container_by_dict_name():
@@ -38,7 +38,7 @@ def test_args_container_by_dict_name():
             parameter('multi-ple-words'),
             parameter('named-param', name='nnn'),
         ).run()
-        assert mockio.stripped_output() == 'pval pval pval pval True True words words mmm'
+        assert mockio.stripped() == 'pval pval pval pval True True words words mmm'
 
 
 def test_args_container_error_on_nonexisting():

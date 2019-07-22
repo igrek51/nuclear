@@ -103,5 +103,5 @@ Commands:
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
 
-See [sub-commands tests](../tests/parser/test_subcommand.py) for specification.
+See [sub-commands tests](tests/parser/test_subcommand.py) for more detailed use cases.
 
