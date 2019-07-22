@@ -61,20 +61,24 @@ def test_all_argument_in_lower_subcommand():
 
 
 def test_exact_many_arguments_count():
+    with MockIO('all', '2') as mockio:
+        CliBuilder(reraise_error=True, run=lambda components: print(len(components))).has(
+            arguments('components', count=2),
+        ).run()
+        assert mockio.stripped() == '2'
     with MockIO():
         cli = CliBuilder(reraise_error=True).has(
             arguments('components', count=2),
         )
         assert_cli_error(lambda: cli.run())
-    with MockIO('all', '2', '3'):
-        cli = CliBuilder(reraise_error=True).has(
-            arguments('components', count=2),
-        )
-        assert_cli_error(lambda: cli.run())
-    with MockIO('all', '2'):
+
+
+def test_exact_many_arguments_count_and_superfluous():
+    with MockIO('all', '2', '3') as mockio:
         CliBuilder(reraise_error=True, run=lambda components: print(components)).has(
             arguments('components', count=2),
         ).run()
+        assert "['all', '2']" in mockio.stripped()
 
 
 def test_min_many_arguments_count():
@@ -90,12 +94,30 @@ def test_min_many_arguments_count():
 
 
 def test_max_many_arguments_count():
-    with MockIO('one', 'two'):
-        cli = CliBuilder(reraise_error=True).has(
-            arguments('components', max_count=1),
-        )
-        assert_cli_error(lambda: cli.run())
-    with MockIO('one'):
-        CliBuilder(reraise_error=True).has(
-            arguments('components', max_count=1),
+    with MockIO('one', 'two') as mockio:
+        CliBuilder(reraise_error=True, run=lambda words: print(len(words))).has(
+            arguments('words', max_count=1),
         ).run()
+        assert '1' in mockio.stripped()
+    with MockIO('one') as mockio:
+        CliBuilder(reraise_error=True, run=lambda words: print(len(words))).has(
+            arguments('words', max_count=1),
+        ).run()
+        assert '1' in mockio.stripped()
+
+
+def test_parsing_many_arguments_typed():
+    with MockIO('1', '41') as mockio:
+        CliBuilder(run=lambda numbers: print(sum(numbers))).has(
+            arguments('numbers', type=int),
+        ).run()
+        assert mockio.stripped() == '42'
+
+
+def test_multiple_many_arguments_rules():
+    with MockIO('1', '41', 'abc') as mockio:
+        CliBuilder(run=lambda numbers, letters: print(letters + numbers)).has(
+            arguments('numbers', count=2),
+            arguments('letters'),
+        ).run()
+        assert mockio.stripped() == "['abc', '1', '41']"

@@ -12,7 +12,6 @@ def match_param(rule: ParameterRule, args: ArgsQue, arg: str) -> Optional[str]:
             args.pop_current()
             if not args.has_next():
                 raise CliSyntaxError('missing value argument for parameter')
-            next(args)  # jump to next index with iterator
             return args.pop_current()
         # match 1 arg: --name=value
         prefix = keyword + '='

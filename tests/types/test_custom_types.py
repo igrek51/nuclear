@@ -17,7 +17,7 @@ def test_custom_parser():
         CliBuilder(run=print_my).has(
             parameter('my', type=my_parser),
         ).run()
-        assert mockio.stripped_output() == '22'
+        assert mockio.stripped() == '22'
 
 
 def test_datetime_arg():
@@ -28,7 +28,7 @@ def test_datetime_arg():
         CliBuilder(run=print_datetime).has(
             parameter('d', type=datetime_format('%Y-%m-%d %H:%M:%S', '%Y-%m-%d')),
         ).run()
-        assert mockio.stripped_output() == str(datetime.datetime(2019, 6, 7))
+        assert mockio.stripped() == str(datetime.datetime(2019, 6, 7))
 
 
 def test_invalid_datetime():

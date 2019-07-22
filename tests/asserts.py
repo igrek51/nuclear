@@ -10,7 +10,7 @@ from cliglue.parser.error import CliError
 def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str = None):
     try:
         action()
-        assert False
+        assert False, 'should raise error'
     except error_type as e:
         assert isinstance(e, error_type)
         if expected_msg:
@@ -48,8 +48,8 @@ class MockIO:
         sys.stdout, sys.stderr = self.old_out, self.old_err
         sys.stdout.write(self.output())
 
-    def output(self):
+    def output(self) -> str:
         return self.new_out.getvalue()
 
-    def stripped_output(self):
+    def stripped(self) -> str:
         return self.output().strip()

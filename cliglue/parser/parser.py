@@ -5,14 +5,15 @@ from typing import Type, Any, List, TypeVar, Optional
 from cliglue.args.args_que import ArgsQue
 from cliglue.args.container import is_args_container_name, ArgsContainer
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, KeywordRule, \
-    DefaultActionRule, ValueRule, PositionalArgumentRule, ManyArgumentsRule, SubcommandRule
+    DefaultActionRule, PositionalArgumentRule, ManyArgumentsRule, SubcommandRule, ValueRule
 from cliglue.builder.typedef import Action
 from cliglue.parser.context import RunContext
-from cliglue.parser.rule_process import normalize_keywords, TCliRule, filter_rules
+from cliglue.parser.rule_process import normalize_keywords, TCliRule, filter_rules, many_arguments_retrieve_count
 from cliglue.utils.output import warn
-from .error import CliDefinitionError, CliSyntaxError
+from .error import CliSyntaxError
 from .keyword import names_from_keywords, name_from_keyword
 from .param import match_param, parse_argument_value, parameter_display_name
+from .validate import validate_rules
 
 
 class Parser(object):
@@ -44,25 +45,12 @@ class Parser(object):
         self._init_vars()
 
     def _init_rules(self):
-        normalize_keywords(self._rules(FlagRule, ParameterRule))
-
         if not self.__run:
             rules: List[DefaultActionRule] = self._rules(DefaultActionRule)
             for rule in rules:
                 self.__run = rule.run
-
-        rules: List[ValueRule] = self._rules(ValueRule)
-        for rule in rules:
-            if rule.required and rule.default:
-                raise CliDefinitionError('argument value may be either required or have the default value')
-
-        many_args = 0
-        for rule in self._rules(PositionalArgumentRule, ManyArgumentsRule):
-            if isinstance(rule, PositionalArgumentRule):
-                if many_args:
-                    raise CliDefinitionError('positional argument can\'t be placed after many arguments rule')
-            elif isinstance(rule, ManyArgumentsRule):
-                many_args += 1
+        normalize_keywords(self._rules(FlagRule, ParameterRule))
+        validate_rules(self.__rules)
 
     def _init_vars(self):
         for rule in self._rules(FlagRule):
@@ -87,6 +75,9 @@ class Parser(object):
 
         for rule in self._rules(PositionalArgumentRule):
             self._set_var(rule.name, rule.default)
+
+        for rule in self._rules(ManyArgumentsRule):
+            self._set_var(rule.name, [])
 
     def _set_var(self, name: str, value):
         self.__vars[name_from_keyword(name)] = value
@@ -121,7 +112,7 @@ class Parser(object):
 
     def _parse_current_level(self, args):
         self._parse_positional_arguments(args)
-        self._parse_remaining_arguments(args)
+        self._parse_many_arguments(args)
         self._check_required_arguments()
         return self._run_default_action()
 
@@ -174,8 +165,8 @@ class Parser(object):
 
     def _parse_subcommand(self, args: ArgsQue) -> Optional[RunContext]:
         if args:
-            # recognize first arg as a command
-            first = next(iter(args))
+            # recognize first argument as a command
+            first = args.reset().peek_current()
             rule: SubcommandRule = self._find_rule(SubcommandRule, first)
             if rule:
                 args.pop_current()
@@ -195,18 +186,36 @@ class Parser(object):
         except ValueError as e:
             raise CliSyntaxError(f'parsing positional argument "{rule.name}"') from e
 
-    def _parse_remaining_arguments(self, args: ArgsQue):
-        many_args_rules = self._rules(ManyArgumentsRule)
-        if many_args_rules:
-            for rule in many_args_rules:
-                remaining_args = args.pop_all()
-                if rule.joined_with:
-                    value = rule.joined_with.join(remaining_args)
-                else:
-                    value = remaining_args
-                self._set_var(rule.name, value)
-        elif self.__parent:
-            self.__parent._parse_remaining_arguments(args)
+    def _parse_many_arguments(self, args: ArgsQue):
+        args.reset()
+        for rule in self._rules(ManyArgumentsRule):
+            retrieve_count: Optional[int] = many_arguments_retrieve_count(rule)
+            if not retrieve_count:
+                retrieve_count = len(args)
+
+            if len(args) < retrieve_count:
+                raise CliSyntaxError(f'{retrieve_count} positional arguments are required,'
+                                     f' but "{len(args)} given"')
+
+            retrieved = []
+            for _ in range(retrieve_count):
+                arg = args.pop_current()
+
+                try:
+                    parsed_value = parse_argument_value(rule, arg)
+                    retrieved.append(parsed_value)
+                except ValueError as e:
+                    raise CliSyntaxError(f'parsing positional argument "{rule.name}"') from e
+
+            if rule.joined_with:
+                var_value = rule.joined_with.join(retrieved)
+            else:
+                var_value = retrieved
+
+            self._set_var(rule.name, var_value)
+
+        if self.__parent:
+            self.__parent._parse_many_arguments(args)
 
     def _run_default_action(self) -> Optional[RunContext]:
         if self.__dry:
