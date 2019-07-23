@@ -15,7 +15,7 @@ So it makes writing console aplications faster and simpler.
 - [Shell autocompletion](#auto-completion) (getting most relevant hints on hitting `Tab`)
 - [Multilevel sub-commands](#sub-commands) (e.g. `git remote add ...` syntax)
 - [Named parameters](#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
-- [Flags](#flags): supporting both short (`-f`) and long (`--force`), multiple flag occurrences
+- [Flags](#flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
 - [Positional arguments](#positional-arguments) (e.g. `git push <origin> <master>`)
 - [Invoking matched action function & injecting parameters](#injecting-parameters)
 - [Custom type validators / parsers](#custom-type-parsers)
@@ -538,13 +538,17 @@ foo@bar:~$ ./example.py
 False
 ``` 
 
+### Combining short flags
+Many short flags may be combined in one argument. Instead of `-t -u -l -p -n` you can just type `-tulpn`.
+
 ### Multiple flag occurrences
 Multiple occurences are also supported for flags. When `multiple` is set to `True`, then the flag value represents how many times it was set. The value type is then `int`, not `bool`.
 ```python
-CliBuilder(run=lambda verbose: print(f'how many times: {verbose}')).has(
+CliBuilder(run=lambda verbose: print(f'verbosity level: {verbose}')).has(
     flag('verbose', 'v', multiple=True),
 ).run()
 ```
+Then `-vvv` should return 3.
 
 See [flag tests](tests/parser/test_flag.py) for more detailed use cases.
 ## Named parameters

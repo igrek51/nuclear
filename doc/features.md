@@ -3,7 +3,7 @@
 - [Shell autocompletion](#auto-completion) (getting most relevant hints on hitting `Tab`)
 - [Multilevel sub-commands](#sub-commands) (e.g. `git remote add ...` syntax)
 - [Named parameters](#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
-- [Flags](#flags): supporting both short (`-f`) and long (`--force`), multiple flag occurrences
+- [Flags](#flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
 - [Positional arguments](#positional-arguments) (e.g. `git push <origin> <master>`)
 - [Invoking matched action function & injecting parameters](#injecting-parameters)
 - [Custom type validators / parsers](#custom-type-parsers)

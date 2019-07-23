@@ -40,12 +40,16 @@ foo@bar:~$ ./example.py
 False
 ``` 
 
+### Combining short flags
+Many short flags may be combined in one argument. Instead of `-t -u -l -p -n` you can just type `-tulpn`.
+
 ### Multiple flag occurrences
 Multiple occurences are also supported for flags. When `multiple` is set to `True`, then the flag value represents how many times it was set. The value type is then `int`, not `bool`.
 ```python
-CliBuilder(run=lambda verbose: print(f'how many times: {verbose}')).has(
+CliBuilder(run=lambda verbose: print(f'verbosity level: {verbose}')).has(
     flag('verbose', 'v', multiple=True),
 ).run()
 ```
+Then `-vvv` should return `3`.
 
 See [flag tests](tests/parser/test_flag.py) for more detailed use cases.

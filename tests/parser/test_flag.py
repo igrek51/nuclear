@@ -85,3 +85,33 @@ def test_multi_flag():
             flag('verbose', 'v', multiple=True),
         ).run()
         assert mockio.output() == 'verbose: 0 0\n'
+
+
+def test_combined_short_single_flags():
+    def print_flags(t: bool, u: bool, l: bool):
+        print(f'flags: {t} {u} {l}')
+
+    with MockIO('-tul') as mockio:
+        CliBuilder(run=print_flags).has(
+            flag('t'),
+            flag('u'),
+            flag('l'),
+        ).run()
+        assert mockio.stripped() == 'flags: True True True'
+
+
+def test_combined_short_multi_flag():
+    def print_flags(verbose: int):
+        print(f'verbose level: {verbose}')
+
+    with MockIO('-vvv') as mockio:
+        CliBuilder(run=print_flags).has(
+            flag('verbose', 'v', multiple=True),
+        ).run()
+        assert mockio.stripped() == 'verbose level: 3'
+
+    with MockIO() as mockio:
+        CliBuilder(run=print_flags).has(
+            flag('verbose', 'v', multiple=True),
+        ).run()
+        assert mockio.stripped() == 'verbose level: 0'

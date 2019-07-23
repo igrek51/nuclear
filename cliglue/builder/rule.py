@@ -54,7 +54,6 @@ class PrimaryOptionRule(ParentRule, HelpRule):
     pass
 
 
-# TODO combining short versions: -tulpn
 @dataclass
 class FlagRule(HelpRule, KeywordRule):
     multiple: bool = False

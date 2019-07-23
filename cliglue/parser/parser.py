@@ -99,8 +99,9 @@ class Parser(object):
 
     def _parse_args_queue(self, args: ArgsQue) -> Optional[RunContext]:
         try:
-            self._parse_flags(args)
+            self._parse_single_flags(args)
             self._parse_params(args)
+            self._parse_combined_flags(args)
             return self._parse_primary_options(args) or \
                 self._parse_subcommand(args) or \
                 self._parse_current_level(args)
@@ -116,17 +117,40 @@ class Parser(object):
         self._check_required_arguments()
         return self._run_default_action()
 
-    def _parse_flags(self, args: ArgsQue):
+    def _parse_single_flags(self, args: ArgsQue):
         for arg in args:
             rule: FlagRule = self._find_rule(FlagRule, arg)
             if rule:
                 args.pop_current()
-                for keyword in rule.keywords:
-                    if rule.multiple:
-                        oldval = self.__vars[name_from_keyword(keyword)]
-                        self._set_var(keyword, oldval + 1)
-                    else:
-                        self._set_var(keyword, True)
+                self._set_single_flag(rule)
+
+    def _set_single_flag(self, rule: FlagRule):
+        for keyword in rule.keywords:
+            if rule.multiple:
+                oldval = self.__vars[name_from_keyword(keyword)]
+                self._set_var(keyword, oldval + 1)
+            else:
+                self._set_var(keyword, True)
+
+    def _parse_combined_flags(self, args: ArgsQue):
+        for arg in args:
+            rules = self._extract_combined_flag(arg)
+            if rules:
+                args.pop_current()
+                for rule in rules:
+                    self._set_single_flag(rule)
+
+    def _extract_combined_flag(self, arg: str) -> List[FlagRule]:
+        if not arg.startswith('-') or arg.startswith('--'):
+            return []
+        matched_flags = []
+        for single_char in arg[1:]:
+            rule: FlagRule = self._find_rule(FlagRule, f'-{single_char}')
+            if rule:
+                matched_flags.append(rule)
+            else:
+                return []  # every combined character has to be detected as single flag
+        return matched_flags
 
     def _parse_params(self, args: ArgsQue):
         for arg in args:
