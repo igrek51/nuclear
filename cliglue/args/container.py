@@ -1,4 +1,4 @@
-from typing import Dict, Any, Mapping
+from typing import Dict, Any
 
 from cliglue.parser.keyword import format_var_name
 
@@ -18,11 +18,3 @@ class ArgsContainer(object):
             return self.__vars[key]
         else:
             return self.__vars[format_var_name(key)]
-
-
-def is_args_container_name(arg: str, annotations: Mapping[str, Any]):
-    if arg == 'args':
-        if arg in annotations:  # has type annotation
-            return annotations[arg] == ArgsContainer
-        return True
-    return False

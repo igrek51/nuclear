@@ -9,7 +9,7 @@ from cliglue.parser.context import RunContext
 from cliglue.parser.error import CliError
 from cliglue.parser.keyword import format_var_names
 from cliglue.parser.parser import Parser
-from cliglue.parser.rule_process import filter_rules
+from cliglue.parser.transform import filter_rules
 
 
 @dataclass

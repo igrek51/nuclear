@@ -6,11 +6,11 @@ from typing import List, Optional
 
 from cliglue.builder.rule import CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
     PositionalArgumentRule, ManyArgumentsRule
-from cliglue.parser.choices import generate_value_choices
+from cliglue.parser.value import generate_value_choices
 from cliglue.parser.context import RunContext
 from cliglue.parser.error import CliError
 from cliglue.parser.parser import Parser
-from cliglue.parser.rule_process import filter_rules
+from cliglue.parser.transform import filter_rules
 from cliglue.utils.files import script_real_path
 from cliglue.utils.output import warn, info
 from cliglue.utils.shell import shell
