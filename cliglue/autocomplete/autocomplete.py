@@ -1,11 +1,12 @@
-import inspect
+import os
 import os
 import re
 import shlex
-from typing import List, Optional, Any
+from typing import List, Optional
 
-from cliglue.builder.rule import ValueRule, CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
+from cliglue.builder.rule import CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
     PositionalArgumentRule, ManyArgumentsRule
+from cliglue.parser.choices import generate_value_choices
 from cliglue.parser.context import RunContext
 from cliglue.parser.error import CliError
 from cliglue.parser.parser import Parser
@@ -150,13 +151,3 @@ def _find_available_completions(rules: List[CliRule], args: List[str], current_w
         completions.extend(possible_choices)
 
     return completions
-
-
-def generate_value_choices(rule: ValueRule) -> List[Any]:
-    if not rule.choices:
-        return []
-    elif isinstance(rule.choices, list):
-        return rule.choices
-    else:
-        (args, _, _, _, _, _, _) = inspect.getfullargspec(rule.choices)
-        return rule.choices()

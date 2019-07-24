@@ -53,6 +53,7 @@ def parameter(
         default: Any = None,
         type: Union[Type, Callable[[str], Any]] = str,
         choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        strict_choices: bool = False,
         multiple: bool = False,
 ) -> ParameterRule:
     """
@@ -78,11 +79,12 @@ def parameter(
     Then parameter value is evaluated by passing the string argument value to that function.
     :param choices: Explicit list of available choices for the parameter value
     or reference to a function which will be invoked to retrieve such possible values list.
+    :param strict_choices: whether given arguments should be validated against available choices
     :param multiple: whether parameter is allowed to occur many times.
     Then parameter has list type and stores list of values
     :return: new parameter rule specification
     """
-    return ParameterRule(set(keywords), name, type, choices, required, default, help, multiple)
+    return ParameterRule(set(keywords), name, type, choices, strict_choices, required, default, help, multiple)
 
 
 def dictionary(
@@ -126,6 +128,7 @@ def argument(
         default: Any = None,
         type: Union[Type, Callable[[str], Any]] = str,
         choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        strict_choices: bool = False,
 ) -> PositionalArgumentRule:
     """
     Create positional argument rule specification.
@@ -141,15 +144,17 @@ def argument(
     Then argument value is evaluated by passing the string argument value to that function.
     :param choices: Explicit list of available choices for the argument value
     or reference to a function which will be invoked to retrieve such possible values list.
+    :param strict_choices: whether given arguments should be validated against available choices
     :return: new positional argument rule specification
     """
-    return PositionalArgumentRule(name, type, choices, required, default, help)
+    return PositionalArgumentRule(name, type, choices, strict_choices, required, default, help)
 
 
 def arguments(
         name: str,
         type: Union[Type, Callable[[str], Any]] = str,
         choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        strict_choices: bool = False,
         count: Optional[int] = None,
         min_count: Optional[int] = None,
         max_count: Optional[int] = None,
@@ -166,6 +171,7 @@ def arguments(
     Then argument value is evaluated by passing the string argument value to that function.
     :param choices: Explicit list of available choices for the argument value
     or reference to a function which will be invoked to retrieve such possible values list.
+    :param strict_choices: whether given arguments should be validated against available choices
     :param count: explicit number of arguments to retrieve.
     If undefined, there is no validation for arguments count.
     If you need particular number of arguments, you can use this count instead of setting min_count=max_count.
@@ -180,7 +186,7 @@ def arguments(
     :param help: description of the arguments displayed in help output
     :return: new many arguments rule specification
     """
-    return ManyArgumentsRule(name, type, choices, help, count, min_count, max_count, joined_with)
+    return ManyArgumentsRule(name, type, choices, strict_choices, help, count, min_count, max_count, joined_with)
 
 
 def default_action(

@@ -34,7 +34,7 @@ foo@bar:~$ ./pos-args.py
 In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError`. It's e.g. when:
 - positional argument or parameter is set to required and has default value set (it doesn't make any sense)
 - positional argument is placed after all remaining arguments
-- all remaining arguments rule is defined more than once
+- parameter / argument value does not belong to strict available choices list
 
 #### Wrong CLI Definition example
 ```python

@@ -7,7 +7,7 @@ from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, Cli
     PositionalArgumentRule, ManyArgumentsRule, DictionaryRule
 from cliglue.parser.context import RunContext
 from cliglue.parser.error import CliError
-from cliglue.parser.keyword import names_from_keywords
+from cliglue.parser.keyword import format_var_names
 from cliglue.parser.parser import Parser
 from cliglue.parser.rule_process import filter_rules
 
@@ -221,7 +221,7 @@ def _param_var_name(rule: ParameterRule) -> str:
         return rule.name.upper()
     else:
         # get name from longest keyword
-        names: Set[str] = names_from_keywords(rule.keywords)
+        names: Set[str] = format_var_names(rule.keywords)
         return max(names, key=lambda n: len(n)).upper()
 
 

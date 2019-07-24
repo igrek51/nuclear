@@ -576,6 +576,7 @@ parameter(
         default: Any = None,
         type: TypeOrParser = str,
         choices: ChoiceProvider = None,
+        strict_choices: bool = False,
         multiple: bool = False,
 )
 ```
@@ -600,6 +601,8 @@ Then parameter value is evaluated by passing the string argument value to that f
 
 `choices` is Explicit list of available choices for the parameter value
 or reference to a function which will be invoked to retrieve such possible values list
+
+`strict_choices` - whether given arguments should be validated against available choices
 
 `multiple` - whether parameter is allowed to occur many times.
 Then parameter has list type and stores list of values
@@ -661,6 +664,7 @@ def argument(
         default: Any = None,
         type: TypeOrParser = str,
         choices: ChoiceProvider = None,
+        strict_choices: bool = False,
 )
 ```
 
@@ -679,6 +683,8 @@ Then argument value is evaluated by passing the string argument value to that fu
 
 `choices` - Explicit list of available choices for the argument value
 or reference to a function which will be invoked to retrieve such possible values list.
+
+`strict_choices` - whether given arguments should be validated against available choices
 
 #### Example: pos-args.py
 ```python
@@ -742,6 +748,7 @@ def arguments(
         name: str,
         type: Union[Type, Callable[[str], Any]] = str,
         choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        strict_choices: bool = False,
         count: Optional[int] = None,
         min_count: Optional[int] = None,
         max_count: Optional[int] = None,
@@ -760,6 +767,8 @@ Then argument value is evaluated by passing the string argument value to that fu
 
 `choices` - Explicit list of available choices for the argument value
 or reference to a function which will be invoked to retrieve such possible values list.
+
+`strict_choices` - whether given arguments should be validated against available choices
 
 `count` - explicit number of arguments to retrieve.
 If undefined, there is no validation for arguments count.
@@ -1004,6 +1013,8 @@ Notice that in that manner, the autocompletion algorithm is being run always in 
 6. `your-app.py` returns a list of proposals to the `bash`.
 7. `bash` shows you these results.
 If there's only one matching proposal, the currently typed word is automatically filled.
+
+Note that your application is being run each time when trying to get matching arguments proposals.
 
 ## Auto-generated help
 `cliglue` auto-generates help and usage output based on the defined CLI rules.
@@ -1343,7 +1354,7 @@ foo@bar:~$ ./pos-args.py
 In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError`. It's e.g. when:
 - positional argument or parameter is set to required and has default value set (it doesn't make any sense)
 - positional argument is placed after all remaining arguments
-- all remaining arguments rule is defined more than once
+- parameter / argument value does not belong to strict available choices list
 
 #### Wrong CLI Definition example
 ```python

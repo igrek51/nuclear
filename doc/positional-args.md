@@ -17,6 +17,7 @@ def argument(
         default: Any = None,
         type: TypeOrParser = str,
         choices: ChoiceProvider = None,
+        strict_choices: bool = False,
 )
 ```
 
@@ -35,6 +36,8 @@ Then argument value is evaluated by passing the string argument value to that fu
 
 `choices` - Explicit list of available choices for the argument value
 or reference to a function which will be invoked to retrieve such possible values list.
+
+`strict_choices` - whether given arguments should be validated against available choices
 
 #### Example: pos-args.py
 ```python
@@ -98,6 +101,7 @@ def arguments(
         name: str,
         type: Union[Type, Callable[[str], Any]] = str,
         choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        strict_choices: bool = False,
         count: Optional[int] = None,
         min_count: Optional[int] = None,
         max_count: Optional[int] = None,
@@ -116,6 +120,8 @@ Then argument value is evaluated by passing the string argument value to that fu
 
 `choices` - Explicit list of available choices for the argument value
 or reference to a function which will be invoked to retrieve such possible values list.
+
+`strict_choices` - whether given arguments should be validated against available choices
 
 `count` - explicit number of arguments to retrieve.
 If undefined, there is no validation for arguments count.

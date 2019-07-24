@@ -1,21 +1,23 @@
-import inspect
-from typing import Dict, Mapping
+from typing import Dict
 from typing import Type, Any, List, TypeVar, Optional
 
 from cliglue.args.args_que import ArgsQue
-from cliglue.args.container import is_args_container_name, ArgsContainer
+from cliglue.args.container import ArgsContainer
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, KeywordRule, \
-    DefaultActionRule, PositionalArgumentRule, ManyArgumentsRule, SubcommandRule, DictionaryRule
+    DefaultActionRule, PositionalArgumentRule, ManyArgumentsRule, SubcommandRule, DictionaryRule, ValueRule
 from cliglue.builder.typedef import Action
-from cliglue.parser.context import RunContext
-from cliglue.parser.dictionary import match_dictionary, dictionary_var_names
-from cliglue.parser.pos_arg import many_arguments_max_count, many_arguments_min_count
-from cliglue.parser.rule_process import normalize_keywords, TCliRule, filter_rules, \
-    parse_rule_value, parse_typed_value
+from cliglue.parser.flag import flag_default_value
+from cliglue.parser.inject import run_action
 from cliglue.utils.output import warn
+from .choices import generate_value_choices
+from .context import RunContext
+from .dictionary import match_dictionary
 from .error import CliSyntaxError
-from .keyword import name_from_keyword
-from .param import match_param, parameter_display_name, parameter_var_names
+from .keyword import format_var_name
+from .param import match_param, parameter_default_value
+from .pos_arg import many_arguments_max_count, many_arguments_min_count
+from .rule_process import normalize_keywords, TCliRule, filter_rules, \
+    parse_rule_value, parse_typed_value
 from .validate import validate_rules
 
 
@@ -49,8 +51,7 @@ class Parser(object):
 
     def _init_rules(self):
         if not self.__run:
-            rules: List[DefaultActionRule] = self._rules(DefaultActionRule)
-            for rule in rules:
+            for rule in self._rules(DefaultActionRule):
                 self.__run = rule.run
         normalize_keywords(self._rules(FlagRule, ParameterRule, DictionaryRule))
         validate_rules(self.__rules)
@@ -58,23 +59,11 @@ class Parser(object):
     def _init_vars(self):
         for rule in self._rules(FlagRule):
             for keyword in rule.keywords:
-                if rule.multiple:
-                    self._set_internal_var(keyword, 0)
-                else:
-                    self._set_internal_var(keyword, False)
+                self._set_internal_var(keyword, flag_default_value(rule))
 
         for rule in self._rules(ParameterRule):
-            for var_name in parameter_var_names(rule):
-                if rule.multiple:
-                    if not rule.default:
-                        default_value = []
-                    elif not isinstance(rule.default, list):
-                        default_value = [rule.default]
-                    else:
-                        default_value = rule.default
-                    self._set_internal_var(var_name, default_value)
-                else:
-                    self._set_internal_var(var_name, rule.default)
+            for var_name in rule.var_names():
+                self._set_internal_var(var_name, parameter_default_value(rule))
 
         for rule in self._rules(PositionalArgumentRule):
             self._set_internal_var(rule.name, rule.default)
@@ -83,17 +72,14 @@ class Parser(object):
             self._set_internal_var(rule.name, [])
 
         for rule in self._rules(DictionaryRule):
-            for var_name in dictionary_var_names(rule):
+            for var_name in rule.var_names():
                 self._set_internal_var(var_name, {})
 
     def _set_internal_var(self, var_name: str, value):
-        self.__vars[name_from_keyword(var_name)] = value
+        self.__vars[format_var_name(var_name)] = value
 
-    def _get_internal_var(self, var_name: str):
-        return self.__vars[name_from_keyword(var_name)]
-
-    def _rules(self, *types: Type[TCliRule]) -> List[TCliRule]:
-        return filter_rules(self.__rules, *types)
+    def _get_internal_var(self, var_name: str) -> Any:
+        return self.__vars[format_var_name(var_name)]
 
     def parse_args(self, args_list: List[str]) -> Optional[RunContext]:
         """
@@ -126,6 +112,7 @@ class Parser(object):
         self._parse_positional_arguments(args)
         self._parse_many_arguments(args)
         self._check_required_arguments()
+        self._check_strict_choices()
         return self._run_default_action()
 
     def _parse_single_flags(self, args: ArgsQue):
@@ -174,13 +161,12 @@ class Parser(object):
         try:
             parsed_value = parse_rule_value(rule, value_str)
         except ValueError as e:
-            param_name = parameter_display_name(rule)
-            raise CliSyntaxError(f'parsing parameter "{param_name}"') from e
+            raise CliSyntaxError(f'parsing parameter "{rule.display_name()}"') from e
 
         self._set_param_value(rule, parsed_value)
 
     def _set_param_value(self, rule: ParameterRule, parsed_value):
-        for var_name in parameter_var_names(rule):
+        for var_name in rule.var_names():
             if rule.multiple:
                 oldval: List = self._get_internal_var(var_name)
                 oldval.append(parsed_value)
@@ -197,7 +183,7 @@ class Parser(object):
                     self._add_dict_value(rule, entry_key, entry_value)
 
     def _add_dict_value(self, rule: DictionaryRule, entry_key, entry_value):
-        for var_name in dictionary_var_names(rule):
+        for var_name in rule.var_names():
             oldval: Dict = self._get_internal_var(var_name)
             oldval[entry_key] = entry_value
             self._set_internal_var(var_name, oldval)
@@ -274,13 +260,7 @@ class Parser(object):
             return self.__parent._run_default_action()
 
     def _run_action(self, action: Action) -> RunContext:
-        if action:
-            (args, _, _, _, _, _, annotations) = inspect.getfullargspec(action)
-            if not args:
-                action()
-            else:
-                kwargs = self._inject_args(args, action, annotations)
-                action(**kwargs)
+        run_action(action, self._internal_vars_merged())
         return self._build_run_context(action)
 
     def _check_superfluous_args(self, args):
@@ -293,7 +273,7 @@ class Parser(object):
 
         for rule in self._rules(ParameterRule):
             if rule.required:
-                for name in parameter_var_names(rule):
+                for name in rule.var_names():
                     if not self._get_internal_var(name):
                         raise CliSyntaxError(f'required parameter "{", ".join(rule.keywords)}" is not given')
 
@@ -312,6 +292,42 @@ class Parser(object):
         if self.__parent and not self.__action_triggered:
             self.__parent._check_required_arguments()
 
+    def _check_strict_choices(self):
+        if self.__dry:
+            return
+
+        for rule in self._rules(ValueRule):
+            if rule.strict_choices and rule.choices:
+                available_choices = generate_value_choices(rule)
+
+                if isinstance(rule, ParameterRule):
+                    for name in rule.var_names():
+                        var_value = self._get_internal_var(name)
+                        if var_value not in available_choices:
+                            raise CliSyntaxError(f'parameter value {var_value} does not belong to available choices: '
+                                                 f'{available_choices}')
+
+                elif isinstance(rule, PositionalArgumentRule):
+                    var_value = self._get_internal_var(rule.name)
+                    if var_value not in available_choices:
+                        raise CliSyntaxError(
+                            f'positional argument value {var_value} does not belong to available choices: '
+                            f'{available_choices}')
+
+                elif isinstance(rule, ManyArgumentsRule):
+                    var_values: List = self._get_internal_var(rule.name)
+                    for var_value in var_values:
+                        if var_value not in available_choices:
+                            raise CliSyntaxError(
+                                f'one of arguments value {var_value} does not belong to available choices: '
+                                f'{available_choices}')
+
+        if self.__parent and not self.__action_triggered:
+            self.__parent._check_strict_choices()
+
+    def _rules(self, *types: Type[TCliRule]) -> List[TCliRule]:
+        return filter_rules(self.__rules, *types)
+
     TKeywordRule = TypeVar('TKeywordRule', bound=KeywordRule)
 
     def _find_rule(self, rule_type: Type[TKeywordRule], keyword: str) -> Optional[TKeywordRule]:
@@ -320,19 +336,10 @@ class Parser(object):
                 if keyword in rule.keywords:
                     return rule
 
-    def _inject_args(self, args: List[str], action: Action, annotations: Mapping[str, Any]) -> Dict[str, Any]:
-        return {arg: self._inject_arg(arg, action, annotations) for arg in args}
-
-    def _inject_arg(self, arg: str, action: Action, annotations: Mapping[str, Any]) -> Any:
-        if arg in self.__vars:
-            return self.__vars[arg]
-        elif self.__parent:
-            return self.__parent._inject_arg(arg, action, annotations)
-        elif is_args_container_name(arg, annotations):
-            return ArgsContainer(self.__vars)
-        else:
-            warn(f"can't inject argument '{arg}' to function '{action.__name__}': name not found")
-            return None
+    def _internal_vars_merged(self) -> Dict[str, Any]:
+        if self.__parent:
+            return {**self.__parent._internal_vars_merged(), **self.__vars}
+        return self.__vars
 
     def _build_run_context(self, action: Optional[Action]) -> RunContext:
         args_container = ArgsContainer(self.__vars)

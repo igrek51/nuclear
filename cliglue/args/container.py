@@ -1,6 +1,6 @@
 from typing import Dict, Any, Mapping
 
-from cliglue.parser.keyword import name_from_keyword
+from cliglue.parser.keyword import format_var_name
 
 
 class ArgsContainer(object):
@@ -17,7 +17,7 @@ class ArgsContainer(object):
         if key in self.__vars:
             return self.__vars[key]
         else:
-            return self.__vars[name_from_keyword(key)]
+            return self.__vars[format_var_name(key)]
 
 
 def is_args_container_name(arg: str, annotations: Mapping[str, Any]):

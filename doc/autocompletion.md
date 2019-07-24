@@ -122,3 +122,5 @@ Notice that in that manner, the autocompletion algorithm is being run always in 
 7. `bash` shows you these results.
 If there's only one matching proposal, the currently typed word is automatically filled.
 
+Note that your application is being run each time when trying to get matching arguments proposals.
+

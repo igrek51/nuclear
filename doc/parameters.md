@@ -22,6 +22,7 @@ parameter(
         default: Any = None,
         type: TypeOrParser = str,
         choices: ChoiceProvider = None,
+        strict_choices: bool = False,
         multiple: bool = False,
 )
 ```
@@ -46,6 +47,8 @@ Then parameter value is evaluated by passing the string argument value to that f
 
 `choices` is Explicit list of available choices for the parameter value
 or reference to a function which will be invoked to retrieve such possible values list
+
+`strict_choices` - whether given arguments should be validated against available choices
 
 `multiple` - whether parameter is allowed to occur many times.
 Then parameter has list type and stores list of values

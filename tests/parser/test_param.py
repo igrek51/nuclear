@@ -100,3 +100,24 @@ def test_multi_parameters():
             parameter('param', multiple=True, type=int),
         ).run()
         assert mockio.output() == 'param: 0\n'
+
+
+def test_strict_choices():
+    with MockIO('--param=4'):
+        cli = CliBuilder(reraise_error=True).has(
+            parameter('param', choices=['42'], strict_choices=True),
+        )
+        assert_cli_error(lambda: cli.run())
+
+    with MockIO('--param=42'):
+        CliBuilder(reraise_error=True).has(
+            parameter('param', choices=['42'], strict_choices=True),
+        ).run()
+
+    def complete():
+        return ['42']
+
+    with MockIO('--param=42'):
+        CliBuilder(reraise_error=True).has(
+            parameter('param', choices=complete, strict_choices=True),
+        ).run()

@@ -124,3 +124,24 @@ def test_multiple_many_arguments_rules():
             arguments('letters'),
         ).run()
         assert mockio.stripped() == "['abc', '1', '41']"
+
+
+def test_strict_choices():
+    with MockIO('4'):
+        cli = CliBuilder(reraise_error=True).has(
+            arguments('a', choices=['42'], strict_choices=True),
+        )
+        assert_cli_error(lambda: cli.run())
+
+    with MockIO('42'):
+        CliBuilder(reraise_error=True).has(
+            arguments('a', choices=['42'], strict_choices=True),
+        ).run()
+
+    def complete():
+        return ['42']
+
+    with MockIO('42'):
+        CliBuilder(reraise_error=True).has(
+            arguments('a', choices=complete, strict_choices=True),
+        ).run()

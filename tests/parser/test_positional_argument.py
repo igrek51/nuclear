@@ -47,3 +47,24 @@ def test_missing_required_argument():
             argument('arg1'),
         )
         assert_cli_error(lambda: cli.run())
+
+
+def test_strict_choices():
+    with MockIO('4'):
+        cli = CliBuilder(reraise_error=True).has(
+            argument('a', choices=['42'], strict_choices=True),
+        )
+        assert_cli_error(lambda: cli.run())
+
+    with MockIO('42'):
+        CliBuilder(reraise_error=True).has(
+            argument('a', choices=['42'], strict_choices=True),
+        ).run()
+
+    def complete():
+        return ['42']
+
+    with MockIO('42'):
+        CliBuilder(reraise_error=True).has(
+            argument('a', choices=complete, strict_choices=True),
+        ).run()
