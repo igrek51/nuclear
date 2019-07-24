@@ -42,7 +42,7 @@ def test_multilevel_commands_usage():
                 parameter('-u', name='user'),
                 arguments(name='cmd', joined_with=' '),
             ),
-            primary_option('--help', '-h', run=action_print),
         ),
+        dictionary('-c', '--config'),
         primary_option('--help', '-h', run=action_print),
     ).run()

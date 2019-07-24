@@ -1,7 +1,7 @@
 from typing import Union, Callable, Optional, List, Type, Any
 
 from .rule import SubcommandRule, PrimaryOptionRule, ParameterRule, PositionalArgumentRule, ManyArgumentsRule, \
-    DefaultActionRule, FlagRule
+    DefaultActionRule, FlagRule, DictionaryRule
 
 
 def subcommand(
@@ -60,7 +60,7 @@ def parameter(
     Parameter is a named value, which will be injected to triggered action by its name.
     Shell syntax for settings parameter value is following:
     '--parameter-name value' or '--parameter-name=value'
-    The parameters may be later referenced by its name or keywords
+    The parameters may be later referenced by its explicit name or keywords
     (in lowercase format without hyphen prefix and with underscores instead of dashes,
     e.g. '--paramater-name' will be injected as 'parameter_name')
     :param keywords: keyword arguments which are matched to parameter.
@@ -68,7 +68,7 @@ def parameter(
     as well as by name: 'p' or 'param', which will be evaluated to '-p' or '--param'.
     Single character parameter will get single hyphen prefix (-p),
     longer parameter names will get double hyphen prefix (--param)
-    :param name: explicit internal paramter name (can be used, when it's different from any keyword)
+    :param name: explicit internal paramter name (can be used to distinguish it from any keyword)
     :param help: description of the parameter displayed in help output
     :param required: whether parameter is required.
     If it's required but it's not given, the syntax error will be raised.
@@ -83,6 +83,40 @@ def parameter(
     :return: new parameter rule specification
     """
     return ParameterRule(set(keywords), name, type, choices, required, default, help, multiple)
+
+
+def dictionary(
+        *keywords: str,
+        name: str = None,
+        help: str = None,
+        key_type: Union[Type, Callable[[str], Any]] = str,
+        value_type: Union[Type, Callable[[str], Any]] = str,
+) -> DictionaryRule:
+    """
+    Create dictionary rule specification.
+    Dictionary contains key-value pairs.
+    You can add multiple values to it by passing arguments in a manner:
+    '-c name1 value1 -c name2 value2'.
+    By default it stores empty Python dict.
+    These values may be later referenced as dict by its explicit name or keywords
+    (in lowercase format without hyphen prefix and with underscores instead of dashes,
+    e.g. '--config-name' will be injected as 'config_name')
+    :param keywords: keyword arguments which are matched to this dictionary.
+    Keywords may be passed using direct format: '-c' or '--config',
+    as well as by name: 'c' or 'config', which will be evaluated to '-c' or '--config'.
+    Single character dictionary will get single hyphen prefix (-c),
+    longer dictionary names will get double hyphen prefix (--config)
+    :param name: explicit internal dictionary name (can be used to distinguish it from any keyword)
+    :param help: description of the dictionary displayed in help output
+    :param key_type: type of dictionary key (e.g. str, int, float)
+    Reference to a parser function may be provided here as well.
+    Then dictionary value is evaluated by passing the string argument value to that function.
+    :param value_type: type of dictionary value (e.g. str, int, float)
+    Reference to a parser function may be provided here as well.
+    Then dictionary value is evaluated by passing the string argument value to that function.
+    :return: new dictionary rule specification
+    """
+    return DictionaryRule(set(keywords), help, name, key_type, value_type)
 
 
 def argument(

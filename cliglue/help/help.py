@@ -4,7 +4,7 @@ from typing import List, Set, Optional
 from dataclasses import dataclass
 
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
-    PositionalArgumentRule, ManyArgumentsRule
+    PositionalArgumentRule, ManyArgumentsRule, DictionaryRule
 from cliglue.parser.context import RunContext
 from cliglue.parser.error import CliError
 from cliglue.parser.keyword import names_from_keywords
@@ -58,7 +58,8 @@ def generate_subcommand_help(
     parameters = filter_rules(all_rules, ParameterRule)
     primary_options = filter_rules(all_rules, PrimaryOptionRule)
     pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
-    all_args = filter_rules(all_rules, ManyArgumentsRule)
+    many_args = filter_rules(all_rules, ManyArgumentsRule)
+    dicts = filter_rules(all_rules, DictionaryRule)
 
     options: List[_OptionHelp] = _generate_options_helps(all_rules, hide_internal)
     commands: List[_OptionHelp] = _generate_commands_helps(subcommands)
@@ -76,11 +77,11 @@ def generate_subcommand_help(
     if commands:
         usage_syntax += ' [COMMAND]'
 
-    if flags or parameters or primary_options:
+    if flags or parameters or primary_options or dicts:
         usage_syntax += ' [OPTIONS]'
 
     usage_syntax += usage_positional_arguments(pos_arguments)
-    usage_syntax += usage_all_arguments(all_args)
+    usage_syntax += usage_many_arguments(many_args)
 
     out.append(f'Usage:\n  {usage_syntax}')
 
@@ -153,6 +154,8 @@ def _generate_option_help(rule: CliRule, hide_internal: bool) -> Optional[_Optio
         return _flag_help(rule)
     elif isinstance(rule, ParameterRule):
         return _parameter_help(rule)
+    elif isinstance(rule, DictionaryRule):
+        return _dictionary_help(rule)
 
 
 def _generate_commands_helps(rules: List[CliRule], parent: _OptionHelp = None, subrules: List[CliRule] = None
@@ -175,7 +178,7 @@ def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp, subrules: List[C
     all_args = filter_rules(subrules, ManyArgumentsRule)
     cmd = _subcommand_prefix(parent) + '|'.join(sorted_keywords(rule.keywords))
     cmd += usage_positional_arguments(pos_args)
-    cmd += usage_all_arguments(all_args)
+    cmd += usage_many_arguments(all_args)
     return _OptionHelp(cmd, rule.help, parent)
 
 
@@ -194,7 +197,7 @@ def _primary_option_help(rule: PrimaryOptionRule, hide_internal: bool) -> Option
     pos_args = filter_rules(rule.subrules, PositionalArgumentRule)
     all_args = filter_rules(rule.subrules, ManyArgumentsRule)
     cmd += usage_positional_arguments(pos_args)
-    cmd += usage_all_arguments(all_args)
+    cmd += usage_many_arguments(all_args)
     return _OptionHelp(cmd, rule.help)
 
 
@@ -205,6 +208,11 @@ def _flag_help(rule: FlagRule) -> _OptionHelp:
 
 def _parameter_help(rule: ParameterRule) -> _OptionHelp:
     cmd = ', '.join(sorted_keywords(rule.keywords)) + ' ' + _param_var_name(rule)
+    return _OptionHelp(cmd, rule.help)
+
+
+def _dictionary_help(rule: DictionaryRule) -> _OptionHelp:
+    cmd = ', '.join(sorted_keywords(rule.keywords)) + ' KEY VALUE'
     return _OptionHelp(cmd, rule.help)
 
 
@@ -247,5 +255,5 @@ def usage_positional_arguments(rules: List[PositionalArgumentRule]) -> str:
     return ''.join([display_positional_argument(rule) for rule in rules])
 
 
-def usage_all_arguments(rules: List[ManyArgumentsRule]) -> str:
+def usage_many_arguments(rules: List[ManyArgumentsRule]) -> str:
     return ''.join([display_all_arguments(rule) for rule in rules])

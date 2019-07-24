@@ -144,3 +144,11 @@ def test_omit_empty_subcommands():
         assert 'nothing' not in mockio.output()
         assert 'do2  ' not in mockio.output()
         assert 'do2 it' in mockio.output()
+
+
+def test_display_dictionary():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            dictionary('-c', '--config'),
+        ).run()
+        assert '--config' in mockio.output()

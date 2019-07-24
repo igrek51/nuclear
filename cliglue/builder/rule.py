@@ -34,7 +34,7 @@ class ParentRule(KeywordRule):
 @dataclass
 class ValueRule(CliRule):
     name: Optional[str] = None
-    type: TypeOrParser = Any
+    type: TypeOrParser = str
     choices: ChoiceProvider = None
 
 
@@ -59,7 +59,12 @@ class FlagRule(HelpRule, KeywordRule):
     multiple: bool = False
 
 
-# TODO Dict value
+@dataclass
+class DictionaryRule(HelpRule, KeywordRule):
+    name: Optional[str] = None
+    key_type: TypeOrParser = str
+    value_type: TypeOrParser = str
+
 
 @dataclass
 class ParameterRule(HelpRule, OptionalValueRule, KeywordRule):

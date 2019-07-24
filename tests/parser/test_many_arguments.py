@@ -81,12 +81,15 @@ def test_exact_many_arguments_count_and_superfluous():
         assert "['all', '2']" in mockio.stripped()
 
 
-def test_min_many_arguments_count():
+def test_min_many_arguments_count_syntax_error():
     with MockIO():
         cli = CliBuilder(reraise_error=True).has(
             arguments('components', min_count=1),
         )
         assert_cli_error(lambda: cli.run())
+
+
+def test_min_many_arguments_count():
     with MockIO('one'):
         CliBuilder(reraise_error=True).has(
             arguments('components', min_count=1),

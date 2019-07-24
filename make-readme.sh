@@ -15,6 +15,7 @@ cat doc/subcommands.md >> $OUTPUT
 cat doc/flags.md >> $OUTPUT
 cat doc/parameters.md >> $OUTPUT
 cat doc/positional-args.md >> $OUTPUT
+cat doc/dictionaries.md >> $OUTPUT
 cat doc/autocompletion.md >> $OUTPUT
 cat doc/help.md >> $OUTPUT
 cat doc/data-types.md >> $OUTPUT

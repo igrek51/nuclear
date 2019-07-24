@@ -5,6 +5,7 @@
 - [Named parameters](#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
 - [Flags](#flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
 - [Positional arguments](#positional-arguments) (e.g. `git push <origin> <master>`)
+- [Key-value dictionaries](#dictionaries) (e.g. `--config key value`)
 - [Invoking matched action function & injecting parameters](#injecting-parameters)
 - [Custom type validators / parsers](#custom-type-parsers)
 - [Custom auto-completers](#custom-completers) (providers of possible values)

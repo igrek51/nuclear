@@ -17,6 +17,7 @@ So it makes writing console aplications faster and simpler.
 - [Named parameters](#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
 - [Flags](#flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
 - [Positional arguments](#positional-arguments) (e.g. `git push <origin> <master>`)
+- [Key-value dictionaries](#dictionaries) (e.g. `--config key value`)
 - [Invoking matched action function & injecting parameters](#injecting-parameters)
 - [Custom type validators / parsers](#custom-type-parsers)
 - [Custom auto-completers](#custom-completers) (providers of possible values)
@@ -548,7 +549,7 @@ CliBuilder(run=lambda verbose: print(f'verbosity level: {verbose}')).has(
     flag('verbose', 'v', multiple=True),
 ).run()
 ```
-Then `-vvv` should return 3.
+Then `-vvv` should return `3`.
 
 See [flag tests](tests/parser/test_flag.py) for more detailed use cases.
 ## Named parameters
@@ -821,6 +822,64 @@ cmd: /bin/bash -c script.sh
 ```
 
 See [all arguments tests](tests/parser/test_many_arguments.py) for more detailed use cases.
+
+## Dictionaries
+Dictionary contains key-value pairs.
+You can add multiple values to it by passing arguments in a manner:
+`-c name1 value1 -c name2 value2`.
+
+By default it stores empty Python dict.
+These values may be later referenced as dict by its explicit name or keywords
+(in lowercase format without hyphen prefix and with underscores instead of dashes,
+e.g. `--config-name` will be injected as `config_name` variable name)
+
+In order to create dictionary rule specification, use:
+```python
+from cliglue import dictionary
+
+dictionary(
+        *keywords: str,
+        name: str = None,
+        help: str = None,
+        key_type: Union[Type, Callable[[str], Any]] = str,
+        value_type: Union[Type, Callable[[str], Any]] = str,
+)
+```
+
+`keywords` - keyword arguments which are matched to this dictionary.
+Keywords may be passed using direct format: '-c' or '--config',
+as well as by name: 'c' or 'config', which will be evaluated to '-c' or '--config'.
+Single character dictionary will get single hyphen prefix (-c),
+longer dictionary names will get double hyphen prefix (--config)
+
+`name` - explicit internal dictionary name (can be used to distinguish it from any keyword)
+
+`help` - description of the dictionary displayed in help output
+
+`key_type` - type of dictionary key (e.g. str, int, float)
+Reference to a parser function may be provided here as well.
+Then dictionary value is evaluated by passing the string argument value to that function.
+
+`value_type` - type of dictionary value (e.g. str, int, float)
+Reference to a parser function may be provided here as well.
+Then dictionary value is evaluated by passing the string argument value to that function.
+
+Basic dictionary example:
+```python
+from cliglue import CliBuilder, dictionary
+
+CliBuilder(run=lambda config: print(config)).has(
+    dictionary('config', 'c', value_type=int),
+).run()
+```
+```console
+foo@bar:~$ ./example.py --config key1 5 -c key2 42
+{'key1': 5, 'key2': 42}
+foo@bar:~$ ./example.py
+{}
+```
+
+See [parameter tests](tests/parser/test_dictionary.py) for more detailed use cases.
 
 ## Auto-completion
 Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
@@ -1319,22 +1378,23 @@ cliglue.parser.error.CliDefinitionError: argument value may be either required o
 Here is the cheatsheet for the most important CLI rules:
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, arguments, flag, parameter, subcommand
+from cliglue import CliBuilder, argument, arguments, flag, parameter, subcommand, dictionary
 
 
 def main():
     CliBuilder('hello-app', version='1.0.0', help='welcome', run=say_hello).has(
-        flag('--force', '-f', help='a flag'),
+        flag('--verbose', '-v', help='verbosity', multiple=True),
         parameter('repeat', 'r', help='how many times', type=int, required=False, default=1, choices=[1, 2, 3, 5, 8]),
         argument('name', help='description', required=False, default='world', type=str, choices=['monty', 'python']),
         arguments('cmd', joined_with=' '),
         subcommand('run', help='runs something').has(
             subcommand('now', 'n', run=lambda cmd: print(f'run now: {cmd}')),
         ),
+        dictionary('config', 'c', help='configuration', key_type=str, value_type=int)
     ).run()
 
 
-def say_hello(name: str, force: bool, repeat: int, cmd: str):
+def say_hello(name: str, verbose: int, repeat: int, cmd: str, config: dict):
     print(f'Hello {name}')
 
 
