@@ -39,7 +39,7 @@ from cliglue.types.time import iso_datetime
 
 def main():
     CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
-               with_defaults=True, help_onerror=False, reraise_error=True, hide_internal=True).has(
+               with_defaults=True, usage_onerror=False, reraise_error=True, hide_internal=True).has(
         subcommand('git').has(
             subcommand('push', run=git_push).has(
                 argument('remote'),

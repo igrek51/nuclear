@@ -100,7 +100,7 @@ def test_3rd_level_help():
 
 def test_print_help_on_syntax_error():
     with MockIO('--param') as mockio:
-        cli = CliBuilder(help_onerror=True, reraise_error=True).has(
+        cli = CliBuilder(usage_onerror=True, reraise_error=True).has(
             parameter('param'),
         )
         assert_error(lambda: cli.run(), error_type=CliSyntaxError)
@@ -152,3 +152,12 @@ def test_display_dictionary():
             dictionary('-c', '--config'),
         ).run()
         assert '--config' in mockio.output()
+
+
+def test_usage_on_syntax_error():
+    with MockIO('') as mockio:
+        CliBuilder(usage_onerror=True, reraise_error=False).has(
+            argument('req')
+        ).run()
+        assert 'Syntax error' in mockio.output()
+        assert '--help" for more information' in mockio.output()

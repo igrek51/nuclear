@@ -2,7 +2,7 @@ import sys
 from typing import Callable, List, Optional
 
 from cliglue.autocomplete.autocomplete import bash_install, bash_autocomplete
-from cliglue.help.help import print_version, print_help
+from cliglue.help.help import print_version, print_help, print_usage
 from cliglue.parser.error import CliSyntaxError, CliDefinitionError
 from cliglue.parser.parser import Parser
 from cliglue.utils.output import error
@@ -17,7 +17,7 @@ class CliBuilder(object):
                  help: Optional[str] = None,
                  run: Optional[Callable[..., None]] = None,
                  with_defaults: bool = True,
-                 help_onerror: bool = True,
+                 usage_onerror: bool = True,
                  reraise_error: bool = False,
                  hide_internal: bool = True,
                  ):
@@ -33,7 +33,7 @@ class CliBuilder(object):
         --version: displaying version,
         --bash-install APP-NAME: installing application in bash with autocompleting,
         --bash-autocomplete [CMDLINE...]: internal action for generating autocompleted proposals to be handled by bash
-        :param help_onerror: wheter help output should be displayed on syntax error
+        :param usage_onerror: wheter usage output should be displayed on syntax error
         :param reraise_error: wheter syntax error should not be caught but reraised instead.
         Enabling this causes stack trace to be flooded to the user.
         :param hide_internal: wheter internal options (--bash-install, --bash-autocomplete)
@@ -47,7 +47,7 @@ class CliBuilder(object):
         if run:
             self.has(default_action(run))
 
-        self.__help_onerror: bool = help_onerror
+        self.__usage_onerror: bool = usage_onerror
         self.__reraise_error: bool = reraise_error
         self.__hide_internal: bool = hide_internal
         if with_defaults:
@@ -79,13 +79,16 @@ class CliBuilder(object):
             raise e
         except CliSyntaxError as e:
             error(f'Syntax error: {e}')
-            if self.__help_onerror:
-                self.print_help([])
+            if self.__usage_onerror:
+                self.print_usage()
             if self.__reraise_error:
                 raise e
 
     def print_help(self, subcommands: List[str]):
         print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands, self.__hide_internal)
+
+    def print_usage(self):
+        print_usage(self.__subrules)
 
     def __bash_autocomplete(self, cmdline: str):
         bash_autocomplete(self.__subrules, cmdline)

@@ -13,14 +13,14 @@ You can disable raising this error again by seting `reraise_error = False` when 
 `CliBuilder(reraise_error = False)`.
 Then only the error log will be displayed in console stdout.
 
-`help_onerror` parameter decides wheter help output should be displayed on syntax error.
+`usage_onerror` parameter decides wheter usage output should be displayed on syntax error.
 
 #### Erros handling example
 ```python
 #!/usr/bin/env python3
 from cliglue import CliBuilder, argument
 
-CliBuilder(help_onerror=False).has(
+CliBuilder(usage_onerror=False).has(
     argument('remote', required=True),
 ).run()
 ```

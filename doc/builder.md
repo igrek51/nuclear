@@ -19,7 +19,7 @@ CliBuilder(
            help: Optional[str] = None,
            run: Optional[Action] = None,
            with_defaults: bool = True,
-           help_onerror: bool = True,
+           usage_onerror: bool = True,
            reraise_error: bool = False,
            hide_internal: bool = True,
 )
@@ -39,7 +39,7 @@ Defaults options are:
 --bash-install APP-NAME: installing application in bash with autocompleting,
 --bash-autocomplete [CMDLINE...]: internal action for generating autocompleted proposals to be handled by bash
 
-`help_onerror` - wheter help output should be displayed on syntax error
+`usage_onerror` - wheter usage output should be displayed on syntax error
 
 `reraise_error` - wheter syntax error should not be caught but reraised instead.
 Enabling this causes stack trace to be flooded to the user.
@@ -66,7 +66,7 @@ Example:
 from cliglue import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
 
 CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
-           with_defaults=True, help_onerror=False, reraise_error=True).has(
+           with_defaults=True, usage_onerror=False, reraise_error=True).has(
     subcommand('checkout'),
     argument('commit'),
     arguments('files'),

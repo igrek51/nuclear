@@ -27,8 +27,31 @@ def print_help(rules: List[CliRule], app_name: str, version: str, help: str, sub
     print('\n'.join(helps))
 
 
+def print_usage(rules: List[CliRule]):
+    all_rules, available_subcommands, precommands = help_context(rules, [])
+
+    pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
+    many_args = filter_rules(all_rules, ManyArgumentsRule)
+
+    commands: List[_OptionHelp] = _generate_commands_helps(available_subcommands)
+
+    command_name = shell_command_name()
+    app_bin_prefix = ' '.join([command_name] + precommands)
+
+    usage = generate_usage(app_bin_prefix, commands, has_options(all_rules), many_args, pos_arguments)
+
+    how_to_help = f'Run "{command_name} --help" for more information.'
+    print('\n'.join([f'Usage: {usage}', how_to_help]))
+
+
 def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str],
                   hide_internal: bool) -> List[str]:
+    all_rules, available_subcommands, precommands = help_context(rules, subargs)
+    return generate_subcommand_help(all_rules, app_name, version, help,
+                                    precommands, available_subcommands, hide_internal)
+
+
+def help_context(rules, subargs):
     available_subcommands = filter_rules(rules, SubcommandRule)
     try:
         run_context: Optional[RunContext] = Parser(rules, dry=True).parse_args(subargs)
@@ -40,9 +63,7 @@ def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, 
     except CliError:
         all_rules: List[CliRule] = rules
         precommands: List[str] = []
-
-    return generate_subcommand_help(all_rules, app_name, version, help, precommands, available_subcommands,
-                                    hide_internal)
+    return all_rules, available_subcommands, precommands
 
 
 def generate_subcommand_help(
@@ -54,36 +75,21 @@ def generate_subcommand_help(
         subcommands: List[SubcommandRule],
         hide_internal: bool,
 ) -> List[str]:
-    flags = filter_rules(all_rules, FlagRule)
-    parameters = filter_rules(all_rules, ParameterRule)
-    primary_options = filter_rules(all_rules, PrimaryOptionRule)
     pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
     many_args = filter_rules(all_rules, ManyArgumentsRule)
-    dicts = filter_rules(all_rules, DictionaryRule)
 
     options: List[_OptionHelp] = _generate_options_helps(all_rules, hide_internal)
     commands: List[_OptionHelp] = _generate_commands_helps(subcommands)
 
     out = []
-    # App info
+
     app_info = app_help_info(app_name, help, version)
     if app_info:
         out.append(app_info + '\n')
 
-    # Usage
-    app_bin_prefix = ' '.join([sys.argv[0]] + precommands)
-    usage_syntax: str = app_bin_prefix
-
-    if commands:
-        usage_syntax += ' [COMMAND]'
-
-    if flags or parameters or primary_options or dicts:
-        usage_syntax += ' [OPTIONS]'
-
-    usage_syntax += usage_positional_arguments(pos_arguments)
-    usage_syntax += usage_many_arguments(many_args)
-
-    out.append(f'Usage:\n  {usage_syntax}')
+    app_bin_prefix = ' '.join([shell_command_name()] + precommands)
+    out.append('Usage:')
+    out.append(generate_usage(app_bin_prefix, commands, has_options(all_rules), many_args, pos_arguments))
 
     if options:
         out.append('\nOptions:')
@@ -116,6 +122,17 @@ def app_name_version(app_name, version):
             info += ' '
         info += version
     return info
+
+
+def generate_usage(app_bin_prefix, commands, has_options: bool, many_args, pos_arguments) -> str:
+    usage_syntax: str = app_bin_prefix
+    if commands:
+        usage_syntax += ' [COMMAND]'
+    if has_options:
+        usage_syntax += ' [OPTIONS]'
+    usage_syntax += usage_positional_arguments(pos_arguments)
+    usage_syntax += usage_many_arguments(many_args)
+    return usage_syntax
 
 
 def __helpers_output(commands, out):
@@ -257,3 +274,11 @@ def usage_positional_arguments(rules: List[PositionalArgumentRule]) -> str:
 
 def usage_many_arguments(rules: List[ManyArgumentsRule]) -> str:
     return ''.join([display_all_arguments(rule) for rule in rules])
+
+
+def shell_command_name():
+    return sys.argv[0]
+
+
+def has_options(rules: List[CliRule]) -> bool:
+    return bool(filter_rules(rules, FlagRule, ParameterRule, DictionaryRule, PrimaryOptionRule))

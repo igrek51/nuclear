@@ -4,7 +4,7 @@
 Let's say we have quite complex CLI definition:
 ```python
 CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
-           with_defaults=True, help_onerror=False, reraise_error=True).has(
+           with_defaults=True, usage_onerror=False, reraise_error=True).has(
     subcommand('git').has(
         subcommand('push', run=git_push).has(
             argument('remote'),

@@ -79,7 +79,7 @@ def test_int_type_param():
 
 def test_missing_required_param():
     with MockIO():
-        cli = CliBuilder(run=print_param, help_onerror=False, reraise_error=True).has(
+        cli = CliBuilder(run=print_param, usage_onerror=False, reraise_error=True).has(
             parameter('--param', required=True),
         )
         assert_cli_error(lambda: cli.run())
