@@ -6,6 +6,14 @@ def list_screens():
     return ['HDMI', 'eDP']
 
 
+def cli_subparameter():
+    return CliBuilder().has(
+        subcommand('sub').has(
+            parameter('--parameter', choices=list_screens),
+        ),
+    )
+
+
 def test_no_match():
     with MockIO('--bash-autocomplete', 'app nomatch') as mockio:
         CliBuilder().run()
@@ -88,6 +96,7 @@ def test_autocomplete_flags():
             ),
             flag('--flag-global'),
         )
+
     with MockIO('--bash-autocomplete', 'app') as mockio:
         cli_flags().run()
         assert '--flag-global\n' in mockio.output()
@@ -106,6 +115,7 @@ def test_autocomplete_parameters():
             ),
             parameter('--param-global'),
         )
+
     with MockIO('--bash-autocomplete', 'app') as mockio:
         cli_parameters().run()
         assert '--param-global\n' in mockio.output()
@@ -116,43 +126,35 @@ def test_autocomplete_parameters():
         assert '--param-local\n' in mockio.output()
 
 
-def cli_parameters():
-    return CliBuilder().has(
-        subcommand('sub').has(
-            parameter('--parameter', choices=list_screens),
-        ),
-    )
-
-
 def test_autocomplete_parameter_name():
     with MockIO('--bash-autocomplete', '"app sub --param"') as mockio:
-        cli_parameters().run()
+        cli_subparameter().run()
         assert '--parameter\n' in mockio.output()
         assert '--parameter=\n' in mockio.output()
 
 
 def test_autocomplete_parameters_choice_2params():
     with MockIO('--bash-autocomplete', '"app sub --parameter"') as mockio:
-        cli_parameters().run()
+        cli_subparameter().run()
         assert '--parameter\n' in mockio.output()
         assert '--parameter=\n' in mockio.output()
     with MockIO('--bash-autocomplete', '"app sub --parameter "') as mockio:
-        cli_parameters().run()
+        cli_subparameter().run()
         assert 'HDMI\n' in mockio.output()
         assert 'eDP\n' in mockio.output()
     with MockIO('--bash-autocomplete', '"app sub --parameter H"') as mockio:
-        cli_parameters().run()
+        cli_subparameter().run()
         assert mockio.output() == 'HDMI\n'
 
 
 def test_autocomplete_parameters_choice_equal():
     with MockIO('--bash-autocomplete', '"app sub --parameter="') as mockio:
-        cli_parameters().run()
+        cli_subparameter().run()
         assert '--parameter=HDMI\n' not in mockio.output()
         assert 'HDMI\n' in mockio.output()
         assert 'eDP\n' in mockio.output()
     with MockIO('--bash-autocomplete', '"app sub --parameter=H"') as mockio:
-        cli_parameters().run()
+        cli_subparameter().run()
         assert mockio.output() == 'HDMI\n'
 
 
@@ -163,6 +165,7 @@ def test_autocomplete_pos_arguments_choice():
                 argument('pos', choices=['abc', 'def']),
             ),
         )
+
     with MockIO('--bash-autocomplete', '"app sub pos "') as mockio:
         cli_argument().run()
         assert 'abc\n' in mockio.output()
@@ -178,6 +181,7 @@ def test_autocomplete_many_arguments_choice():
         return CliBuilder().has(
             arguments('words', choices=['abc', 'def']),
         )
+
     with MockIO('--bash-autocomplete', '"app "') as mockio:
         cli_argument().run()
         assert 'abc\n' in mockio.output()
@@ -210,3 +214,12 @@ def test_empty_choices():
             parameter('pos', choices=[]),
         ).run()
         assert mockio.stripped() == ''
+
+
+def test_completing_word_in_the_middle():
+    with MockIO('--bash-autocomplete', '"app ru in"', '1') as mockio:
+        CliBuilder().has(
+            subcommand('info'),
+            subcommand('run'),
+        ).run()
+        assert mockio.stripped() == 'run'

@@ -5,22 +5,20 @@ from typing import List, Optional
 from cliglue.builder.rule import CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
     PositionalArgumentRule, ManyArgumentsRule
 from cliglue.parser.context import RunContext
-from cliglue.parser.error import CliError
 from cliglue.parser.parser import Parser
 from cliglue.parser.transform import filter_rules
 from cliglue.parser.value import generate_value_choices
 
 
-# TODO not only the last argument may be focused on
-def bash_autocomplete(rules: List[CliRule], cmdline: str):
-    filtered = find_matching_completions(cmdline, rules)
+def bash_autocomplete(rules: List[CliRule], cmdline: str, word_idx: Optional[int]):
+    filtered = find_matching_completions(cmdline, rules, word_idx)
     print('\n'.join(filtered))
 
 
-def find_matching_completions(cmdline, rules) -> List[str]:
+def find_matching_completions(cmdline, rules, word_idx: Optional[int]) -> List[str]:
     extracted_cmdline = _extract_quotes(cmdline)
     args: List[str] = extract_args(extracted_cmdline)
-    current_word: str = args[-1] if len(args) > 0 else ''
+    current_word: str = get_current_word(args, word_idx)
     available: List[str] = _find_available_completions(rules, args, current_word)
     # convert '--param=value' proposals to 'value'
     hyphen_param_matcher = re.compile(r'-(.+)=(.+)')
@@ -31,7 +29,7 @@ def find_matching_completions(cmdline, rules) -> List[str]:
     ]
 
 
-def extract_args(extracted_cmdline):
+def extract_args(extracted_cmdline) -> List[str]:
     args = shlex.split(extracted_cmdline)[1:]
     # restore last whitespace
     if extracted_cmdline.endswith(' ') or extracted_cmdline.endswith('\t'):
@@ -39,10 +37,16 @@ def extract_args(extracted_cmdline):
     return args
 
 
-def _extract_quotes(cmdline):
+def _extract_quotes(cmdline) -> str:
     if cmdline.startswith('"') and cmdline.endswith('"'):
         return cmdline[1:-1]
     return cmdline
+
+
+def get_current_word(args: List[str], word_idx: Optional[int]) -> str:
+    if word_idx is None or word_idx - 1 >= len(args):
+        return args[-1] if len(args) > 0 else ''
+    return args[word_idx - 1]
 
 
 def _find_available_completions(rules: List[CliRule], args: List[str], current_word: str) -> List[str]:

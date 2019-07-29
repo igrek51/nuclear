@@ -91,8 +91,8 @@ class CliBuilder(object):
     def print_usage(self):
         print_usage(self.__subrules)
 
-    def __bash_autocomplete(self, cmdline: str):
-        bash_autocomplete(self.__subrules, cmdline)
+    def __bash_autocomplete(self, cmdline: str, word_idx: Optional[int]):
+        bash_autocomplete(self.__subrules, cmdline, word_idx)
 
     def __add_default_rules(self):
         def __print_root_help():
@@ -107,8 +107,8 @@ class CliBuilder(object):
         def __bash_install(app_name: str):
             bash_install(app_name)
 
-        def __bash_autocomplete(cmdline: str):
-            self.__bash_autocomplete(cmdline)
+        def __bash_autocomplete(cmdline: str, word_idx: Optional[int]):
+            self.__bash_autocomplete(cmdline, word_idx)
 
         if self.__version:
             self.has(
@@ -126,7 +126,8 @@ class CliBuilder(object):
             ),
             primary_option('--bash-autocomplete', run=__bash_autocomplete,
                            help='Return matching autocompletion proposals').has(
-                arguments('cmdline', joined_with=' '),
+                argument('cmdline', help='current command line'),
+                argument('word-idx', help='current word index', type=int, required=False),
             ),
         )
 
