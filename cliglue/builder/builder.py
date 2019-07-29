@@ -1,7 +1,8 @@
 import sys
 from typing import Callable, List, Optional
 
-from cliglue.autocomplete.autocomplete import bash_install, bash_autocomplete
+from cliglue.autocomplete.autocomplete import bash_autocomplete
+from cliglue.autocomplete.bash_install import bash_install
 from cliglue.help.help import print_version, print_help, print_usage
 from cliglue.parser.error import CliSyntaxError, CliDefinitionError
 from cliglue.parser.parser import Parser

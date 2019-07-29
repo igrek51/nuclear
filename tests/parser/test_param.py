@@ -121,3 +121,50 @@ def test_strict_choices():
         CliBuilder(reraise_error=True).has(
             parameter('param', choices=complete, strict_choices=True),
         ).run()
+
+
+def test_multi_default_list():
+    def show_param(param):
+        print(param)
+
+    with MockIO() as mockio:
+        CliBuilder(run=show_param).has(
+            parameter('param', multiple=True, type=int, default=[1]),
+        ).run()
+        assert mockio.stripped() == '[1]'
+
+    with MockIO('--param', '2') as mockio:
+        CliBuilder(run=show_param).has(
+            parameter('param', multiple=True, type=int, default=[1]),
+        ).run()
+        assert mockio.stripped() == '[1, 2]'
+
+
+def test_multi_default_value():
+    def show_param(param):
+        print(param)
+
+    with MockIO() as mockio:
+        CliBuilder(run=show_param).has(
+            parameter('param', multiple=True, type=int, default=1),
+        ).run()
+        assert mockio.stripped() == '[1]'
+
+    with MockIO('--param', '2') as mockio:
+        CliBuilder(run=show_param).has(
+            parameter('param', multiple=True, type=int, default=1),
+        ).run()
+        assert mockio.stripped() == '[1, 2]'
+
+
+def test_parsing_param_syntax_error():
+    with MockIO('--param', 'notanumber'):
+        cli = CliBuilder(reraise_error=True).has(
+            parameter('param', type=int),
+        )
+        assert_cli_error(lambda: cli.run(), 'parsing parameter "--param":')
+    with MockIO('-p', 'notanumber'):
+        cli = CliBuilder(reraise_error=True).has(
+            parameter('-p', name='param', type=int),
+        )
+        assert_cli_error(lambda: cli.run(), 'parsing parameter "param":')

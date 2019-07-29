@@ -66,3 +66,20 @@ def test_removing_by_3():
     assert result == [['1', '2', '3'], ['4', '5', '6']]
     assert not args
     assert len(args) == 0
+
+
+def test_just_peeking():
+    args = ArgsQue(['1', '2'])
+    result = []
+    for _ in args:
+        result.append(args.peek_current())
+        result.append(args.pop_current())
+
+    assert args.peek_current() is None
+    assert result == ['1', '1', '2', '2']
+
+
+def test_pop_all():
+    args = ArgsQue(['1', '2'])
+    assert args.pop_all() == ['1', '2']
+    assert args.pop_all() == []

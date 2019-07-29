@@ -14,7 +14,7 @@ def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_ms
     except error_type as e:
         assert isinstance(e, error_type)
         if expected_msg:
-            assert expected_msg in str(e)
+            assert expected_msg in str(e), 'unexpected error message'
 
 
 def assert_cli_error(action, expected_error: str = None):

@@ -38,3 +38,13 @@ def test_subcommand_default_action():
             ),
         ).run()
         assert mockio.output() == 'ok\n'
+
+
+def test_parent_default_action():
+    with MockIO('nmcli', 'dev') as mockio:
+        CliBuilder(run=print_ok).has(
+            subcommand('nmcli').has(
+                subcommand('dev')
+            ),
+        ).run()
+        assert mockio.output() == 'ok\n'

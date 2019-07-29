@@ -1,7 +1,7 @@
 from typing import Dict
 
 from cliglue import *
-from tests.asserts import MockIO
+from tests.asserts import MockIO, assert_cli_error
 
 
 def test_dictionary_setting_value():
@@ -47,3 +47,26 @@ def test_typed_dictionary():
         ).run()
         assert mockio.stripped() == "{1: 2}"
 
+
+def test_explicit_var_name():
+    def print_dict(configuration: Dict):
+        print(configuration)
+
+    with MockIO('-c', '1', '2') as mockio:
+        CliBuilder(run=print_dict).has(
+            dictionary('-c', name='configuration'),
+        ).run()
+        assert mockio.stripped() == "{'1': '2'}"
+
+
+def test_incomplete_dict_params():
+    with MockIO('-c'):
+        cli = CliBuilder(reraise_error=True).has(
+            dictionary('-c'),
+        )
+        assert_cli_error(lambda: cli.run(), 'missing key argument for dictionary')
+    with MockIO('-c', 'name'):
+        cli = CliBuilder(reraise_error=True).has(
+            dictionary('-c'),
+        )
+        assert_cli_error(lambda: cli.run(), 'missing value argument for dictionary')

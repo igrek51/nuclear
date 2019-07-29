@@ -12,10 +12,7 @@ def parse_value_rule(rule: ValueRule, arg: str) -> Any:
 def parse_typed_value(_type: TypeOrParser, arg: str) -> Any:
     if _type is None:
         return arg
-    # custom parser
-    if callable(_type):
-        return _type(arg)
-    # cast to custom type or default types
+    # invoke custom parser or cast to custom type
     return _type(arg)
 
 

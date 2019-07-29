@@ -145,3 +145,11 @@ def test_strict_choices():
         CliBuilder(reraise_error=True).has(
             arguments('a', choices=complete, strict_choices=True),
         ).run()
+
+
+def test_parsing_syntax_error():
+    with MockIO('notanumber'):
+        cli = CliBuilder(reraise_error=True).has(
+            arguments('nums', type=int),
+        )
+        assert_cli_error(lambda: cli.run(), 'parsing many arguments "nums":')

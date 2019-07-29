@@ -53,16 +53,12 @@ def generate_help(rules: List[CliRule], app_name: str, version: str, help: str, 
 
 def help_context(rules, subargs):
     available_subcommands = filter_rules(rules, SubcommandRule)
-    try:
-        run_context: Optional[RunContext] = Parser(rules, dry=True).parse_args(subargs)
-        all_rules: List[CliRule] = run_context.active_rules
-        active_subcommands: List[SubcommandRule] = run_context.active_subcommands
-        precommands: List[str] = [_subcommand_short_name(rule) for rule in active_subcommands]
-        if active_subcommands:
-            available_subcommands = filter_rules(active_subcommands[-1].subrules, SubcommandRule)
-    except CliError:
-        all_rules: List[CliRule] = rules
-        precommands: List[str] = []
+    run_context: Optional[RunContext] = Parser(rules, dry=True).parse_args(subargs)
+    all_rules: List[CliRule] = run_context.active_rules
+    active_subcommands: List[SubcommandRule] = run_context.active_subcommands
+    precommands: List[str] = [_subcommand_short_name(rule) for rule in active_subcommands]
+    if active_subcommands:
+        available_subcommands = filter_rules(active_subcommands[-1].subrules, SubcommandRule)
     return all_rules, available_subcommands, precommands
 
 
@@ -224,7 +220,7 @@ def _flag_help(rule: FlagRule) -> _OptionHelp:
 
 
 def _parameter_help(rule: ParameterRule) -> _OptionHelp:
-    cmd = ', '.join(sorted_keywords(rule.keywords)) + ' ' + _param_var_name(rule)
+    cmd = ', '.join(sorted_keywords(rule.keywords)) + ' ' + _param_display_name(rule)
     return _OptionHelp(cmd, rule.help)
 
 
@@ -233,7 +229,7 @@ def _dictionary_help(rule: DictionaryRule) -> _OptionHelp:
     return _OptionHelp(cmd, rule.help)
 
 
-def _param_var_name(rule: ParameterRule) -> str:
+def _param_display_name(rule: ParameterRule) -> str:
     if rule.name:
         return rule.name.upper()
     else:

@@ -1,9 +1,5 @@
-import datetime
-
 from cliglue import *
-from cliglue.types.filesystem import existing_file
-from cliglue.types.time import datetime_format
-from tests.asserts import MockIO, assert_cli_error
+from tests.asserts import MockIO
 
 
 def test_custom_parser():
@@ -20,34 +16,9 @@ def test_custom_parser():
         assert mockio.stripped() == '22'
 
 
-def test_datetime_arg():
-    def print_datetime(d):
-        print(str(d))
-
-    with MockIO('-d=2019-06-07') as mockio:
-        CliBuilder(run=print_datetime).has(
-            parameter('d', type=datetime_format('%Y-%m-%d %H:%M:%S', '%Y-%m-%d')),
+def test_type_none():
+    with MockIO('--param', 'notanumber') as mockio:
+        CliBuilder(reraise_error=True, run=lambda param: print(param)).has(
+            parameter('param', type=None),
         ).run()
-        assert mockio.stripped() == str(datetime.datetime(2019, 6, 7))
-
-
-def test_invalid_datetime():
-    def print_datetime(d):
-        print(str(d))
-
-    with MockIO('-d=2019'):
-        cli = CliBuilder(run=print_datetime, usage_onerror=False, reraise_error=True).has(
-            parameter('d', type=datetime_format('%Y-%m-%d %H:%M:%S', '%Y-%m-%d')),
-        )
-        assert_cli_error(lambda: cli.run())
-
-
-def test_invalid_file():
-    def print_file(file):
-        print(file)
-
-    with MockIO('--file=dupa'):
-        cli = CliBuilder(run=print_file, usage_onerror=False, reraise_error=True).has(
-            parameter('file', type=existing_file),
-        )
-        assert_cli_error(lambda: cli.run())
+        assert 'notanumber' in mockio.stripped()

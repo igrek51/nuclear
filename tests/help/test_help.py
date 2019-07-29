@@ -161,3 +161,11 @@ def test_usage_on_syntax_error():
         ).run()
         assert 'Syntax error' in mockio.output()
         assert '--help" for more information' in mockio.output()
+
+
+def test_display_explicit_param_name():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            parameter('p', name='param'),
+        ).run()
+        assert '-p PARAM' in mockio.output()

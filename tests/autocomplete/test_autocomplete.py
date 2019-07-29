@@ -173,6 +173,17 @@ def test_autocomplete_pos_arguments_choice():
         assert 'def' not in mockio.output()
 
 
+def test_autocomplete_many_arguments_choice():
+    def cli_argument():
+        return CliBuilder().has(
+            arguments('words', choices=['abc', 'def']),
+        )
+    with MockIO('--bash-autocomplete', '"app "') as mockio:
+        cli_argument().run()
+        assert 'abc\n' in mockio.output()
+        assert 'def' in mockio.output()
+
+
 def test_autocomplete_command_last_word_space():
     with MockIO('--bash-autocomplete', 'app info age') as mockio:
         CliBuilder().has(
@@ -191,3 +202,11 @@ def test_doubled_proposals():
         assert '--version\n' in mockio.output()
         assert '--bash-install\n' in mockio.output()
         assert '--bash-autocomplete\n' in mockio.output()
+
+
+def test_empty_choices():
+    with MockIO('--bash-autocomplete', '"app sub --pos "') as mockio:
+        CliBuilder().has(
+            parameter('pos', choices=[]),
+        ).run()
+        assert mockio.stripped() == ''

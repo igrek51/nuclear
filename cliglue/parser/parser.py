@@ -224,7 +224,7 @@ class Parser(object):
                     parsed_value = parse_value_rule(rule, arg)
                     retrieved.append(parsed_value)
                 except ValueError as e:
-                    raise CliSyntaxError(f'parsing positional argument "{rule.name}"') from e
+                    raise CliSyntaxError(f'parsing many arguments "{rule.name}"') from e
 
             if rule.joined_with:
                 var_value = rule.joined_with.join(retrieved)
