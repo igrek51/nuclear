@@ -22,10 +22,10 @@ dictionary(
 ```
 
 `keywords` - keyword arguments which are matched to this dictionary.
-Keywords may be passed using direct format: '-c' or '--config',
-as well as by name: 'c' or 'config', which will be evaluated to '-c' or '--config'.
-Single character dictionary will get single hyphen prefix (-c),
-longer dictionary names will get double hyphen prefix (--config)
+Keywords may be passed using direct format: `-c` or `--config`,
+as well as by name: `c` or `config`, which will be evaluated to `-c` or `--config`.
+Single character dictionary will get single hyphen prefix (`-c`),
+longer dictionary names will get double hyphen prefix (`--config`)
 
 `name` - explicit internal dictionary name (can be used to distinguish it from any keyword)
 

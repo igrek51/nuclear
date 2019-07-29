@@ -4,6 +4,7 @@ It's a builder for Command Line Interface specification.
 After that, you can invoke `.run()` method in order to parse provided arguments and invoke particular actions.
 
 Empty CliBuilder has standard options enabled by default:
+
 - `--help` - displaying usage and help
 - `--version` - displaying application version number (if it has been defined)
 
@@ -23,7 +24,8 @@ CliBuilder(
            reraise_error: bool = False,
            hide_internal: bool = True,
 )
- ```
+```
+
 `name` - name of the application for which the CLI is built
 
 `version` - application version (displayed in help/version output)
@@ -53,6 +55,7 @@ The next step is to declare CLI rules for `CliBuilder` using `.has()` method
 It is used to introduce the next level of sub-rules.
 
 Available rules are:
+
 - subcommand
 - flag
 - parameter

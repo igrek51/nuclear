@@ -1,6 +1,7 @@
 ## Sub-commands
 Commands may form a multilevel tree with nested sub-commands.
 Sub-commands syntax is commonly known, e.g.:
+
 - `git remote rename ...`
 - `docker container ls`
 - `nmcli device wifi list`

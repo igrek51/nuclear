@@ -3,6 +3,7 @@
 
 ### Handling syntax errors - CliSyntaxError
 In case of syntax error, `CliBuilder.run()` raises `CliSyntaxError`, it's when:
+
 - parameter value is missing: `--param-name` without next argument
 - required parameter is not given
 - required positional argument is not given
@@ -32,6 +33,7 @@ foo@bar:~$ ./pos-args.py
 
 ### CliDefinitionError
 In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError`. It's e.g. when:
+
 - positional argument or parameter is set to required and has default value set (it doesn't make any sense)
 - positional argument is placed after all remaining arguments
 - parameter / argument value does not belong to strict available choices list

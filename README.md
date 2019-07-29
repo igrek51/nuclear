@@ -1,6 +1,8 @@
 # cliglue - glue for CLI
 [![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
 [![PyPI version](https://badge.fury.io/py/cliglue.png)](https://badge.fury.io/py/cliglue)
+[![Documentation Status](https://readthedocs.org/projects/cliglue/badge/?version=latest)](https://cliglue.readthedocs.io/en/latest/?badge=latest)
+
 
 `cliglue` is a declarative parser for command line interfaces in Python.
 It's a binding glue between CLI shell arguments and functions being invoked.
@@ -67,6 +69,7 @@ CliBuilder('hello-app', run=say_hello).has(
 ```
 
 Let's trace what is happening here:
+
 - `CliBuilder` builds CLI tree for entire application.
 - `'hello-app'` is a name for that application to be displayed in help output.
 - `run=say_hello` sets default action for the application. Now a function `say_hello` is binded as a main action and will be invoked if no other action is matched.
@@ -94,6 +97,7 @@ Options:
 ```
 
 Notice there are already rules being displayed, which were declared before:
+
 - positional argument `name`: `./hello.py [OPTIONS] NAME`
 - flag `reverse`: `--reverse`
 - parameter `repeat`: `--repeat REPEAT`
@@ -109,6 +113,7 @@ We've binded `say_hello` as a default action, so it has been invoked with partic
 ```python
 say_hello(name='world', reverse=False, repeat=1)
 ```
+
 - positional argument `name` has been assigned a `'world'` value.
 - flag `reverse` was not given, so it's `False` by default.
 - parameter `repeat` was not given either, so it was set to its default value `1`.
@@ -139,6 +144,7 @@ You only need to bind the keywords to the rules and `cliglue` will handle all th
 
 ## `cliglue` vs `argparse`
 Why to use `cliglue`, since we already have Python `argparse`? Here are some subjective advantages of `cliglue`:
+
 - declarative way of CLI logic in one place,
 - autocompletion out of the box,
 - easier way of building multilevel sub-commands,
@@ -304,6 +310,7 @@ It's a builder for Command Line Interface specification.
 After that, you can invoke `.run()` method in order to parse provided arguments and invoke particular actions.
 
 Empty CliBuilder has standard options enabled by default:
+
 - `--help` - displaying usage and help
 - `--version` - displaying application version number (if it has been defined)
 
@@ -323,7 +330,8 @@ CliBuilder(
            reraise_error: bool = False,
            hide_internal: bool = True,
 )
- ```
+```
+
 `name` - name of the application for which the CLI is built
 
 `version` - application version (displayed in help/version output)
@@ -353,6 +361,7 @@ The next step is to declare CLI rules for `CliBuilder` using `.has()` method
 It is used to introduce the next level of sub-rules.
 
 Available rules are:
+
 - subcommand
 - flag
 - parameter
@@ -393,6 +402,7 @@ just prints the standard help output, because it's the default action for an emp
 ## Sub-commands
 Commands may form a multilevel tree with nested sub-commands.
 Sub-commands syntax is commonly known, e.g.:
+
 - `git remote rename ...`
 - `docker container ls`
 - `nmcli device wifi list`
@@ -581,10 +591,10 @@ parameter(
 )
 ```
 `keywords` keyword arguments which are matched to parameter.
-Parameter keywords may be passed using direct format: '-p' or '--param',
-as well as by name: 'p' or 'param', which will be evaluated to '-p' or '--param'.
-Single character parameter will get single hyphen prefix (-p),
-longer parameter names will get double hyphen prefix (--param)
+Parameter keywords may be passed using direct format: `-p` or `--param`,
+as well as by name: `p` or `param`, which will be evaluated to `-p` or `--param`.
+Single character parameter will get single hyphen prefix (`-p`),
+longer parameter names will get double hyphen prefix (`--param`)
 
 `name` is explicit paramter name (can be used, when it's different from any keyword)
 
@@ -856,10 +866,10 @@ dictionary(
 ```
 
 `keywords` - keyword arguments which are matched to this dictionary.
-Keywords may be passed using direct format: '-c' or '--config',
-as well as by name: 'c' or 'config', which will be evaluated to '-c' or '--config'.
-Single character dictionary will get single hyphen prefix (-c),
-longer dictionary names will get double hyphen prefix (--config)
+Keywords may be passed using direct format: `-c` or `--config`,
+as well as by name: `c` or `config`, which will be evaluated to `-c` or `--config`.
+Single character dictionary will get single hyphen prefix (`-c`),
+longer dictionary names will get double hyphen prefix (`--config`)
 
 `name` - explicit internal dictionary name (can be used to distinguish it from any keyword)
 
@@ -1323,6 +1333,7 @@ Person(name='Eric', age=33)
 
 ### Handling syntax errors - CliSyntaxError
 In case of syntax error, `CliBuilder.run()` raises `CliSyntaxError`, it's when:
+
 - parameter value is missing: `--param-name` without next argument
 - required parameter is not given
 - required positional argument is not given
@@ -1352,6 +1363,7 @@ foo@bar:~$ ./pos-args.py
 
 ### CliDefinitionError
 In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError`. It's e.g. when:
+
 - positional argument or parameter is set to required and has default value set (it doesn't make any sense)
 - positional argument is placed after all remaining arguments
 - parameter / argument value does not belong to strict available choices list

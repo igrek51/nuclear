@@ -39,6 +39,7 @@ CliBuilder('hello-app', run=say_hello).has(
 ```
 
 Let's trace what is happening here:
+
 - `CliBuilder` builds CLI tree for entire application.
 - `'hello-app'` is a name for that application to be displayed in help output.
 - `run=say_hello` sets default action for the application. Now a function `say_hello` is binded as a main action and will be invoked if no other action is matched.
@@ -66,6 +67,7 @@ Options:
 ```
 
 Notice there are already rules being displayed, which were declared before:
+
 - positional argument `name`: `./hello.py [OPTIONS] NAME`
 - flag `reverse`: `--reverse`
 - parameter `repeat`: `--repeat REPEAT`
@@ -81,6 +83,7 @@ We've binded `say_hello` as a default action, so it has been invoked with partic
 ```python
 say_hello(name='world', reverse=False, repeat=1)
 ```
+
 - positional argument `name` has been assigned a `'world'` value.
 - flag `reverse` was not given, so it's `False` by default.
 - parameter `repeat` was not given either, so it was set to its default value `1`.

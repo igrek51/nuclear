@@ -27,10 +27,10 @@ parameter(
 )
 ```
 `keywords` keyword arguments which are matched to parameter.
-Parameter keywords may be passed using direct format: '-p' or '--param',
-as well as by name: 'p' or 'param', which will be evaluated to '-p' or '--param'.
-Single character parameter will get single hyphen prefix (-p),
-longer parameter names will get double hyphen prefix (--param)
+Parameter keywords may be passed using direct format: `-p` or `--param`,
+as well as by name: `p` or `param`, which will be evaluated to `-p` or `--param`.
+Single character parameter will get single hyphen prefix (`-p`),
+longer parameter names will get double hyphen prefix (`--param`)
 
 `name` is explicit paramter name (can be used, when it's different from any keyword)
 
