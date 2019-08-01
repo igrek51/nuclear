@@ -104,5 +104,5 @@ Commands:
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
 
-See [sub-commands tests](tests/parser/test_subcommand.py) for more detailed use cases.
+See [sub-commands tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_subcommand.py) for more detailed use cases.
 

@@ -54,5 +54,5 @@ foo@bar:~$ ./example.py
 {}
 ```
 
-See [parameter tests](tests/parser/test_dictionary.py) for more detailed use cases.
+See [dictionaries tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_dictionary.py) for more detailed use cases.
 

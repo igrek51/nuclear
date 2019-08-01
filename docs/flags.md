@@ -52,4 +52,4 @@ CliBuilder(run=lambda verbose: print(f'verbosity level: {verbose}')).has(
 ```
 Then `-vvv` should return `3`.
 
-See [flag tests](tests/parser/test_flag.py) for more detailed use cases.
+See [flag tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_flag.py) for more detailed use cases.

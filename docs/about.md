@@ -1,7 +1,9 @@
 # cliglue - glue for CLI
-[![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
-[![PyPI version](https://badge.fury.io/py/cliglue.png)](https://badge.fury.io/py/cliglue)
+[![GitHub version](https://badge.fury.io/gh/igrek51%2Fcliglue.svg)](https://github.com/igrek51/cliglue)
+[![PyPI version](https://badge.fury.io/py/cliglue.svg)](https://pypi.org/project/cliglue)
 [![Documentation Status](https://readthedocs.org/projects/cliglue/badge/?version=latest)](https://cliglue.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
+[![Coverage Status](https://coveralls.io/repos/github/igrek51/cliglue/badge.svg?branch=master)](https://coveralls.io/github/igrek51/cliglue?branch=master)
 
 
 `cliglue` is a declarative parser for command line interfaces in Python.

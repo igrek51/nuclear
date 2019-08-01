@@ -6,7 +6,9 @@ python:
 
 install:
   - pip install -r requirements.txt -r requirements-dev.txt
-
-script:
+before_script:
   - python3 setup.py develop
+script:
   - ./pytest.sh
+after_success:
+  - coveralls

@@ -1,7 +1,9 @@
 # cliglue - glue for CLI
-[![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
-[![PyPI version](https://badge.fury.io/py/cliglue.png)](https://badge.fury.io/py/cliglue)
+[![GitHub version](https://badge.fury.io/gh/igrek51%2Fcliglue.svg)](https://github.com/igrek51/cliglue)
+[![PyPI version](https://badge.fury.io/py/cliglue.svg)](https://pypi.org/project/cliglue)
 [![Documentation Status](https://readthedocs.org/projects/cliglue/badge/?version=latest)](https://cliglue.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
+[![Coverage Status](https://coveralls.io/repos/github/igrek51/cliglue/badge.svg?branch=master)](https://coveralls.io/github/igrek51/cliglue?branch=master)
 
 
 `cliglue` is a declarative parser for command line interfaces in Python.
@@ -13,20 +15,20 @@ You don't need to write the "glue" code for binding & parsing parameters every t
 So it makes writing console aplications faster and simpler.
 
 ## Features
-- [Auto-generated help and usage](#auto-generated-help) (`--help`)
-- [Shell autocompletion](#auto-completion) (getting most relevant hints on hitting `Tab`)
-- [Multilevel sub-commands](#sub-commands) (e.g. `git remote add ...` syntax)
-- [Named parameters](#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
-- [Flags](#flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
-- [Positional arguments](#positional-arguments) (e.g. `git push <origin> <master>`)
-- [Key-value dictionaries](#dictionaries) (e.g. `--config key value`)
-- [Invoking matched action function & injecting parameters](#injecting-parameters)
-- [Custom type validators / parsers](#custom-type-parsers)
-- [Custom auto-completers](#custom-completers) (providers of possible values)
-- [Handling syntax errors, parameters validation](#errors-handling)
-- [Typed values](#data-types) (int, time, date, file, etc.)
-- [Standard options](#clibuilder) enabled by default (`--help`, `--version`)
-- [Declarative CLI builder](#cli-rules-cheatsheet)
+- [Auto-generated help and usage](https://cliglue.readthedocs.io/en/latest#auto-generated-help) (`--help`)
+- [Shell autocompletion](https://cliglue.readthedocs.io/en/latest#auto-completion) (getting most relevant hints on hitting `Tab`)
+- [Multilevel sub-commands](https://cliglue.readthedocs.io/en/latest#sub-commands) (e.g. `git remote add ...` syntax)
+- [Named parameters](https://cliglue.readthedocs.io/en/latest#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
+- [Flags](https://cliglue.readthedocs.io/en/latest#flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
+- [Positional arguments](https://cliglue.readthedocs.io/en/latest#positional-arguments) (e.g. `git push <origin> <master>`)
+- [Key-value dictionaries](https://cliglue.readthedocs.io/en/latest#dictionaries) (e.g. `--config key value`)
+- [Invoking matched action function & injecting parameters](https://cliglue.readthedocs.io/en/latest#injecting-parameters)
+- [Custom type validators / parsers](https://cliglue.readthedocs.io/en/latest#custom-type-parsers)
+- [Custom auto-completers](https://cliglue.readthedocs.io/en/latest#custom-completers) (providers of possible values)
+- [Handling syntax errors, parameters validation](https://cliglue.readthedocs.io/en/latest#errors-handling)
+- [Typed values](https://cliglue.readthedocs.io/en/latest#data-types) (int, time, date, file, etc.)
+- [Standard options](https://cliglue.readthedocs.io/en/latest#clibuilder) enabled by default (`--help`, `--version`)
+- [Declarative CLI builder](https://cliglue.readthedocs.io/en/latest#cli-rules-cheatsheet)
 
 ## Quick start
 Let's create simple command-line application using `cliglue`.
@@ -505,7 +507,7 @@ Commands:
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
 
-See [sub-commands tests](tests/parser/test_subcommand.py) for more detailed use cases.
+See [sub-commands tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_subcommand.py) for more detailed use cases.
 
 ## Flags
 Flag is a boolean parameter which is toggled by single keyword.
@@ -561,7 +563,7 @@ CliBuilder(run=lambda verbose: print(f'verbosity level: {verbose}')).has(
 ```
 Then `-vvv` should return `3`.
 
-See [flag tests](tests/parser/test_flag.py) for more detailed use cases.
+See [flag tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_flag.py) for more detailed use cases.
 ## Named parameters
 Parameter is a named value, which will be injected to triggered action by its name.
 There are supported both manners for setting parameter value:
@@ -653,7 +655,7 @@ foo@bar:~$ ./example.py --skip build --skip run
 skipping: ['build', 'run']
 ``` 
 
-See [parameter tests](tests/parser/test_param.py) for more detailed use cases.
+See [parameter tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_param.py) for more detailed use cases.
 
 ## Positional arguments
 Positional argument is an unnamed parameter, which is recognized only by its position on their order in command line arguments list.
@@ -740,8 +742,7 @@ remote: origin, argument: develop
 ```
 
 See [positional arguments tests](../tests/parser/test_positional_argument.py) as a specification.
-
-### Multiple positional arguments
+## Many positional arguments
 `cliglue` allows to match all remaining (not already matched) arguments.
 It can be useful when using syntax like `docker cmd`:
 ```docker run cmd ubuntu /bin/bash -c /script.sh```
@@ -801,7 +802,7 @@ Note that `arguments(count=1)` rule with is like single `argument` rule, except 
 
 You can use many consecutive `arguments` rules as long as they have `count` or `max_count` set.
 
-#### Example: many-args.py
+### Example: many-args.py
 ```python
 #!/usr/bin/env python3
 from cliglue import CliBuilder, arguments, subcommand
@@ -840,7 +841,7 @@ foo@bar:~$ ./many-args.py run "/bin/bash -c script.sh"
 cmd: /bin/bash -c script.sh
 ```
 
-See [all arguments tests](tests/parser/test_many_arguments.py) for more detailed use cases.
+See [many arguments tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_many_arguments.py) for more detailed use cases.
 
 ## Dictionaries
 Dictionary contains key-value pairs.
@@ -898,10 +899,10 @@ foo@bar:~$ ./example.py
 {}
 ```
 
-See [parameter tests](tests/parser/test_dictionary.py) for more detailed use cases.
+See [dictionaries tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_dictionary.py) for more detailed use cases.
 
 ## Auto-completion
-Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
+Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key, while typing a command line.
 
 Auto-completion provided by `cliglue` is enabled by default to all known keywords based on the declared subcommands and options.
 
@@ -940,7 +941,7 @@ CliBuilder('completers-demo').has(
 In order to enable auto-completion, you need to install some extension to bash. Fortunately `cliglue` has built-in tools to do that:
 ```console
 foo@bar:~$ sudo ./completers.py --bash-install completers-demo
-[info]  creating link: /usr/bin/completers-demo -> ~/cliglue/doc/example/completers.py
+[info]  creating link: /usr/bin/completers-demo -> ~/cliglue/docs/example/completers.py
 #!/bin/bash
 _autocomplete_98246661() {
 COMPREPLY=( $(completers-demo --bash-autocomplete "${COMP_LINE}") )

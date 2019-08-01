@@ -89,5 +89,5 @@ foo@bar:~$ ./example.py --skip build --skip run
 skipping: ['build', 'run']
 ``` 
 
-See [parameter tests](tests/parser/test_param.py) for more detailed use cases.
+See [parameter tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_param.py) for more detailed use cases.
 

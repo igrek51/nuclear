@@ -1,5 +1,5 @@
 ## Auto-completion
-Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key.
+Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key, while typing a command line.
 
 Auto-completion provided by `cliglue` is enabled by default to all known keywords based on the declared subcommands and options.
 
@@ -38,7 +38,7 @@ CliBuilder('completers-demo').has(
 In order to enable auto-completion, you need to install some extension to bash. Fortunately `cliglue` has built-in tools to do that:
 ```console
 foo@bar:~$ sudo ./completers.py --bash-install completers-demo
-[info]  creating link: /usr/bin/completers-demo -> ~/cliglue/doc/example/completers.py
+[info]  creating link: /usr/bin/completers-demo -> ~/cliglue/docs/example/completers.py
 #!/bin/bash
 _autocomplete_98246661() {
 COMPREPLY=( $(completers-demo --bash-autocomplete "${COMP_LINE}") )

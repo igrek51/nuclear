@@ -2,7 +2,25 @@ site_name: cliglue
 theme: readthedocs
 repo_url: https://github.com/igrek51/cliglue
 site_author: igrek51
-docs_dir: doc
+docs_dir: docs
 
 nav:
-    - Home: README.md
+    - Single page documentation: README.md
+    - About: about.md
+    - Features: features.md
+    - Quick start: quick-start.md
+    - How does it work?: how-it-works.md
+    - cliglue vs argparse: vs-argparse.md
+    - Installation: installation.md
+    - CLI Builder: builder.md
+    - Sub-commands: subcommands.md
+    - Flags: flags.md
+    - Named parameters: parameters.md
+    - Positional arguments: positional-args.md
+    - Many positional arguments: many-args.md
+    - Dictionaries: dictionaries.md
+    - Auto-completion: autocompletion.md
+    - Auto-generated help: help.md
+    - Data types: data-types.md
+    - Errors handling: errors.md
+    - CLI Rules cheatsheet: cheatsheet.md
