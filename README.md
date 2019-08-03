@@ -157,7 +157,7 @@ Why to use `cliglue`, since we already have Python `argparse`? Here are some sub
 
 ### Migrating from `argparse` to `cliglue`
 
-#### Basic CLI
+#### Migrating: Basic CLI
 argparse:
 ```python
 import argparse
@@ -176,7 +176,7 @@ CliBuilder(help='Program description', run=do_something).has(
 ).run()
 ```
 
-#### Flags
+#### Migrating: Flags
 argparse:
 ```python
 parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
@@ -186,7 +186,7 @@ cliglue:
 flag("-v", "--verbose", help="increase output verbosity"),
 ```
 
-#### Positional arguments
+#### Migrating: Positional arguments
 argparse:
 ```python
 parser.add_argument("square", help="display a square of a given number", type=int)
@@ -196,7 +196,7 @@ cliglue:
 argument("square", help="display a square of a given number", type=int),
 ```
 
-#### Sub-commands
+#### Migrating: Sub-commands
 argparse:
 ```python
 def foo(args):
@@ -223,11 +223,11 @@ args.func(args)
 ```
 cliglue:
 ```python
-def foo(args):
-    print(args.x * args.y)
+def foo(x, y):
+    print(x * y)
 
-def bar(args):
-    print(args.z)
+def bar(z):
+    print(z)
 
 
 CliBuilder().has(
@@ -241,15 +241,14 @@ CliBuilder().has(
 ).run()
 ```
 
-#### Transferring values to functions
+#### Migrating: Transferring values to functions
 argparse:
 ```python
 do_action(args.square, args.verbose)
 ```
 cliglue:
 ```python
-# invoking done automatically
-CliBuilder(run=do_action)
+CliBuilder(run=do_action)  # invoking actions is done automatically by binding
 ```
 
 ## Installation
