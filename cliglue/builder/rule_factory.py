@@ -51,7 +51,7 @@ def parameter(
         help: str = None,
         required: bool = False,
         default: Any = None,
-        type: Union[Type, Callable[[str], Any]] = str,
+        type: Union[Type, Callable[[str], Any], None] = str,
         choices: Union[List[Any], Callable[..., List[Any]]] = None,
         strict_choices: bool = False,
         multiple: bool = False,

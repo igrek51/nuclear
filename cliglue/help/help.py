@@ -6,7 +6,6 @@ from dataclasses import dataclass
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
     PositionalArgumentRule, ManyArgumentsRule, DictionaryRule
 from cliglue.parser.context import RunContext
-from cliglue.parser.error import CliError
 from cliglue.parser.keyword import format_var_names
 from cliglue.parser.parser import Parser
 from cliglue.parser.transform import filter_rules
@@ -38,7 +37,7 @@ def print_usage(rules: List[CliRule]):
     command_name = shell_command_name()
     app_bin_prefix = ' '.join([command_name] + precommands)
 
-    usage = generate_usage(app_bin_prefix, commands, has_options(all_rules), many_args, pos_arguments)
+    usage = generate_usage(app_bin_prefix, commands, have_rules_options(all_rules), many_args, pos_arguments)
 
     how_to_help = f'Run "{command_name} --help" for more information.'
     print('\n'.join([f'Usage: {usage}', how_to_help]))
@@ -85,7 +84,7 @@ def generate_subcommand_help(
 
     app_bin_prefix = ' '.join([shell_command_name()] + precommands)
     out.append('Usage:')
-    out.append(generate_usage(app_bin_prefix, commands, has_options(all_rules), many_args, pos_arguments))
+    out.append(generate_usage(app_bin_prefix, commands, have_rules_options(all_rules), many_args, pos_arguments))
 
     if options:
         out.append('\nOptions:')
@@ -276,5 +275,5 @@ def shell_command_name():
     return sys.argv[0]
 
 
-def has_options(rules: List[CliRule]) -> bool:
+def have_rules_options(rules: List[CliRule]) -> bool:
     return bool(filter_rules(rules, FlagRule, ParameterRule, DictionaryRule, PrimaryOptionRule))

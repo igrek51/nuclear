@@ -82,4 +82,4 @@ foo@bar:~$ ./pos-args.py origin develop
 remote: origin, argument: develop
 ```
 
-See [positional arguments tests](../tests/parser/test_positional_argument.py) as a specification.
+See [positional arguments tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_positional_argument.py) as a specification.
