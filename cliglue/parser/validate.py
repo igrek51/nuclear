@@ -50,10 +50,17 @@ def check_strict_choices(rules: List[ValueRule], internal_vars: InternalVars):
 
             if isinstance(rule, ParameterRule):
                 for name in rule.var_names():
-                    var_value = internal_vars[name]
-                    if var_value not in available_choices:
-                        raise CliSyntaxError(f'parameter value {var_value} does not belong to available choices: '
-                                             f'{available_choices}')
+                    if rule.multiple:
+                        for var_value in internal_vars[name]:
+                            if var_value not in available_choices:
+                                raise CliSyntaxError(
+                                    f'parameter value {var_value} does not belong to available choices: '
+                                    f'{available_choices}')
+                    else:
+                        var_value = internal_vars[name]
+                        if var_value not in available_choices:
+                            raise CliSyntaxError(f'parameter value {var_value} does not belong to available choices: '
+                                                 f'{available_choices}')
 
             elif isinstance(rule, PositionalArgumentRule):
                 var_value = internal_vars[rule.name]

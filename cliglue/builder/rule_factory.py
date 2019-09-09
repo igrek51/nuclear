@@ -1,4 +1,4 @@
-from typing import Union, Callable, Optional, List, Type, Any
+from typing import Union, Callable, Optional, List, Type, Any, Iterable
 
 from .rule import SubcommandRule, PrimaryOptionRule, ParameterRule, PositionalArgumentRule, ManyArgumentsRule, \
     DefaultActionRule, FlagRule, DictionaryRule
@@ -52,7 +52,7 @@ def parameter(
         required: bool = False,
         default: Any = None,
         type: Union[Type, Callable[[str], Any], None] = str,
-        choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        choices: Union[Iterable[Any], Callable[..., List[Any]]] = None,
         strict_choices: bool = False,
         multiple: bool = False,
 ) -> ParameterRule:
@@ -127,7 +127,7 @@ def argument(
         required: bool = True,
         default: Any = None,
         type: Union[Type, Callable[[str], Any]] = str,
-        choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        choices: Union[Iterable[Any], Callable[..., List[Any]]] = None,
         strict_choices: bool = False,
 ) -> PositionalArgumentRule:
     """
@@ -153,7 +153,7 @@ def argument(
 def arguments(
         name: str,
         type: Union[Type, Callable[[str], Any]] = str,
-        choices: Union[List[Any], Callable[..., List[Any]]] = None,
+        choices: Union[Iterable[Any], Callable[..., List[Any]]] = None,
         strict_choices: bool = False,
         count: Optional[int] = None,
         min_count: Optional[int] = None,

@@ -168,3 +168,25 @@ def test_parsing_param_syntax_error():
             parameter('-p', name='param', type=int),
         )
         assert_cli_error(lambda: cli.run(), 'parsing parameter "param":')
+
+
+def test_strict_multi_parameters():
+    with MockIO() as mockio:
+        CliBuilder(run=lambda params: print(params)).has(
+            parameter('add', name='params', multiple=True, choices=['abc', 'def'], strict_choices=True),
+        ).run()
+        assert mockio.stripped() == '[]'
+
+    with MockIO('--add', 'def', '--add', 'abc') as mockio:
+        CliBuilder(run=lambda params: print(params)).has(
+            parameter('add', name='params', multiple=True, choices=['abc', 'def'], strict_choices=True),
+        ).run()
+        assert mockio.stripped() == "['def', 'abc']"
+
+
+def test_strict_multi_parameters_fail():
+    with MockIO('--add', 'dupa'):
+        cli = CliBuilder(run=lambda params: print(params), reraise_error=True).has(
+            parameter('add', name='params', multiple=True, choices=['abc', 'def'], strict_choices=True),
+        )
+        assert_cli_error(lambda: cli.run())
