@@ -2,15 +2,17 @@
 import re
 from typing import List
 
-from cliglue import CliBuilder, parameter, default_action
+from cliglue import CliBuilder, flag, parameter, subcommand, argument
 from cliglue.utils.shell import shell, shell_output
 
 
 def main():
-    CliBuilder('completers-demo').has(
-        parameter('output', choices=list_screens, required=True),
-        parameter('mode', choices=['640x480', '800x480', '800x600'], required=True),
-        default_action(adjust_screen),
+    CliBuilder('autocomplete-demo').has(
+        subcommand('adjust', run=adjust_screen, help='change screen resolution').has(
+            argument('output', choices=list_screens, required=True, help='screen output name'),
+            parameter('mode', choices=['640x480', '800x480', '800x600'], required=True, help='resolution mode'),
+            flag('primary', help='set output as primary'),
+        )
     ).run()
 
 
@@ -24,7 +26,7 @@ def list_screens() -> List[str]:
 
 
 def adjust_screen(output: str, mode: str):
-    shell(f'xrandr --output {output} --mode {mode}')
+    shell(f'echo xrandr --output {output} --mode {mode}')
 
 
 if __name__ == '__main__':
