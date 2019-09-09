@@ -7,7 +7,7 @@ from .output import fatal
 def shell(cmd: str):
     err_code = shell_error_code(cmd)
     if err_code != 0:
-        fatal('failed executing: %s' % cmd)
+        fatal(f'failed executing: {cmd}')
 
 
 def shell_error_code(cmd: str) -> int:
