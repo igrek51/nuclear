@@ -9,6 +9,7 @@ from cliglue.parser.context import RunContext
 from cliglue.parser.keyword import format_var_names
 from cliglue.parser.parser import Parser
 from cliglue.parser.transform import filter_rules
+from cliglue.version import __version__
 
 
 @dataclass
@@ -100,23 +101,19 @@ def generate_subcommand_help(
 
 def app_help_info(app_name: str, help: str, version: str) -> Optional[str]:
     info = app_name_version(app_name, version)
-    if help:
-        if info:
-            info += ' - '
-        info += help
-    return info
+    return ' - '.join(filter(bool, [info, help]))
 
 
 def app_name_version(app_name, version):
-    info = ''
+    infos = []
     if app_name:
-        info += app_name
+        infos += [app_name]
     if version:
         version = _normalized_version(version)
-        if info:
-            info += ' '
-        info += version
-    return info
+        infos += [version]
+    if infos:
+        infos += [f'(cliglue v{__version__})']
+    return ' '.join(infos)
 
 
 def generate_usage(app_bin_prefix, commands, has_options: bool, many_args, pos_arguments) -> str:

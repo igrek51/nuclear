@@ -100,6 +100,6 @@ Run "multiapp.py git COMMAND --help" for more information on a command.
 Use `--version` in order to show your application version:
 ```console
 foo@bar:~$ python3 multiapp.py --version
-multiapp v1.0.0
+multiapp v1.0.0 (cliglue v1.0.1)
 ```
 

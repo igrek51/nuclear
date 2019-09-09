@@ -1,4 +1,5 @@
 import setuptools
+from cliglue import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -8,7 +9,7 @@ with open("requirements.txt", "r") as fh:
 
 setuptools.setup(
     name="cliglue",
-    version="1.0.0",
+    version=__version__,
     author="igrek51",
     author_email="igrek51.dev@gmail.com",
     description="Declarative parser for command line interfaces",
