@@ -6,7 +6,7 @@ from dataclasses import dataclass
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
     PositionalArgumentRule, ManyArgumentsRule, DictionaryRule
 from cliglue.parser.context import RunContext
-from cliglue.parser.keyword import format_var_names
+from cliglue.parser.keyword import format_var_names, format_var_name
 from cliglue.parser.parser import Parser
 from cliglue.parser.transform import filter_rules
 from cliglue.version import __version__
@@ -19,7 +19,7 @@ class _OptionHelp(object):
     parent: '_OptionHelp' = None
 
 
-internal_options = {'--bash-install', '--bash-autocomplete'}
+internal_options = {'--bash-autocomplete'}
 
 
 def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str], hide_internal: bool):
@@ -74,6 +74,7 @@ def generate_subcommand_help(
     pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
     many_args = filter_rules(all_rules, ManyArgumentsRule)
 
+    pos_args_helps: List[_OptionHelp] = _generate_pos_args_helps(pos_arguments, many_args)
     options: List[_OptionHelp] = _generate_options_helps(all_rules, hide_internal)
     commands: List[_OptionHelp] = _generate_commands_helps(subcommands)
 
@@ -86,6 +87,10 @@ def generate_subcommand_help(
     app_bin_prefix = ' '.join([shell_command_name()] + precommands)
     out.append('Usage:')
     out.append(generate_usage(app_bin_prefix, commands, have_rules_options(all_rules), many_args, pos_arguments))
+
+    if pos_args_helps:
+        out.append('\nArguments:')
+        __helpers_output(pos_args_helps, out)
 
     if options:
         out.append('\nOptions:')
@@ -132,7 +137,11 @@ def __helpers_output(commands, out):
     for helper in commands:
         name_padded = helper.cmd.ljust(padding)
         if helper.help:
-            out.append(f'  {name_padded} - {helper.help}')
+            for idx, line in enumerate(helper.help.splitlines()):
+                if idx == 0:
+                    out.append(f'  {name_padded} - {line}')
+                else:
+                    out.append(' ' * (2 + padding + 3) + line)
         else:
             out.append(f'  {name_padded}')
 
@@ -151,6 +160,14 @@ def _max_name_width(helps: List[_OptionHelp]) -> int:
     return max(map(lambda h: len(h.cmd), helps))
 
 
+def _generate_pos_args_helps(
+        pos_arguments: List[PositionalArgumentRule],
+        many_args: List[ManyArgumentsRule]
+) -> List[_OptionHelp]:
+    return [_pos_arg_help(rule) for rule in pos_arguments] + \
+           [_many_args_help(rule) for rule in many_args]
+
+
 def _generate_options_helps(rules: List[CliRule], hide_internal: bool) -> List[_OptionHelp]:
     # filter non-empty
     return list(filter(lambda o: o, [_generate_option_help(rule, hide_internal) for rule in rules]))
@@ -165,6 +182,7 @@ def _generate_option_help(rule: CliRule, hide_internal: bool) -> Optional[_Optio
         return _parameter_help(rule)
     elif isinstance(rule, DictionaryRule):
         return _dictionary_help(rule)
+    return None
 
 
 def _generate_commands_helps(rules: List[CliRule], parent: _OptionHelp = None, subrules: List[CliRule] = None
@@ -217,7 +235,9 @@ def _flag_help(rule: FlagRule) -> _OptionHelp:
 
 def _parameter_help(rule: ParameterRule) -> _OptionHelp:
     cmd = ', '.join(sorted_keywords(rule.keywords)) + ' ' + _param_display_name(rule)
-    return _OptionHelp(cmd, rule.help)
+    default_value = display_default_value(rule.default)
+    help_text = '\n'.join(filter(lambda t: t is not None, [rule.help, default_value]))
+    return _OptionHelp(cmd, help_text)
 
 
 def _dictionary_help(rule: DictionaryRule) -> _OptionHelp:
@@ -225,9 +245,22 @@ def _dictionary_help(rule: DictionaryRule) -> _OptionHelp:
     return _OptionHelp(cmd, rule.help)
 
 
+def _pos_arg_help(rule: PositionalArgumentRule) -> _OptionHelp:
+    cmd = display_positional_argument(rule)
+    default_value = display_default_value(rule.default)
+    help_text = '\n'.join(filter(lambda t: t is not None, [rule.help, default_value]))
+    return _OptionHelp(cmd, help_text)
+
+
+def _many_args_help(rule: ManyArgumentsRule) -> _OptionHelp:
+    cmd = display_many_arguments(rule)
+    help_text = rule.help
+    return _OptionHelp(cmd, help_text)
+
+
 def _param_display_name(rule: ParameterRule) -> str:
     if rule.name:
-        return rule.name.upper()
+        return format_var_name(rule.name).upper()
     else:
         # get name from longest keyword
         names: Set[str] = format_var_names(rule.keywords)
@@ -235,7 +268,7 @@ def _param_display_name(rule: ParameterRule) -> str:
 
 
 def _argument_var_name(rule: PositionalArgumentRule) -> str:
-    return rule.name.upper()
+    return format_var_name(rule.name).upper()
 
 
 def _subcommand_short_name(rule: SubcommandRule) -> str:
@@ -255,9 +288,12 @@ def display_positional_argument(rule: PositionalArgumentRule) -> str:
         return f' [{var_name}]'
 
 
-def display_all_arguments(rule: ManyArgumentsRule) -> str:
+def display_many_arguments(rule: ManyArgumentsRule) -> str:
     arg_name = rule.name.upper()
-    return f' [{arg_name}...]'
+    if rule.count_min():
+        return f' {arg_name}...'
+    else:
+        return f' [{arg_name}...]'
 
 
 def usage_positional_arguments(rules: List[PositionalArgumentRule]) -> str:
@@ -265,7 +301,7 @@ def usage_positional_arguments(rules: List[PositionalArgumentRule]) -> str:
 
 
 def usage_many_arguments(rules: List[ManyArgumentsRule]) -> str:
-    return ''.join([display_all_arguments(rule) for rule in rules])
+    return ''.join([display_many_arguments(rule) for rule in rules])
 
 
 def shell_command_name():
@@ -274,3 +310,9 @@ def shell_command_name():
 
 def have_rules_options(rules: List[CliRule]) -> bool:
     return bool(filter_rules(rules, FlagRule, ParameterRule, DictionaryRule, PrimaryOptionRule))
+
+
+def display_default_value(default) -> Optional[str]:
+    if default is None:
+        return None
+    return 'Default: ' + str(default)

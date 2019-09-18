@@ -116,7 +116,7 @@ def test_default_help_when_no_arguments():
 def test_hiding_internal_options():
     with MockIO('--help') as mockio:
         CliBuilder(hide_internal=True).run()
-        assert '--bash-install' not in mockio.output()
+        assert '--bash-install' in mockio.output()
         assert '--bash-autocomplete' not in mockio.output()
     with MockIO('--help') as mockio:
         CliBuilder(hide_internal=False).run()
@@ -169,3 +169,44 @@ def test_display_explicit_param_name():
             parameter('p', name='param'),
         ).run()
         assert '-p PARAM' in mockio.output()
+
+
+def test_display_parameter_default_value():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            parameter('src-path', help='source path', default='/home/user'),
+            parameter('target-path', default='/root'),
+            parameter('num', help='number', type=int, default=52),
+        ).run()
+        assert 'SRC_PATH' in mockio.output()
+        assert 'source path' in mockio.output()
+        assert 'Default: /home/user' in mockio.output()
+        assert 'Default: 52' in mockio.output()
+
+
+def test_display_argument_default_value():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            argument('src-path', help='source path', default='/home/user', required=False),
+            argument('target-path', default='/root', required=False),
+            argument('num', help='number', type=int, default=52, required=False),
+        ).run()
+        assert 'SRC_PATH' in mockio.output()
+        assert 'source path' in mockio.output()
+        assert 'Default: /home/user' in mockio.output()
+        assert 'Default: 52' in mockio.output()
+
+
+def test_display_arguments_help():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            argument('src-path', help='source path'),
+            argument('num', help='number', type=int),
+            arguments('paths'),
+        ).run()
+        assert 'Arguments:' in mockio.output()
+        assert 'SRC_PATH' in mockio.output()
+        assert 'source path' in mockio.output()
+        assert 'NUM' in mockio.output()
+        assert 'number' in mockio.output()
+        assert 'PATHS' in mockio.output()

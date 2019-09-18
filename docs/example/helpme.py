@@ -8,7 +8,7 @@ def main():
         subcommand('git').has(
             subcommand('help', help='shows help'),
             subcommand('push').has(
-                argument('remote'),
+                argument('remote', 'remote repo name'),
                 argument('branch', required=False),
             ),
             subcommand('describe').has(
