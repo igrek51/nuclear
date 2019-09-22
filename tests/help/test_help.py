@@ -222,3 +222,21 @@ def test_display_arguments_with_subcommand_help():
         ).run()
         mockio.assert_match(r'^ +module \[MODULES\.\.\.\] +- install modules$')
         mockio.assert_match(r'^ +module list \[MODULES...\] +- list modules$')
+
+
+def test_subcommand_arguments_help():
+    with MockIO('module', '--help') as mockio:
+        CliBuilder().has(
+            subcommand('module', help='install modules').has(
+                arguments('modules', help='module names'),
+            )
+        ).run()
+        mockio.assert_match(r'^ +\[MODULES...\] +- module names$')
+
+
+def test_strict_choices_show_list_help():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            arguments('modules', help='module names', choices=['monty', 'python'], strict_choices=True)
+        ).run()
+        mockio.assert_match(r'Choices: monty, python$')

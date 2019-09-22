@@ -61,3 +61,9 @@ class MockIO:
             if matcher.search(line):
                 return
         assert False, f'Regex: "{regex}" does not match the output: {self.output()}'
+
+    def assert_not_match(self, regex: str):
+        matcher = re.compile(regex)
+        for line in self.output().splitlines():
+            if matcher.search(line):
+                assert False, f'Regex: "{regex}" should not match the output: {self.output()}'

@@ -4,11 +4,12 @@ from typing import List, Set, Optional
 from dataclasses import dataclass, field
 
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
-    PositionalArgumentRule, ManyArgumentsRule, DictionaryRule
+    PositionalArgumentRule, ManyArgumentsRule, DictionaryRule, ValueRule
 from cliglue.parser.context import RunContext
 from cliglue.parser.keyword import format_var_names, format_var_name
 from cliglue.parser.parser import Parser
 from cliglue.parser.transform import filter_rules
+from cliglue.parser.value import generate_value_choices
 from cliglue.version import __version__
 
 
@@ -235,7 +236,8 @@ def _flag_help(rule: FlagRule) -> _OptionHelp:
 def _parameter_help(rule: ParameterRule) -> _OptionHelp:
     cmd = ', '.join(sorted_keywords(rule.keywords)) + ' ' + _param_display_name(rule)
     default_value = display_default_value(rule.default)
-    help_text = '\n'.join(filter(lambda t: t is not None, [rule.help, default_value]))
+    choices_help = display_choices_help(rule)
+    help_text = join_nonempty_lines(rule.help, default_value, choices_help)
     return _OptionHelp(cmd, help_text)
 
 
@@ -247,13 +249,15 @@ def _dictionary_help(rule: DictionaryRule) -> _OptionHelp:
 def _pos_arg_help(rule: PositionalArgumentRule) -> _OptionHelp:
     cmd = display_positional_argument(rule)
     default_value = display_default_value(rule.default)
-    help_text = '\n'.join(filter(lambda t: t is not None, [rule.help, default_value]))
+    choices_help = display_choices_help(rule)
+    help_text = join_nonempty_lines(rule.help, default_value, choices_help)
     return _OptionHelp(cmd, help_text)
 
 
 def _many_args_help(rule: ManyArgumentsRule) -> _OptionHelp:
     cmd = display_many_arguments(rule)
-    help_text = rule.help
+    choices_help = display_choices_help(rule)
+    help_text = join_nonempty_lines(rule.help, choices_help)
     return _OptionHelp(cmd, help_text)
 
 
@@ -315,3 +319,14 @@ def display_default_value(default) -> Optional[str]:
     if default is None:
         return None
     return 'Default: ' + str(default)
+
+
+def display_choices_help(rule: ValueRule) -> Optional[str]:
+    choices = generate_value_choices(rule)
+    if not choices:
+        return None
+    return 'Choices: ' + ', '.join(choices)
+
+
+def join_nonempty_lines(*lines: str) -> str:
+    return '\n'.join(filter(lambda t: t is not None, lines))
