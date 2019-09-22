@@ -1,3 +1,4 @@
+import re
 import sys
 from io import StringIO
 from typing import Type
@@ -53,3 +54,10 @@ class MockIO:
 
     def stripped(self) -> str:
         return self.output().strip()
+
+    def assert_match(self, regex: str):
+        matcher = re.compile(regex)
+        for line in self.output().splitlines():
+            if matcher.search(line):
+                return
+        assert False, f'Regex: "{regex}" does not match the output: {self.output()}'

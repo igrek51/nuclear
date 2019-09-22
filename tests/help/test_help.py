@@ -210,3 +210,15 @@ def test_display_arguments_help():
         assert 'NUM' in mockio.output()
         assert 'number' in mockio.output()
         assert 'PATHS' in mockio.output()
+
+
+def test_display_arguments_with_subcommand_help():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            subcommand('module', help='install modules').has(
+                subcommand('list', help='list modules'),
+                arguments('modules', help='module names'),
+            )
+        ).run()
+        mockio.assert_match(r'^ +module \[MODULES\.\.\.\] +- install modules$')
+        mockio.assert_match(r'^ +module list \[MODULES...\] +- list modules$')

@@ -1,7 +1,7 @@
 import sys
 from typing import List, Set, Optional
 
-from dataclasses import dataclass
+from dataclasses import dataclass, field
 
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
     PositionalArgumentRule, ManyArgumentsRule, DictionaryRule
@@ -17,6 +17,8 @@ class _OptionHelp(object):
     cmd: str
     help: str
     parent: '_OptionHelp' = None
+    rule: SubcommandRule = None
+    subrules: List[CliRule] = field(default_factory=lambda: [])
 
 
 internal_options = {'--bash-autocomplete'}
@@ -33,12 +35,12 @@ def print_usage(rules: List[CliRule]):
     pos_arguments = filter_rules(all_rules, PositionalArgumentRule)
     many_args = filter_rules(all_rules, ManyArgumentsRule)
 
-    commands: List[_OptionHelp] = _generate_commands_helps(available_subcommands)
+    has_commands = bool(filter_rules(available_subcommands, SubcommandRule))
 
     command_name = shell_command_name()
     app_bin_prefix = ' '.join([command_name] + precommands)
 
-    usage = generate_usage(app_bin_prefix, commands, have_rules_options(all_rules), many_args, pos_arguments)
+    usage = generate_usage(app_bin_prefix, has_commands, have_rules_options(all_rules), many_args, pos_arguments)
 
     how_to_help = f'Run "{command_name} --help" for more information.'
     print('\n'.join([f'Usage: {usage}', how_to_help]))
@@ -86,7 +88,7 @@ def generate_subcommand_help(
 
     app_bin_prefix = ' '.join([shell_command_name()] + precommands)
     out.append('Usage:')
-    out.append(generate_usage(app_bin_prefix, commands, have_rules_options(all_rules), many_args, pos_arguments))
+    out.append(generate_usage(app_bin_prefix, bool(commands), have_rules_options(all_rules), many_args, pos_arguments))
 
     if pos_args_helps:
         out.append('\nArguments:')
@@ -121,9 +123,9 @@ def app_name_version(app_name, version):
     return ' '.join(infos)
 
 
-def generate_usage(app_bin_prefix, commands, has_options: bool, many_args, pos_arguments) -> str:
+def generate_usage(app_bin_prefix, has_commands: bool, has_options: bool, many_args, pos_arguments) -> str:
     usage_syntax: str = app_bin_prefix
-    if commands:
+    if has_commands:
         usage_syntax += ' [COMMAND]'
     if has_options:
         usage_syntax += ' [OPTIONS]'
@@ -188,31 +190,28 @@ def _generate_option_help(rule: CliRule, hide_internal: bool) -> Optional[_Optio
 def _generate_commands_helps(rules: List[CliRule], parent: _OptionHelp = None, subrules: List[CliRule] = None
                              ) -> List[_OptionHelp]:
     commands: List[_OptionHelp] = []
-    if not subrules:
-        subrules = []
-    for rule in rules:
-        if isinstance(rule, SubcommandRule):
-            subsubrules = subrules + rule.subrules
-            helper = _subcommand_help(rule, parent, subsubrules)
-            if rule.run or rule.help:
-                commands.append(helper)
-            commands.extend(_generate_commands_helps(rule.subrules, helper, subsubrules))
+    for rule in filter_rules(rules, SubcommandRule):
+        subsubrules = (subrules or []) + rule.subrules
+        helper = _subcommand_help(rule, parent, subsubrules)
+        if rule.run or rule.help:
+            commands.append(helper)
+        commands.extend(_generate_commands_helps(rule.subrules, helper, subsubrules))
     return commands
 
 
 def _subcommand_help(rule: SubcommandRule, parent: _OptionHelp, subrules: List[CliRule]) -> _OptionHelp:
     pos_args = filter_rules(subrules, PositionalArgumentRule)
-    all_args = filter_rules(subrules, ManyArgumentsRule)
+    many_args = filter_rules(subrules, ManyArgumentsRule)
     cmd = _subcommand_prefix(parent) + '|'.join(sorted_keywords(rule.keywords))
     cmd += usage_positional_arguments(pos_args)
-    cmd += usage_many_arguments(all_args)
-    return _OptionHelp(cmd, rule.help, parent)
+    cmd += usage_many_arguments(many_args)
+    return _OptionHelp(cmd, rule.help, parent=parent, rule=rule, subrules=subrules)
 
 
 def _subcommand_prefix(helper: _OptionHelp) -> str:
     if not helper:
         return ''
-    return helper.cmd + ' '
+    return _subcommand_prefix(helper.parent) + '|'.join(sorted_keywords(helper.rule.keywords)) + ' '
 
 
 def _primary_option_help(rule: PrimaryOptionRule, hide_internal: bool) -> Optional[_OptionHelp]:
