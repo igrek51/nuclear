@@ -1,5 +1,5 @@
 ## `cliglue` vs `argparse`
-Why to use `cliglue`, since we already have Python `argparse`? Here are some subjective advantages of `cliglue`:
+Why use `cliglue`, since Python has already `argparse`? Here are some subjective advantages of `cliglue`:
 
 - declarative way of CLI logic in one place,
 - autocompletion out of the box,
@@ -10,6 +10,51 @@ Why to use `cliglue`, since we already have Python `argparse`? Here are some sub
 - CLI definition code as a clear documentation.
 
 ### Migrating from `argparse` to `cliglue`
+
+#### Migrating: Sub-commands
+argparse:
+```python
+def foo(args):
+    print(args.x * args.y)
+
+def bar(args):
+    print(args.z)
+
+
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers()
+
+parser_foo = subparsers.add_parser('foo', help='foo help')
+parser_foo.add_argument('-x', type=int, default=1)
+parser_foo.add_argument('y', type=float)
+parser_foo.set_defaults(func=foo)
+
+parser_bar = subparsers.add_parser('bar', help='bar help')
+parser_bar.add_argument('z')
+parser_bar.set_defaults(func=bar)
+
+args = parser.parse_args()
+args.func(args)
+```
+with cliglue it's much simpler and more clear:
+```python
+def foo(x, y):
+    print(x * y)
+
+def bar(z):
+    print(z)
+
+
+CliBuilder().has(
+    subcommand('foo', help='foo help', run=foo).has(
+        parameter('-x', type=int, default=1),
+        argument('y', type=float),
+    ),
+    subcommand('bar', help='bar help', run=bar).has(
+        argument('z'),
+    ),
+).run()
+```
 
 #### Migrating: Basic CLI
 argparse:
@@ -48,51 +93,6 @@ parser.add_argument("square", help="display a square of a given number", type=in
 cliglue:
 ```python
 argument("square", help="display a square of a given number", type=int),
-```
-
-#### Migrating: Sub-commands
-argparse:
-```python
-def foo(args):
-    print(args.x * args.y)
-
-def bar(args):
-    print(args.z)
-
-
-parser = argparse.ArgumentParser()
-subparsers = parser.add_subparsers()
-
-parser_foo = subparsers.add_parser('foo', help='foo help')
-parser_foo.add_argument('-x', type=int, default=1)
-parser_foo.add_argument('y', type=float)
-parser_foo.set_defaults(func=foo)
-
-parser_bar = subparsers.add_parser('bar', help='bar help')
-parser_bar.add_argument('z')
-parser_bar.set_defaults(func=bar)
-
-args = parser.parse_args()
-args.func(args)
-```
-cliglue:
-```python
-def foo(x, y):
-    print(x * y)
-
-def bar(z):
-    print(z)
-
-
-CliBuilder().has(
-    subcommand('foo', help='foo help', run=foo).has(
-        parameter('-x', type=int, default=1),
-        argument('y', type=float),
-    ),
-    subcommand('bar', help='bar help', run=bar).has(
-        argument('z'),
-    ),
-).run()
 ```
 
 #### Migrating: Transferring values to functions

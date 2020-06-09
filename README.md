@@ -8,11 +8,12 @@
 
 `cliglue` is a declarative parser for command line interfaces in Python.
 It's a binding glue between CLI shell arguments and functions being invoked.
+It mostly focuses on building multi level command trees.
 
 `cliglue` parses and validates command line arguments provided by user when running console application.
 Then it automatically triggers matched action, based on the declared Command-Line Interface rules, injecting all needed parameters.
 You don't need to write the "glue" code for binding & parsing parameters every time.
-So it makes writing console aplications faster and simpler.
+So it makes writing console aplications simpler and more clear.
 
 ## Features
 - [Auto-generated help and usage](https://cliglue.readthedocs.io/en/latest#auto-generated-help) (`--help`)
@@ -31,109 +32,175 @@ So it makes writing console aplications faster and simpler.
 - [Declarative CLI builder](https://cliglue.readthedocs.io/en/latest#cli-rules-cheatsheet)
 
 ## Quick start
-Let's create simple command-line application using `cliglue`.
-Let's assume we already have a function as follows:
+Let's create a simple command-line application using `cliglue`.
+Let's assume we already have our fancy functions as follows:
 ```python
-def say_hello(name: str, reverse: bool, repeat: int):
-    if reverse:
-        name = name[::-1]
-    print(f'Hello {name}.' * repeat)
+def say_hello(name: str, decode: bool, repeat: int):
+    if decode:
+        name = base64.b64decode(name).decode('utf-8')
+    print(' '.join([f"I'm a {name}!"] * repeat))
+
+def calculate_factorial(n: int):
+    print(reduce(lambda x, y: x * y, range(1, n + 1)))
+
+def calculate_primes(n: int):
+    print(sorted(reduce((lambda r, x: r - set(range(x ** 2, n, x)) if (x in r) else r),
+                        range(2, int(n ** 0.5)), set(range(2, n)))))
 ```
-and we need a "glue" which binds it with a CLI (Command-Line Interface).
-We want it to be run with different parameters provided by user to the terminal shell in a manner:
-`./hello.py WORLD --reverse --repeat=1`.
-We've just identified one positional argument, one flag and one numerical parameter.
-So our CLI definition may be declared using `cliglue`:
+and we need a "glue" which binds them with a CLI (Command-Line Interface).
+We want it to be run with different keywords and parameters provided by user to the terminal shell in a following manner:
+- `./quickstart.py hello NAME --decode --repeat=3` mapped to `say_hello` function,
+- `./quickstart.py calculate factorial N` mapped to `calculate_factorial` function,
+- `./quickstart.py calculate primes N` mapped to `calculate_primes` function,
+
+We've just identified 2 main commands in a program: `hello` and `calculate` (which in turn contains 2 subcommands: `factorial` & `primes`). That forms a tree:
+- `hello` command has one positional argument `NAME`, one boolean flag `decode` and one numerical parameter `repeat`.
+- `calculate` command has 2 another subcommands:
+    * `factorial` subcommand has one positional argument `N`,
+    * `primes` subcommand has one positional argument `N`,
+
+So our CLI definition may be declared using `cliglue` in a following way:
 ```python
-CliBuilder('hello-app', run=say_hello).has(
-    argument('name'),
-    flag('reverse'),
-    parameter('repeat', type=int, default=1),
+CliBuilder().has(
+    subcommand('hello', run=say_hello).has(
+        argument('name'),
+        flag('decode', help='Decode name as base64'),
+        parameter('repeat', type=int, default=1),
+    ),
+    subcommand('calculate').has(
+        subcommand('factorial', help='Calculate factorial', run=calculate_factorial).has(
+            argument('n', type=int),
+        ),
+        subcommand('primes', help='List prime numbers using Sieve of Eratosthenes', run=calculate_primes).has(
+            argument('n', type=int, required=False, default=100, help='maximum number to check'),
+        ),
+    ),
 )
 ```
-Getting all together, we've binded our function with a Command-Line Interface:
+Getting it all together, we've bound our function with a Command-Line Interface:
 
-**hello.py**:
+**quickstart.py**:
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, flag, parameter
+import base64
+from functools import reduce
+from cliglue import CliBuilder, argument, flag, parameter, subcommand
 
-def say_hello(name: str, reverse: bool, repeat: int):
-    if reverse:
-        name = name[::-1]
-    print(f'Hello {name}.' * repeat)
+def say_hello(name: str, decode: bool, repeat: int):
+    if decode:
+        name = base64.b64decode(name).decode('utf-8')
+    print(' '.join([f"I'm a {name}!"] * repeat))
 
-CliBuilder('hello-app', run=say_hello).has(
-    argument('name'),
-    flag('reverse'),
-    parameter('repeat', type=int, default=1),
+def calculate_factorial(n: int):
+    print(reduce(lambda x, y: x * y, range(1, n + 1)))
+
+def calculate_primes(n: int):
+    print(sorted(reduce((lambda r, x: r - set(range(x ** 2, n, x)) if (x in r) else r),
+                        range(2, int(n ** 0.5)), set(range(2, n)))))
+
+CliBuilder().has(
+    subcommand('hello', run=say_hello).has(
+        argument('name'),
+        flag('decode', help='Decode name as base64'),
+        parameter('repeat', type=int, default=1),
+    ),
+    subcommand('calculate').has(
+        subcommand('factorial', help='Calculate factorial', run=calculate_factorial).has(
+            argument('n', type=int),
+        ),
+        subcommand('primes', help='List prime numbers using Sieve of Eratosthenes', run=calculate_primes).has(
+            argument('n', type=int, required=False, default=100, help='maximum number to check'),
+        ),
+    ),
 ).run()
 ```
 
 Let's trace what is happening here:
 
-- `CliBuilder` builds CLI tree for entire application.
-- `'hello-app'` is a name for that application to be displayed in help output.
-- `run=say_hello` sets default action for the application. Now a function `say_hello` is binded as a main action and will be invoked if no other action is matched.
-- `.has(...)` allows to embed other rules inside that builder. Returns `CliBuilder` itself.
-- `argument('name')` declares positional argument. From now, first CLI argument (after binary name) will be recognized as `name` variable.
-- `flag('reverse')` binds `--reverse` keyword to a flag named `reverse`. So as it may be used later on.
+- `CliBuilder()` builds CLI tree for entire application.
+- `.has(...)` allows to embed other nested rules inside that builder. Returns `CliBuilder` itself for further building.
+- `subcommand('hello', run=say_hello)` binds `hello` command to `say_hello` function. From now, it will be invoked when `hello` command occurrs.
+- `subcommand.has(...)` embeds nested subrules on lower level for that subcommand only.
+- `argument('name')` declares positional argument. From now, first CLI argument (after binary name and commands) will be recognized as `name` variable.
+- `flag('decode')` binds `--decode` keyword to a flag named `decode`. So as it may be used later on. Providing `help` adds description to help screen.
 - `parameter('repeat', type=int, default=1)` binds `--repeat` keyword to a parameter named `repeat`, which type is `int` and its default value is `1`.
 - Finally, invoking `.run()` does all the magic.
-It gets system arguments list, starts to process them and invokes relevant action.
+It gets system arguments list, starts to process them and invokes most relevant action.
 
 ### Help / Usage
-`CliBuilder` has some basic options added by default, like `--help` or `--version`.
+`CliBuilder` has some basic options added by default, e.g. `--help`.
 Thus, you can check the usage by running application with `--help` flag:
 ```console
-foo@bar:~$ ./hello.py --help
-hello-app
-
+foo@bar:~$ ./quickstart.py --help
 Usage:
-  ./hello.py [OPTIONS] NAME
+./quickstart.py [COMMAND] [OPTIONS]
 
 Options:
-  -h, --help [SUCOMMANDS...]       - Display this help and exit
-  --reverse                       
-  --repeat REPEAT                 
+  -h, --help [SUBCOMMANDS...] - Display this help and exit
+  --bash-install APP_NAME     - Install this program in bash to be executable from anywhere, add autocompletion links
+
+Commands:
+  hello NAME           
+  calculate factorial N - Calculate factorial
+  calculate primes [N]  - List prime numbers using Sieve of Eratosthenes
+
+Run "./quickstart.py COMMAND --help" for more information on a command.
 ```
 
-Notice there are already rules being displayed, which were declared before:
+As prompted, we can check more detailed subcommand helps:
+```console
+foo@bar:~$ ./quickstart.py hello --help
+Usage:
+./quickstart.py hello [OPTIONS] NAME
 
-- positional argument `name`: `./hello.py [OPTIONS] NAME`
-- flag `reverse`: `--reverse`
-- parameter `repeat`: `--repeat REPEAT`
+Arguments:
+   NAME
+
+Options:
+  --decode                    - Decode name as base64
+  --repeat REPEAT             - Default: 1
+  -h, --help [SUBCOMMANDS...] - Display this help and exit
+  --bash-install APP_NAME     - Install this program in bash to be executable from anywhere, add autocompletion links
+```
 
 ### Injecting parameters
-Now when we execute our application with one argument provided, we get:
+Let's invoke `say_hello` function on a first run.
+
+Now when we execute our application with required argument provided, we get:
 ```console
-foo@bar:~$ ./hello.py world
-Hello world.
+foo@bar:~$ ./quickstart.py hello world
+I'm a world!
 ```
 Note that `world` has been recognized as `name` argument.
 We've binded `say_hello` as a default action, so it has been invoked with particular parameters:
 ```python
-say_hello(name='world', reverse=False, repeat=1)
+say_hello(name='world', decode=False, repeat=1)
 ```
 
 - positional argument `name` has been assigned a `'world'` value.
-- flag `reverse` was not given, so it's `False` by default.
+- flag `decode` was not given, so it's `False` by default.
 - parameter `repeat` was not given either, so it was set to its default value `1`.
 
 Let's provide all of the parameters explicitly, then we get:
 ```console
-foo@bar:~$ ./hello.py --reverse world --repeat 2
-Hello dlrow.Hello dlrow.
+foo@bar:~$ ./quickstart.py hello UGlja2xl --decode --repeat=3
+I'm a Pickle! I'm a Pickle! I'm a Pickle!
 ```
-Or we can do the same in a different way:
+Or we can do the same in arbitrary order:
 ```console
-foo@bar:~$ ./hello.py world --repeat=2 --reverse
-Hello dlrow.Hello dlrow.
+foo@bar:~$ ./quickstart.py hello --repeat 3 --decode UGlja2xl
+I'm a Pickle! I'm a Pickle! I'm a Pickle!
+```
+
+Invoking other subcommands is just as easy:
+```console
+foo@bar:~$ ./quickstart.py calculate primes 50
+[2, 3, 5, 7, 11, 13, 17, 19, 23, 29, 31, 37, 41, 43, 47, 49]
 ```
 
 When you are writing function for your action and you need to access some of the variables (flags, parameters, arguments, etc.),
 just simply add a parameter to the function with a name same as the variable you need.
-Then, the proper value will be injected by `cliglue`.
+Then, the proper value will be parsed and injected by `cliglue`.
 
 ## How does it work?
 1. You define all required CLI rules for your program in a declarative tree.
@@ -145,7 +212,7 @@ Then, the proper value will be injected by `cliglue`.
 You only need to bind the keywords to the rules and `cliglue` will handle all the rest for you.
 
 ## `cliglue` vs `argparse`
-Why to use `cliglue`, since we already have Python `argparse`? Here are some subjective advantages of `cliglue`:
+Why use `cliglue`, since Python has already `argparse`? Here are some subjective advantages of `cliglue`:
 
 - declarative way of CLI logic in one place,
 - autocompletion out of the box,
@@ -156,6 +223,51 @@ Why to use `cliglue`, since we already have Python `argparse`? Here are some sub
 - CLI definition code as a clear documentation.
 
 ### Migrating from `argparse` to `cliglue`
+
+#### Migrating: Sub-commands
+argparse:
+```python
+def foo(args):
+    print(args.x * args.y)
+
+def bar(args):
+    print(args.z)
+
+
+parser = argparse.ArgumentParser()
+subparsers = parser.add_subparsers()
+
+parser_foo = subparsers.add_parser('foo', help='foo help')
+parser_foo.add_argument('-x', type=int, default=1)
+parser_foo.add_argument('y', type=float)
+parser_foo.set_defaults(func=foo)
+
+parser_bar = subparsers.add_parser('bar', help='bar help')
+parser_bar.add_argument('z')
+parser_bar.set_defaults(func=bar)
+
+args = parser.parse_args()
+args.func(args)
+```
+with cliglue it's much simpler and more clear:
+```python
+def foo(x, y):
+    print(x * y)
+
+def bar(z):
+    print(z)
+
+
+CliBuilder().has(
+    subcommand('foo', help='foo help', run=foo).has(
+        parameter('-x', type=int, default=1),
+        argument('y', type=float),
+    ),
+    subcommand('bar', help='bar help', run=bar).has(
+        argument('z'),
+    ),
+).run()
+```
 
 #### Migrating: Basic CLI
 argparse:
@@ -194,51 +306,6 @@ parser.add_argument("square", help="display a square of a given number", type=in
 cliglue:
 ```python
 argument("square", help="display a square of a given number", type=int),
-```
-
-#### Migrating: Sub-commands
-argparse:
-```python
-def foo(args):
-    print(args.x * args.y)
-
-def bar(args):
-    print(args.z)
-
-
-parser = argparse.ArgumentParser()
-subparsers = parser.add_subparsers()
-
-parser_foo = subparsers.add_parser('foo', help='foo help')
-parser_foo.add_argument('-x', type=int, default=1)
-parser_foo.add_argument('y', type=float)
-parser_foo.set_defaults(func=foo)
-
-parser_bar = subparsers.add_parser('bar', help='bar help')
-parser_bar.add_argument('z')
-parser_bar.set_defaults(func=bar)
-
-args = parser.parse_args()
-args.func(args)
-```
-cliglue:
-```python
-def foo(x, y):
-    print(x * y)
-
-def bar(z):
-    print(z)
-
-
-CliBuilder().has(
-    subcommand('foo', help='foo help', run=foo).has(
-        parameter('-x', type=int, default=1),
-        argument('y', type=float),
-    ),
-    subcommand('bar', help='bar help', run=bar).has(
-        argument('z'),
-    ),
-).run()
 ```
 
 #### Migrating: Transferring values to functions

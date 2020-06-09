@@ -4,6 +4,8 @@
 rm -rf build/
 rm -rf dist/
 
+# increment __version__
+
 ./make-readme.sh
 
 python3.7 setup.py sdist bdist_wheel

@@ -120,8 +120,8 @@ class CliBuilder(object):
                 arguments('subcommands'),
             ),
             primary_option('--bash-install', run=__bash_install,
-                           help='Install this program in bash to be executable from anywhere. '
-                                'It adds autocompletion links as well.').has(
+                           help='Install this program in bash to be executable from anywhere, '
+                                'add autocompletion links').has(
                 argument('app-name', help='binary name'),
             ),
             primary_option('--bash-autocomplete', run=__bash_autocomplete,

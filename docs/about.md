@@ -8,9 +8,10 @@
 
 `cliglue` is a declarative parser for command line interfaces in Python.
 It's a binding glue between CLI shell arguments and functions being invoked.
+It mostly focuses on building multi level command trees.
 
 `cliglue` parses and validates command line arguments provided by user when running console application.
 Then it automatically triggers matched action, based on the declared Command-Line Interface rules, injecting all needed parameters.
 You don't need to write the "glue" code for binding & parsing parameters every time.
-So it makes writing console aplications faster and simpler.
+So it makes writing console aplications simpler and more clear.
 
