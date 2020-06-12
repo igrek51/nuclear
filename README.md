@@ -137,7 +137,6 @@ Usage:
 
 Options:
   -h, --help [SUBCOMMANDS...] - Display this help and exit
-  --bash-install APP_NAME     - Install this program in bash to be executable from anywhere, add autocompletion links
 
 Commands:
   hello NAME           
@@ -160,7 +159,6 @@ Options:
   --decode                    - Decode name as base64
   --repeat REPEAT             - Default: 1
   -h, --help [SUBCOMMANDS...] - Display this help and exit
-  --bash-install APP_NAME     - Install this program in bash to be executable from anywhere, add autocompletion links
 ```
 
 ### Injecting parameters
@@ -369,7 +367,7 @@ python3 setup.py develop
 Running tests:
 ```bash
 pip3 install -r requirements.txt -r requirements-dev.txt
-./pytest.sh
+./test.sh
 ```
 
 ## CliBuilder

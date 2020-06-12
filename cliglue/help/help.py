@@ -22,7 +22,7 @@ class _OptionHelp(object):
     subrules: List[CliRule] = field(default_factory=lambda: [])
 
 
-internal_options = {'--bash-autocomplete'}
+internal_options = {'--bash-autocomplete', '--bash-install'}
 
 
 def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str], hide_internal: bool):
