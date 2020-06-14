@@ -49,6 +49,6 @@ python3 setup.py develop
 Running tests:
 ```bash
 pip3 install -r requirements.txt -r requirements-dev.txt
-./pytest.sh
+./test.sh
 ```
 
