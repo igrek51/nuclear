@@ -9,6 +9,6 @@ install:
 before_script:
   - python3 setup.py develop
 script:
-  - ./test.sh
+  - ./pytest.sh
 after_success:
   - coveralls
