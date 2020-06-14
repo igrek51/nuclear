@@ -367,7 +367,7 @@ python3 setup.py develop
 Running tests:
 ```bash
 pip3 install -r requirements.txt -r requirements-dev.txt
-./test.sh
+./pytest.sh
 ```
 
 ## CliBuilder

@@ -52,12 +52,12 @@ def test_parent_default_action():
 
 def test_on_empty_action_overriden():
     with MockIO() as mockio:
-        CliBuilder(run=print_bad, on_empty=print_ok).has(
+        CliBuilder(run=print_bad, help_on_empty=True).has(
             flag('any')
         ).run()
-        assert mockio.output() == 'ok\n'
+        assert 'Usage' in mockio.output()
     with MockIO('--any') as mockio:
-        CliBuilder(run=print_ok, on_empty=print_bad).has(
+        CliBuilder(run=print_ok, help_on_empty=True).has(
             flag('any')
         ).run()
         assert mockio.output() == 'ok\n'

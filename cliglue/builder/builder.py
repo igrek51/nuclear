@@ -21,7 +21,7 @@ class CliBuilder(object):
                  usage_onerror: bool = True,
                  reraise_error: bool = False,
                  hide_internal: bool = True,
-                 on_empty: Optional[Callable[..., None]] = None,
+                 help_on_empty: bool = False,
                  ):
         """
         A builder for Command Line Interface specification
@@ -45,7 +45,6 @@ class CliBuilder(object):
         self.__version: str = version
         self.__help: str = help
         self.__subrules: List[CliRule] = []
-        self.__on_empty: Optional[Callable[..., None]] = on_empty
 
         if run:
             self.has(default_action(run))
@@ -53,6 +52,7 @@ class CliBuilder(object):
         self.__usage_onerror: bool = usage_onerror
         self.__reraise_error: bool = reraise_error
         self.__hide_internal: bool = hide_internal
+        self.__help_on_empty: bool = help_on_empty
         if with_defaults:
             self.__add_default_rules()
 
@@ -76,10 +76,8 @@ class CliBuilder(object):
 
     def run_with_args(self, args: List[str]):
         try:
-            if not args and self.__on_empty is not None:
-                Parser([default_action(self.__on_empty)]).parse_args(args)
-                return
-            Parser(self.__subrules).parse_args(args)
+            parser = self.__create_parser(args)
+            parser.parse_args(args)
         except CliDefinitionError as e:
             error(f'CLI Definition error: {e}')
             raise e
@@ -89,6 +87,15 @@ class CliBuilder(object):
                 self.print_usage()
             if self.__reraise_error:
                 raise e
+
+    def __create_parser(self, args: List[str]) -> Parser:
+        if not args and self.__help_on_empty:
+            def __print_root_help():
+                self.print_help([])
+
+            return Parser([default_action(__print_root_help)])
+
+        return Parser(self.__subrules)
 
     def print_help(self, subcommands: List[str]):
         print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands, self.__hide_internal)
