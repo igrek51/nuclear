@@ -21,6 +21,7 @@ class CliBuilder(object):
                  usage_onerror: bool = True,
                  reraise_error: bool = False,
                  hide_internal: bool = True,
+                 on_empty: Optional[Callable[..., None]] = None,
                  ):
         """
         A builder for Command Line Interface specification
@@ -44,6 +45,7 @@ class CliBuilder(object):
         self.__version: str = version
         self.__help: str = help
         self.__subrules: List[CliRule] = []
+        self.__on_empty: Optional[Callable[..., None]] = on_empty
 
         if run:
             self.has(default_action(run))
@@ -74,6 +76,9 @@ class CliBuilder(object):
 
     def run_with_args(self, args: List[str]):
         try:
+            if not args and self.__on_empty is not None:
+                Parser([default_action(self.__on_empty)]).parse_args(args)
+                return
             Parser(self.__subrules).parse_args(args)
         except CliDefinitionError as e:
             error(f'CLI Definition error: {e}')

@@ -48,3 +48,16 @@ def test_parent_default_action():
             ),
         ).run()
         assert mockio.output() == 'ok\n'
+
+
+def test_on_empty_action_overriden():
+    with MockIO() as mockio:
+        CliBuilder(run=print_bad, on_empty=print_ok).has(
+            flag('any')
+        ).run()
+        assert mockio.output() == 'ok\n'
+    with MockIO('--any') as mockio:
+        CliBuilder(run=print_ok, on_empty=print_bad).has(
+            flag('any')
+        ).run()
+        assert mockio.output() == 'ok\n'
