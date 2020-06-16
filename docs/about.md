@@ -4,6 +4,7 @@
 [![Documentation Status](https://readthedocs.org/projects/cliglue/badge/?version=latest)](https://cliglue.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
 [![Coverage Status](https://coveralls.io/repos/github/igrek51/cliglue/badge.svg?branch=master)](https://coveralls.io/github/igrek51/cliglue?branch=master)
+[![codecov](https://codecov.io/gh/igrek51/cliglue/branch/master/graph/badge.svg)](https://codecov.io/gh/igrek51/cliglue)
 
 
 `cliglue` is a declarative parser for command line interfaces in Python.
