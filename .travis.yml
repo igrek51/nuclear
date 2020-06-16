@@ -12,3 +12,5 @@ script:
   - ./pytest.sh
 after_success:
   - coveralls
+  - CODECOV_TOKEN="51a23440-eee0-40f8-a91f-94df5966d46a" bash <(curl -s https://codecov.io/bash)
+
