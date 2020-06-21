@@ -8,9 +8,7 @@ def file_completer(current: Optional[str]):
     for file in os.listdir(listdir):
         filepath = f'{prefixdir}{file}'
         if os.path.isdir(filepath):
-            # prevent from immediate resolving
-            names.append(f'{filepath}/')
-            names.append(f'{filepath}/ ')
+            names.append(f'{filepath}')
         else:
             names.append(filepath)
     return sorted(names)

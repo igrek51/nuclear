@@ -28,8 +28,6 @@ def install_bash(app_name: str):
     usr_bin_executable: str = f'/usr/bin/{app_name}'
     if os.path.exists(usr_bin_executable) or os.path.islink(usr_bin_executable):
         warn(f'file {usr_bin_executable} already exists - skipping.')
-        if not os.path.exists(usr_bin_executable):
-            warn(f'link {usr_bin_executable} is broken.')
     else:
         info(f'creating link: {usr_bin_executable} -> {app_path}')
         shell(f'sudo ln -s {app_path} {usr_bin_executable}')
@@ -55,9 +53,10 @@ def install_autocomplete(app_name: Optional[str]):
     shell(f"""cat << 'EOF' | sudo tee {completion_script_path}
 #!/bin/bash
 {function_name}() {{
-COMPREPLY=( $({app_name} --autocomplete "${{COMP_LINE}}" ${{COMP_CWORD}}) )
+    IFS=$'\n'
+    COMPREPLY=($({app_name} --autocomplete "${{COMP_LINE}}" ${{COMP_CWORD}}))
 }}
-complete -F {function_name} {app_name}
+complete -o filenames -F {function_name} {app_name}
 EOF
 """)
     info(f'Autocompleter has been installed in {completion_script_path} for command "{app_name}". '

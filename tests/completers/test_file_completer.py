@@ -12,10 +12,10 @@ def test_file_completer_empty():
         ).run()
         proposals = mockio.stripped().splitlines()
         assert '.gitignore' in proposals
-        assert 'tests/' in proposals
+        assert 'tests' in proposals
 
-        assert 'tests' not in proposals
-        assert 'tests/autocomplete/' not in proposals
+        assert 'tests/' not in proposals
+        assert 'tests/autocomplete' not in proposals
         assert 'tests/__init__.py' not in proposals
         assert '.' not in proposals
         assert '..' not in proposals
@@ -35,7 +35,7 @@ def test_file_completer_dir1():
             arguments('f', choices=file_completer),
         ).run()
         proposals = set(mockio.stripped().splitlines())
-        assert proposals == {'tests/'}
+        assert proposals == {'tests'}
 
 
 def test_file_completer_dir_content():
@@ -44,11 +44,11 @@ def test_file_completer_dir_content():
             arguments('f', choices=file_completer),
         ).run()
         proposals = mockio.stripped().splitlines()
-        assert 'tests/autocomplete/' in proposals
+        assert 'tests/autocomplete' in proposals
         assert 'tests/__init__.py' in proposals
 
         assert 'tests/' not in proposals
-        assert 'tests/autocomplete' not in proposals
+        assert 'tests/autocomplete/' not in proposals
         assert '.gitignore' not in proposals
         assert '.' not in proposals
         assert '..' not in proposals
@@ -60,7 +60,7 @@ def test_file_completer_subdir():
             arguments('f', choices=file_completer),
         ).run()
         proposals = set(mockio.stripped().splitlines())
-        assert proposals == {'tests/autocomplete/'}
+        assert proposals == {'tests/autocomplete'}
 
 
 def test_file_completer_subdir_content():

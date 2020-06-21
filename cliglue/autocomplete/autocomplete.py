@@ -17,16 +17,23 @@ def bash_autocomplete(rules: List[CliRule], cmdline: str, word_idx: Optional[int
 
 def find_matching_completions(cmdline, rules, word_idx: Optional[int]) -> List[str]:
     extracted_cmdline = _extract_quotes(cmdline)
-    args: List[str] = extract_args(extracted_cmdline)
+    try:
+        args: List[str] = extract_args(extracted_cmdline)
+    except ValueError:
+        return []
     current_word: str = get_current_word(args, word_idx)
     available: List[str] = _find_available_completions(rules, args, current_word)
     # convert '--param=value' proposals to 'value'
     hyphen_param_matcher = re.compile(r'-(.+)=(.+)')
     return [
-        hyphen_param_matcher.sub('\\2', c)
+        escape_spaces(hyphen_param_matcher.sub('\\2', c))
         for c in available
         if c.startswith(current_word)
     ]
+
+
+def escape_spaces(name: str) -> str:
+    return name.replace(' ', '\\ ')
 
 
 def extract_args(extracted_cmdline) -> List[str]:

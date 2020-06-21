@@ -216,6 +216,14 @@ def test_empty_choices():
         assert mockio.stripped() == ''
 
 
+def test_opened_quote():
+    with MockIO('--autocomplete', '"app \""') as mockio:
+        CliBuilder().has(
+            parameter('pos', choices=['val']),
+        ).run()
+        assert mockio.stripped() == ''
+
+
 def test_completing_word_in_the_middle():
     with MockIO('--autocomplete', '"app ru in"', '1') as mockio:
         CliBuilder().has(
@@ -234,3 +242,14 @@ def test_complete_with_completer_function():
             arguments('a', choices=complete),
         ).run()
         assert mockio.stripped() == '42\n47'
+
+
+def test_escaping_space_filenames():
+    def complete():
+        return ['file with spaces', 'file_without']
+
+    with MockIO('--autocomplete', '"app file"') as mockio:
+        CliBuilder(reraise_error=True).has(
+            arguments('a', choices=complete),
+        ).run()
+        assert mockio.stripped() == 'file\\ with\\ spaces\nfile_without'
