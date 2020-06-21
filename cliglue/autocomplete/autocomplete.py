@@ -73,14 +73,15 @@ def _find_available_completions(rules: List[CliRule], args: List[str], current_w
         for rule in parameters:
             for keyword in rule.keywords:
                 if previous == keyword:
-                    possible_choices: List[str] = generate_value_choices(rule)
+                    possible_choices: List[str] = generate_value_choices(rule, current=current_word)
                     return possible_choices
 
     # "--param=value" autocompletion
     for rule in parameters:
         for keyword in rule.keywords:
             if current_word.startswith(keyword + '='):
-                possible_choices: List[str] = list(map(lambda c: keyword + '=' + c, generate_value_choices(rule)))
+                possible_choices: List[str] = list(map(lambda c: keyword + '=' + c,
+                                                       generate_value_choices(rule, current=current_word)))
                 return possible_choices
 
     completions: List[str] = []
@@ -102,10 +103,10 @@ def _find_available_completions(rules: List[CliRule], args: List[str], current_w
 
     # positional arguments
     for rule in pos_arguments:
-        possible_choices: List[str] = generate_value_choices(rule)
+        possible_choices: List[str] = generate_value_choices(rule, current=current_word)
         completions.extend(possible_choices)
     for rule in many_args:
-        possible_choices: List[str] = generate_value_choices(rule)
+        possible_choices: List[str] = generate_value_choices(rule, current=current_word)
         completions.extend(possible_choices)
 
     return completions

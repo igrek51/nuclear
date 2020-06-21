@@ -1,5 +1,6 @@
+import inspect
 from collections.abc import Iterable
-from typing import List, Any
+from typing import List, Any, Optional
 
 from cliglue.builder.rule import ValueRule
 from cliglue.builder.typedef import TypeOrParser
@@ -16,7 +17,7 @@ def parse_typed_value(_type: TypeOrParser, arg: str) -> Any:
     return _type(arg)
 
 
-def generate_value_choices(rule: ValueRule) -> List[Any]:
+def generate_value_choices(rule: ValueRule, current: Optional[str] = None) -> List[Any]:
     if not rule.choices:
         return []
     elif isinstance(rule.choices, list):
@@ -24,4 +25,9 @@ def generate_value_choices(rule: ValueRule) -> List[Any]:
     elif isinstance(rule.choices, Iterable):
         return [choice for choice in rule.choices]
     else:
-        return list(rule.choices())
+        (args, _, _, _, _, _, annotations) = inspect.getfullargspec(rule.choices)
+        if len(args) >= 1:
+            results = rule.choices(current=current)
+        else:
+            results = rule.choices()
+        return list(results)
