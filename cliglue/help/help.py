@@ -1,3 +1,4 @@
+import os
 import sys
 from dataclasses import dataclass, field
 from typing import List, Set, Optional
@@ -307,7 +308,8 @@ def usage_many_arguments(rules: List[ManyArgumentsRule]) -> str:
 
 
 def shell_command_name():
-    return sys.argv[0]
+    _, command = os.path.split(sys.argv[0])
+    return command
 
 
 def have_rules_options(rules: List[CliRule]) -> bool:
