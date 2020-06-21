@@ -2,7 +2,7 @@ import sys
 from typing import Callable, List, Optional
 
 from cliglue.autocomplete.autocomplete import bash_autocomplete
-from cliglue.autocomplete.bash_install import bash_install
+from cliglue.autocomplete.bash_install import install_bash, install_autocomplete
 from cliglue.help.help import print_version, print_help, print_usage
 from cliglue.parser.error import CliSyntaxError, CliDefinitionError
 from cliglue.parser.parser import Parser
@@ -33,12 +33,12 @@ class CliBuilder(object):
         Defaults options are:
         -h, --help: displaying help,
         --version: displaying version,
-        --bash-install APP-NAME: installing application in bash with autocompleting,
-        --bash-autocomplete [CMDLINE...]: internal action for generating autocompleted proposals to be handled by bash
+        --install-bash APP-NAME: installing application in bash with autocompleting,
+        --autocomplete [CMDLINE...]: internal action for generating autocompleted proposals to be handled by bash
         :param usage_onerror: wheter usage output should be displayed on syntax error
         :param reraise_error: wheter syntax error should not be caught but reraised instead.
         Enabling this causes stack trace to be flooded to the user.
-        :param hide_internal: wheter internal options (--bash-install, --bash-autocomplete)
+        :param hide_internal: wheter internal options (--install-bash, --autocomplete)
         should be hidden on help output.
         """
         self.__name: str = name
@@ -116,8 +116,11 @@ class CliBuilder(object):
         def __print_version():
             print_version(self.__name, self.__version)
 
-        def __bash_install(app_name: str):
-            bash_install(app_name)
+        def __install_bash(app_name: str):
+            install_bash(app_name)
+
+        def __install_autocomplete(app_name: str):
+            install_autocomplete(app_name)
 
         def __bash_autocomplete(cmdline: str, word_idx: Optional[int]):
             self.__bash_autocomplete(cmdline, word_idx)
@@ -131,12 +134,16 @@ class CliBuilder(object):
             primary_option('-h', '--help', run=__print_subcommand_help, help='Display this help and exit').has(
                 arguments('subcommands'),
             ),
-            primary_option('--bash-install', run=__bash_install,
+            primary_option('--install-bash', run=__install_bash,
                            help='Install this program in bash to be executable from anywhere, '
                                 'add autocompletion links').has(
                 argument('app-name', help='binary name'),
             ),
-            primary_option('--bash-autocomplete', run=__bash_autocomplete,
+            primary_option('--install-autocomplete', run=__install_autocomplete,
+                           help='Install autocompletion links').has(
+                argument('app-name', help='binary name'),
+            ),
+            primary_option('--autocomplete', run=__bash_autocomplete,
                            help='Return matching autocompletion proposals').has(
                 argument('cmdline', help='current command line'),
                 argument('word-idx', help='current word index', type=int, required=False),

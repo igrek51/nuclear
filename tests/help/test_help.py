@@ -116,12 +116,12 @@ def test_default_help_when_no_arguments():
 def test_hiding_internal_options():
     with MockIO('--help') as mockio:
         CliBuilder(hide_internal=True).run()
-        assert '--bash-install' not in mockio.output()
-        assert '--bash-autocomplete' not in mockio.output()
+        assert '--install-bash' not in mockio.output()
+        assert '--autocomplete' not in mockio.output()
     with MockIO('--help') as mockio:
         CliBuilder(hide_internal=False).run()
-        assert '--bash-install' in mockio.output()
-        assert '--bash-autocomplete' in mockio.output()
+        assert '--install-bash' in mockio.output()
+        assert '--autocomplete' in mockio.output()
 
 
 def test_omit_empty_subcommands():

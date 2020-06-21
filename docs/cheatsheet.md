@@ -108,8 +108,8 @@ Usage:
 Options:
   --version                        - Print version information and exit
   -h, --help [SUCOMMANDS...]       - Display this help and exit
-  --bash-install APP-NAME          - Install script as a bash binary and add autocompletion links
-  --bash-autocomplete [CMDLINE...] - Return matching autocompletion proposals
+  --install-bash APP-NAME          - Install script as a bash binary and add autocompletion links
+  --autocomplete [CMDLINE...] - Return matching autocompletion proposals
 
 Commands:
   git                                           

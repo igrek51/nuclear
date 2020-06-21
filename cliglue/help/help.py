@@ -1,7 +1,6 @@
 import sys
-from typing import List, Set, Optional
-
 from dataclasses import dataclass, field
+from typing import List, Set, Optional
 
 from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
     PositionalArgumentRule, ManyArgumentsRule, DictionaryRule, ValueRule
@@ -22,7 +21,7 @@ class _OptionHelp(object):
     subrules: List[CliRule] = field(default_factory=lambda: [])
 
 
-internal_options = {'--bash-autocomplete', '--bash-install'}
+internal_options = {'--autocomplete', '--install-bash', '--install-autocomplete'}
 
 
 def print_help(rules: List[CliRule], app_name: str, version: str, help: str, subargs: List[str], hide_internal: bool):

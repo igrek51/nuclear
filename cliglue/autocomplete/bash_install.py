@@ -5,7 +5,7 @@ from cliglue.utils.output import warn, info
 from cliglue.utils.shell import shell
 
 
-def bash_install(app_name: str):
+def install_bash(app_name: str):
     """
     Install script link in /usr/bin/{app_name}
     and create bash autocompletion script
@@ -31,6 +31,16 @@ def bash_install(app_name: str):
         info(f'creating link: {usr_bin_executable} -> {app_path}')
         shell(f'ln -s {app_path} {usr_bin_executable}')
 
+    install_autocomplete(app_name)
+
+
+def install_autocomplete(app_name: str):
+    """
+    Create bash autocompletion script
+    """
+    if os.geteuid() != 0:
+        warn("you may need to have root privileges in order to install autocompletion script")
+
     # bash autocompletion install
     completion_script_path: str = f'/etc/bash_completion.d/cliglue_{app_name}.sh'
     app_hash: int = hash(app_name) % (10 ** 8)
@@ -39,7 +49,7 @@ def bash_install(app_name: str):
     shell(f"""cat << 'EOF' | tee {completion_script_path}
 #!/bin/bash
 {function_name}() {{
-COMPREPLY=( $({app_name} --bash-autocomplete "${{COMP_LINE}}" ${{COMP_CWORD}}) )
+COMPREPLY=( $({app_name} --autocomplete "${{COMP_LINE}}" ${{COMP_CWORD}}) )
 }}
 complete -F {function_name} {app_name}
 EOF

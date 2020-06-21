@@ -38,15 +38,15 @@ CliBuilder(
 Defaults options are:
 -h, --help: displaying help,
 --version: displaying version,
---bash-install APP-NAME: installing application in bash with autocompleting,
---bash-autocomplete [CMDLINE...]: internal action for generating autocompleted proposals to be handled by bash
+--install-bash APP-NAME: installing application in bash with autocompleting,
+--autocomplete [CMDLINE...]: internal action for generating autocompleted proposals to be handled by bash
 
 `usage_onerror` - wheter usage output should be displayed on syntax error
 
 `reraise_error` - wheter syntax error should not be caught but reraised instead.
 Enabling this causes stack trace to be flooded to the user.
 
-`hide_internal` - wheter internal options (`--bash-install`, `--bash-autocomplete`) should be hidden on help output.
+`hide_internal` - wheter internal options (`--install-bash`, `--autocomplete`) should be hidden on help output.
 
 ### Step 2. Declaring CLI rules
 The next step is to declare CLI rules for `CliBuilder` using `.has()` method

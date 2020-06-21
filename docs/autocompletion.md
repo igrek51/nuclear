@@ -37,11 +37,11 @@ CliBuilder('completers-demo').has(
 
 In order to enable auto-completion, you need to install some extension to bash. Fortunately `cliglue` has built-in tools to do that:
 ```console
-foo@bar:~$ sudo ./completers.py --bash-install completers-demo
+foo@bar:~$ sudo ./completers.py --install-bash completers-demo
 [info]  creating link: /usr/bin/completers-demo -> ~/cliglue/docs/example/completers.py
 #!/bin/bash
 _autocomplete_98246661() {
-COMPREPLY=( $(completers-demo --bash-autocomplete "${COMP_LINE}") )
+COMPREPLY=( $(completers-demo --autocomplete "${COMP_LINE}") )
 }
 complete -F _autocomplete_98246661 completers-demo
 [info]  Autocompleter has been installed in /etc/bash_completion.d/autocomplete_completers-demo.sh. Please restart your shell.
@@ -53,8 +53,8 @@ foo@bar:~$ completers-d[Tab]
 foo@bar:~$ completers-demo
 
 foo@bar:~$ completers-demo [Tab][Tab]
---bash-autocomplete  -h                   --mode               --output
---bash-install       --help               --mode=              --output=
+--autocomplete  -h                   --mode               --output
+--install-bash       --help               --mode=              --output=
 
 foo@bar:~$ completers-demo --mo[Tab]
 foo@bar:~$ completers-demo --mode
@@ -93,7 +93,7 @@ CliBuilder().has(
 In order to enable the autocompletion, there must be a specific script in `/etc/bash_completion.d/`.
 With `cliglue` you just need to run:
 ```console
-# sudo ./sample-app.py --bash-install sample-app
+# sudo ./sample-app.py --install-bash sample-app
 ```
 It will install autocompletion script and add a symbolic link in `/usr/bin/`,
 so as you can run your app with `sample-app` command instead of `./sample_app.py`.
@@ -106,17 +106,17 @@ Sometimes, you need to make some modifications in your code,
 but after these modifications you will NOT need to reinstall autocompletion again.
 You had to do it only once, because autocompletion script only redirects its query and run `sample_app.py`:
 ```console
-sample-app --bash-autocomplete "sample-app --he"
+sample-app --autocomplete "sample-app --he"
 ```
 
 ### How does auto-completion work?
 1. While typing a command in `bash`, you hit `Tab` key. (`your-app.py cmd[TAB]`)
 2. `bash` looks for an autocompletion script in `/etc/bash_completion.d/`.
-There should be a script installed for your command after running `--bash-install` on your application.
+There should be a script installed for your command after running `--install-bash` on your application.
 So when it's found, this script is called by bash.
-3. The autocompletion script redirects to your application, running it with `--bash-autocomplete` option, namely script runs `your-app.py --bash-autocomplete "cmd"`, asking it for returning the most relevant command proposals.
+3. The autocompletion script redirects to your application, running it with `--autocomplete` option, namely script runs `your-app.py --autocomplete "cmd"`, asking it for returning the most relevant command proposals.
 Notice that in that manner, the autocompletion algorithm is being run always in up-to-date version.
-4. `your-app.py` has `--bash-autocomplete` option enabled by default so it starts to analyze which keyword from your CLI definition is the most relevant to the currently typed word (`cmd`).
+4. `your-app.py` has `--autocomplete` option enabled by default so it starts to analyze which keyword from your CLI definition is the most relevant to the currently typed word (`cmd`).
 5. If you defined custom completers functions, they will be invoked right now (if needed) in order to get up-to-date proposals and analyze them as well. 
 6. `your-app.py` returns a list of proposals to the `bash`.
 7. `bash` shows you these results.

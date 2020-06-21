@@ -50,7 +50,7 @@ if __name__ == '__main__':
     main()
 ```
 
-sudo ./autocomplete-demo.py --bash-install autocomplete-demo
+sudo ./autocomplete-demo.py --install-bash autocomplete-demo
 
 bash
 
