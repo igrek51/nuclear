@@ -119,7 +119,7 @@ class CliBuilder(object):
         def __install_bash(app_name: str):
             install_bash(app_name)
 
-        def __install_autocomplete(app_name: str):
+        def __install_autocomplete(app_name: Optional[str]):
             install_autocomplete(app_name)
 
         def __bash_autocomplete(cmdline: str, word_idx: Optional[int]):
@@ -141,7 +141,7 @@ class CliBuilder(object):
             ),
             primary_option('--install-autocomplete', run=__install_autocomplete,
                            help='Install autocompletion links').has(
-                argument('app-name', help='binary name'),
+                argument('app-name', help='binary name', required=False),
             ),
             primary_option('--autocomplete', run=__bash_autocomplete,
                            help='Return matching autocompletion proposals').has(

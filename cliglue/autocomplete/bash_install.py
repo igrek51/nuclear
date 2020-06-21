@@ -1,4 +1,6 @@
 import os
+import sys
+from typing import Optional
 
 from cliglue.utils.files import script_real_path
 from cliglue.utils.output import warn, info
@@ -34,14 +36,16 @@ def install_bash(app_name: str):
     install_autocomplete(app_name)
 
 
-def install_autocomplete(app_name: str):
+def install_autocomplete(app_name: Optional[str]):
     """
     Create bash autocompletion script
     """
     if os.geteuid() != 0:
         warn("you may need to have root privileges in order to install autocompletion script")
 
-    # bash autocompletion install
+    if not app_name:
+        app_name = shell_command_name()
+
     completion_script_path: str = f'/etc/bash_completion.d/cliglue_{app_name}.sh'
     app_hash: int = hash(app_name) % (10 ** 8)
     # function should be unique across bash env
@@ -54,4 +58,10 @@ COMPREPLY=( $({app_name} --autocomplete "${{COMP_LINE}}" ${{COMP_CWORD}}) )
 complete -F {function_name} {app_name}
 EOF
 """)
-    info(f'Autocompleter has been installed in {completion_script_path}. Please restart your shell.')
+    info(f'Autocompleter has been installed in {completion_script_path} for command {app_name}. '
+         f'Please restart your shell.')
+
+
+def shell_command_name():
+    _, command = os.path.split(sys.argv[0])
+    return command
