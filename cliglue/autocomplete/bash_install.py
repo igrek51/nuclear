@@ -29,7 +29,7 @@ def install_bash(app_name: str):
             warn(f'link {usr_bin_executable} is broken.')
     else:
         info(f'creating link: {usr_bin_executable} -> {app_path}')
-        shell(f'ln -s {app_path} {usr_bin_executable}')
+        shell(f'sudo ln -s {app_path} {usr_bin_executable}')
 
     install_autocomplete(app_name)
 
@@ -46,7 +46,7 @@ def install_autocomplete(app_name: str):
     app_hash: int = hash(app_name) % (10 ** 8)
     # function should be unique across bash env
     function_name: str = f'_autocomplete_{app_hash}'
-    shell(f"""cat << 'EOF' | tee {completion_script_path}
+    shell(f"""cat << 'EOF' | sudo tee {completion_script_path}
 #!/bin/bash
 {function_name}() {{
 COMPREPLY=( $({app_name} --autocomplete "${{COMP_LINE}}" ${{COMP_CWORD}}) )
