@@ -324,7 +324,7 @@ def display_default_value(default) -> Optional[str]:
 
 def display_choices_help(rule: ValueRule) -> Optional[str]:
     choices = generate_value_choices(rule)
-    if not choices:
+    if not choices or not rule.strict_choices:
         return None
     return 'Choices: ' + ', '.join(choices)
 

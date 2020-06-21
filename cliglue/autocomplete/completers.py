@@ -2,5 +2,10 @@ import os
 
 
 def file_completer():
-    files = [f for f in os.listdir('.')]
-    return sorted(files)
+    names = []
+    for file in [f for f in os.listdir('.')]:
+        if os.path.isdir(file):
+            names.append(f'{file}/')
+        else:
+            names.append(file)
+    return sorted(names)

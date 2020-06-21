@@ -241,3 +241,11 @@ def test_strict_choices_show_list_help():
             arguments('modules', help='module names', choices=['monty', 'python'], strict_choices=True)
         ).run()
         mockio.assert_match(r'Choices: monty, python$')
+
+
+def test_unstrict_choices_hidden():
+    with MockIO('--help') as mockio:
+        CliBuilder().has(
+            arguments('modules', help='module names', choices=['monty', 'python'], strict_choices=False)
+        ).run()
+        assert 'Choices:' not in mockio.output()
