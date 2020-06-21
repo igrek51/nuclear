@@ -1,5 +1,6 @@
 import os
 import sys
+import zlib
 from typing import Optional
 
 from cliglue.utils.files import script_real_path
@@ -16,7 +17,7 @@ def install_bash(app_name: str):
     assert os.path.isfile(app_path)
 
     if os.geteuid() != 0:
-        warn("you may need to have root privileges in order to install script")
+        warn("gaining root privileges in order to install script")
 
     # ensure script is executable
     if not os.access(app_path, os.X_OK):
@@ -33,6 +34,7 @@ def install_bash(app_name: str):
         info(f'creating link: {usr_bin_executable} -> {app_path}')
         shell(f'sudo ln -s {app_path} {usr_bin_executable}')
 
+    info(f'Link installed in {usr_bin_executable}. Please restart your shell.')
     install_autocomplete(app_name)
 
 
@@ -41,13 +43,13 @@ def install_autocomplete(app_name: Optional[str]):
     Create bash autocompletion script
     """
     if os.geteuid() != 0:
-        warn("you may need to have root privileges in order to install autocompletion script")
+        warn("gaining root privileges in order to install autocompletion script")
 
     if not app_name:
         app_name = shell_command_name()
 
     completion_script_path: str = f'/etc/bash_completion.d/cliglue_{app_name}.sh'
-    app_hash: int = hash(app_name) % (10 ** 8)
+    app_hash: int = zlib.adler32(app_name.encode('utf-8'))
     # function should be unique across bash env
     function_name: str = f'_autocomplete_{app_hash}'
     shell(f"""cat << 'EOF' | sudo tee {completion_script_path}
@@ -58,7 +60,7 @@ COMPREPLY=( $({app_name} --autocomplete "${{COMP_LINE}}" ${{COMP_CWORD}}) )
 complete -F {function_name} {app_name}
 EOF
 """)
-    info(f'Autocompleter has been installed in {completion_script_path} for command {app_name}. '
+    info(f'Autocompleter has been installed in {completion_script_path} for command "{app_name}". '
          f'Please restart your shell.')
 
 

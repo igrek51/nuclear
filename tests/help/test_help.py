@@ -54,6 +54,7 @@ def test_default_print_help_empty():
     with MockIO('--help') as mockio:
         CliBuilder(with_defaults=True).run()
         assert 'Usage' in mockio.output()
+        assert 'glue [OPTIONS]' in mockio.output()
 
 
 def test_root_help():
