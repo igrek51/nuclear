@@ -4,9 +4,9 @@ set -ex
 OUTPUT=README.md
 
 cat docs/about.md > $OUTPUT
+cat docs/how-it-works.md >> $OUTPUT
 cat docs/features.md >> $OUTPUT
 cat docs/quick-start.md >> $OUTPUT
-cat docs/how-it-works.md >> $OUTPUT
 cat docs/vs-argparse.md >> $OUTPUT
 cat docs/installation.md >> $OUTPUT
 
