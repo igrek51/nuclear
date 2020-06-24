@@ -21,9 +21,9 @@ CliBuilder().has(
 ```
 
 ## How does it work?
-1. You define all required CLI rules for your program in a declarative tree.
-2. User provides command-line arguments when running program in a shell.
-3. `nuclear` parses and validates all the parameters, flags, sub-commands, positional arguments, etc, and stores them internally.
+1. You define CLI rules for your program in a declarative tree using `CliBuilder`. Rules can bind your functions to be invoked later.
+2. When running your program in a shell provided with command-line arguments, it starts `.run()` which does the parsing.
+3. `nuclear` parses and validates all the parameters, flags, sub-commands, positional arguments, etc., and stores them internally.
 4. `nuclear` finds the most relevant action (starting from the most specific) and invokes it.
 5. When invoking a function, `nuclear` injects all its needed parameters based on the previously defined & parsed values.
 
