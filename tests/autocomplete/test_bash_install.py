@@ -40,8 +40,9 @@ def test_autocomplete_install_explicit_name():
         assert 'Autocompleter has been installed' in mockio.output()
         assert os.path.exists(f'/etc/bash_completion.d/nuclear_{app_name}.sh')
         completion_script = Path(f'/etc/bash_completion.d/nuclear_{app_name}.sh').read_text()
-        assert '''COMPREPLY=($(nuclear_test_dupa123 --autocomplete "${COMP_LINE}" ${COMP_CWORD}))''' in completion_script
-        assert '''complete -o filenames -F _autocomplete_1437206436 nuclear_test_dupa123''' in completion_script
+        assert '''COMPREPLY=($(nuclear_test_dupa123 --autocomplete "${COMP_LINE}" ${COMP_CWORD}))''' \
+               in completion_script
+        assert '''complete -o filenames -F _autocomplete_1446250409 nuclear_test_dupa123''' in completion_script
 
     shell(f'sudo rm -f /etc/bash_completion.d/nuclear_{app_name}.sh')
     assert not os.path.exists(f'/etc/bash_completion.d/nuclear_{app_name}.sh')
