@@ -55,12 +55,23 @@ class MockIO:
     def stripped(self) -> str:
         return self.output().strip()
 
+    def uncolor(self) -> str:
+        matcher = re.compile(r'\x1b\[[01](;[0-9]+)?m')
+        return matcher.sub('', self.output())
+
     def assert_match(self, regex: str):
         matcher = re.compile(regex)
         for line in self.output().splitlines():
             if matcher.search(line):
                 return
         assert False, f'Regex: "{regex}" does not match the output: {self.output()}'
+
+    def assert_match_uncolor(self, regex: str):
+        matcher = re.compile(regex)
+        for line in self.uncolor().splitlines():
+            if matcher.search(line):
+                return
+        assert False, f'Regex: "{regex}" does not match the output: {self.uncolor()}'
 
     def assert_not_match(self, regex: str):
         matcher = re.compile(regex)
