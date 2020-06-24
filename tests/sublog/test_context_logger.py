@@ -11,7 +11,7 @@ def test_context_logger():
                 log.warn('im a root')
 
             logger.debug('logged out')
-        log.debug('exited')
+        log.debug(42)
 
         # datetime
         mockio.assert_match('^\\[\x1b\\[0;36m\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\x1b\\[0m\\] ')
@@ -23,7 +23,7 @@ def test_context_logger():
         mockio.assert_match_uncolor('] logged in request_id=3735936685 user=igrek page="sweet home"$')
         mockio.assert_match_uncolor('] im a root$')
         mockio.assert_match_uncolor('] logged out request_id=3735936685$')
-        mockio.assert_match_uncolor('] exited$')
+        mockio.assert_match_uncolor('] 42$')
 
 
 def test_root_context_logger():

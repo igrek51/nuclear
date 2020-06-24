@@ -6,7 +6,7 @@ from nuclear.args.container import ArgsContainer
 from nuclear.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, KeywordRule, \
     DefaultActionRule, PositionalArgumentRule, ManyArgumentsRule, SubcommandRule, DictionaryRule, ValueRule
 from nuclear.builder.typedef import Action
-from nuclear.utils.output import warn
+from nuclear.sublog import log
 from .context import RunContext
 from .error import CliSyntaxError
 from .inject import run_action
@@ -246,7 +246,7 @@ class Parser(object):
 
     def _check_superfluous_args(self, args: ArgsQue):
         if args and not self.__dry:
-            warn(f'unrecognized arguments: {" ".join(args)}')
+            log.warn(f'unrecognized arguments: {" ".join(args)}')
 
     def _check_required_arguments(self):
         check_required_arguments(self.__rules, self.internal_vars)

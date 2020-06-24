@@ -4,7 +4,7 @@ from typing import Dict, Mapping
 
 from nuclear.args.container import ArgsContainer
 from nuclear.builder.typedef import Action
-from nuclear.utils.output import warn
+from nuclear.sublog import log
 
 
 def run_action(action: Action, internal_vars: Dict[str, Any]):
@@ -28,7 +28,7 @@ def inject_arg(arg: str, action: Action, annotations: Mapping[str, Any], interna
     elif is_args_container_name(arg, annotations):
         return ArgsContainer(internal_vars)
     else:
-        warn(f"can't inject argument '{arg}' to function '{action.__name__}': name not found")
+        log.warn(f"can't inject argument '{arg}' to function '{action.__name__}': name not found")
         return None
 
 

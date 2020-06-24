@@ -1,13 +1,11 @@
 import subprocess
 from typing import Union
 
-from .output import fatal
-
 
 def shell(cmd: str):
     err_code = shell_error_code(cmd)
     if err_code != 0:
-        fatal(f'failed executing: {cmd}')
+        raise RuntimeError(f'command failed: {cmd}')
 
 
 def shell_error_code(cmd: str) -> int:

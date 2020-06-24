@@ -6,7 +6,7 @@ from nuclear.autocomplete.install import install_bash, install_autocomplete
 from nuclear.help.help import print_version, print_help, print_usage
 from nuclear.parser.error import CliSyntaxError, CliDefinitionError
 from nuclear.parser.parser import Parser
-from nuclear.utils.output import error
+from nuclear.sublog import log
 from .rule import DefaultActionRule, CliRule
 from .rule_factory import default_action, primary_option, arguments, argument
 
@@ -79,10 +79,10 @@ class CliBuilder(object):
             parser = self.__create_parser(args)
             parser.parse_args(args)
         except CliDefinitionError as e:
-            error(f'CLI Definition error: {e}')
+            log.error(f'CLI Definition error: {e}')
             raise e
         except CliSyntaxError as e:
-            error(f'Syntax error: {e}')
+            log.error(f'Syntax error: {e}')
             if self.__usage_onerror:
                 self.print_usage()
             if self.__reraise_error:

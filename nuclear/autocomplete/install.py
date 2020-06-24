@@ -3,8 +3,8 @@ import sys
 import zlib
 from typing import Optional
 
+from nuclear.sublog import log
 from nuclear.utils.files import script_real_path
-from nuclear.utils.output import warn, info
 from nuclear.utils.shell import shell
 
 
@@ -17,22 +17,22 @@ def install_bash(app_name: str):
     assert os.path.isfile(app_path)
 
     if os.geteuid() != 0:
-        warn("gaining root privileges in order to install script")
+        log.warn("gaining root privileges in order to install script")
 
     # ensure script is executable
     if not os.access(app_path, os.X_OK):
-        info(f'making script executable')
+        log.info(f'making script executable')
         shell(f'chmod +x {app_path}')
 
     # creating /usr/bin/ link
     usr_bin_executable: str = f'/usr/bin/{app_name}'
     if os.path.exists(usr_bin_executable) or os.path.islink(usr_bin_executable):
-        warn(f'file {usr_bin_executable} already exists - skipping.')
+        log.warn(f'file {usr_bin_executable} already exists - skipping.')
     else:
-        info(f'creating link: {usr_bin_executable} -> {app_path}')
+        log.info(f'creating link: {usr_bin_executable} -> {app_path}')
         shell(f'sudo ln -s {app_path} {usr_bin_executable}')
 
-    info(f'Link installed in {usr_bin_executable}. Please restart your shell.')
+    log.info(f'Link installed in {usr_bin_executable}. Please restart your shell.')
     install_autocomplete(app_name)
 
 
@@ -41,7 +41,7 @@ def install_autocomplete(app_name: Optional[str]):
     Create bash autocompletion script
     """
     if os.geteuid() != 0:
-        warn("gaining root privileges in order to install autocompletion script")
+        log.warn("gaining root privileges in order to install autocompletion script")
 
     if not app_name:
         app_name = shell_command_name()
@@ -59,8 +59,8 @@ def install_autocomplete(app_name: Optional[str]):
 complete -o filenames -F {function_name} {app_name}
 EOF
 """)
-    info(f'Autocompleter has been installed in {completion_script_path} for command "{app_name}". '
-         f'Please restart your shell.')
+    log.info(f'Autocompleter has been installed in {completion_script_path} for command "{app_name}". '
+             f'Please restart your shell.')
 
 
 def shell_command_name():
