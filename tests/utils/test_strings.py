@@ -1,4 +1,4 @@
-from cliglue.utils.strings import *
+from nuclear.utils.strings import *
 from tests.asserts import assert_error
 
 

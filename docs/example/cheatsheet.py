@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, arguments, flag, parameter, subcommand, dictionary
+from nuclear import CliBuilder, argument, arguments, flag, parameter, subcommand, dictionary
 
 
 def main():

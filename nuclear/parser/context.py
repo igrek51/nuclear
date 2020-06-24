@@ -2,9 +2,9 @@ from typing import Optional, List
 
 from dataclasses import dataclass
 
-from cliglue.args.container import ArgsContainer
-from cliglue.builder.rule import SubcommandRule, CliRule
-from cliglue.builder.typedef import Action
+from nuclear.args.container import ArgsContainer
+from nuclear.builder.rule import SubcommandRule, CliRule
+from nuclear.builder.typedef import Action
 
 
 @dataclass

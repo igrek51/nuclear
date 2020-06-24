@@ -12,7 +12,7 @@ e.g. `--paramater-name` will be injected as `parameter_name`)
 
 In order to create parameter rule specification, use:
 ```python
-from cliglue import parameter
+from nuclear import parameter
 
 parameter(
         *keywords: str,
@@ -55,7 +55,7 @@ Then parameter has list type and stores list of values
 
 Basic parameter example:
 ```python
-from cliglue import CliBuilder, parameter
+from nuclear import CliBuilder, parameter
 
 CliBuilder(run=lambda param: print(param)).has(
     parameter('param', 'p'),
@@ -89,5 +89,5 @@ foo@bar:~$ ./example.py --skip build --skip run
 skipping: ['build', 'run']
 ``` 
 
-See [parameter tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_param.py) for more detailed use cases.
+See [parameter tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_param.py) for more detailed use cases.
 

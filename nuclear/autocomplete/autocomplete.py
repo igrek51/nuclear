@@ -2,12 +2,12 @@ import re
 import shlex
 from typing import List, Optional
 
-from cliglue.builder.rule import CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
+from nuclear.builder.rule import CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
     PositionalArgumentRule, ManyArgumentsRule
-from cliglue.parser.context import RunContext
-from cliglue.parser.parser import Parser
-from cliglue.parser.transform import filter_rules
-from cliglue.parser.value import generate_value_choices
+from nuclear.parser.context import RunContext
+from nuclear.parser.parser import Parser
+from nuclear.parser.transform import filter_rules
+from nuclear.parser.value import generate_value_choices
 
 
 def bash_autocomplete(rules: List[CliRule], cmdline: str, word_idx: Optional[int]):

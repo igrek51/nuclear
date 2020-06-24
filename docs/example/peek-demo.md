@@ -1,6 +1,6 @@
 ipython3
 ```python
-from cliglue import CliBuilder, flag, parameter
+from nuclear import CliBuilder, flag, parameter
 
 cli = CliBuilder(run=lambda force: print(f'force is {force}'))
 
@@ -19,8 +19,8 @@ subl ./autocomplete-demo.py
 import re
 from typing import List
 
-from cliglue import CliBuilder, flag, parameter, subcommand, argument
-from cliglue.utils.shell import shell, shell_output
+from nuclear import CliBuilder, flag, parameter, subcommand, argument
+from nuclear.utils.shell import shell, shell_output
 
 
 def main():

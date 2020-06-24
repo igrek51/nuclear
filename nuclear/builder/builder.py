@@ -1,12 +1,12 @@
 import sys
 from typing import Callable, List, Optional
 
-from cliglue.autocomplete.autocomplete import bash_autocomplete
-from cliglue.autocomplete.install import install_bash, install_autocomplete
-from cliglue.help.help import print_version, print_help, print_usage
-from cliglue.parser.error import CliSyntaxError, CliDefinitionError
-from cliglue.parser.parser import Parser
-from cliglue.utils.output import error
+from nuclear.autocomplete.autocomplete import bash_autocomplete
+from nuclear.autocomplete.install import install_bash, install_autocomplete
+from nuclear.help.help import print_version, print_help, print_usage
+from nuclear.parser.error import CliSyntaxError, CliDefinitionError
+from nuclear.parser.parser import Parser
+from nuclear.utils.output import error
 from .rule import DefaultActionRule, CliRule
 from .rule_factory import default_action, primary_option, arguments, argument
 

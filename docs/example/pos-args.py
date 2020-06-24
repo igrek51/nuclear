@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 
 def print_args(remote: str, branch: str):

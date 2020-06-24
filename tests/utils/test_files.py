@@ -1,4 +1,4 @@
-from cliglue.utils.files import *
+from nuclear.utils.files import *
 
 
 def test_read_file():

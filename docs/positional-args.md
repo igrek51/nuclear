@@ -8,7 +8,7 @@ Let's assume we have CLI syntax: `git push <origin> <master>`.
 
 In order to create positional argument rule specification, use:
 ```python
-from cliglue import argument
+from nuclear import argument
 
 def argument(
         name: str,
@@ -42,7 +42,7 @@ or reference to a function which will be invoked to retrieve such possible value
 #### Example: pos-args.py
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 
 def print_args(remote: str, branch: str):
@@ -82,4 +82,4 @@ foo@bar:~$ ./pos-args.py origin develop
 remote: origin, argument: develop
 ```
 
-See [positional arguments tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_positional_argument.py) as a specification.
+See [positional arguments tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_positional_argument.py) as a specification.

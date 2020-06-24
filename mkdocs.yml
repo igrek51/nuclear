@@ -1,6 +1,6 @@
-site_name: cliglue
+site_name: nuclear
 theme: readthedocs
-repo_url: https://github.com/igrek51/cliglue
+repo_url: https://github.com/igrek51/nuclear
 site_author: igrek51
 docs_dir: docs
 
@@ -10,7 +10,7 @@ nav:
     - Features: features.md
     - Quick start: quick-start.md
     - How does it work?: how-it-works.md
-    - cliglue vs argparse: vs-argparse.md
+    - nuclear vs argparse: vs-argparse.md
     - Installation: installation.md
     - CLI Builder: builder.md
     - Sub-commands: subcommands.md

@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from cliglue import CliBuilder, subcommand
+from nuclear import CliBuilder, subcommand
 
 
 def main():

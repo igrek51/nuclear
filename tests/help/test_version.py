@@ -1,6 +1,6 @@
-from cliglue import *
+from nuclear import *
 from tests.asserts import MockIO
-from cliglue import __version__
+from nuclear import __version__
 
 
 def test_print_version():
@@ -21,13 +21,13 @@ def test_print_name_with_version():
         assert 'apk v1.2.3' in mockio.stripped()
 
 
-def test_print_cliglue_version():
+def test_print_nuclear_version():
     with MockIO('--version') as mockio:
         CliBuilder(name='apk', version='1.2.3').run()
-        assert f'apk v1.2.3 (cliglue v{__version__})' == mockio.stripped()
+        assert f'apk v1.2.3 (nuclear v{__version__})' == mockio.stripped()
 
 
-def test_print_cliglue_version_without_app_name():
+def test_print_nuclear_version_without_app_name():
     with MockIO('--version') as mockio:
         CliBuilder(version='1.2.3').run()
-        assert f'v1.2.3 (cliglue v{__version__})' == mockio.stripped()
+        assert f'v1.2.3 (nuclear v{__version__})' == mockio.stripped()

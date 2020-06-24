@@ -1,5 +1,5 @@
 import setuptools
-from cliglue import __version__
+from nuclear import __version__
 
 with open("README.md", "r") as fh:
     long_description = fh.read()
@@ -8,14 +8,14 @@ with open("requirements.txt", "r") as fh:
     install_requires = fh.read().splitlines()
 
 setuptools.setup(
-    name="cliglue",
+    name="nuclear",
     version=__version__,
     author="igrek51",
     author_email="igrek51.dev@gmail.com",
     description="Declarative parser for command line interfaces",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/igrek51/cliglue",
+    url="https://github.com/igrek51/nuclear",
     packages=setuptools.find_packages(),
     classifiers=[
         "Programming Language :: Python :: 3",

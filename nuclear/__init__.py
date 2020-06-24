@@ -3,4 +3,4 @@ from .builder.rule_factory import subcommand, flag, dictionary, parameter, prima
     default_action
 from .version import __version__
 
-name = "cliglue"
+name = "nuclear"

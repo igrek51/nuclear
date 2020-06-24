@@ -30,13 +30,13 @@ sudo dnf install python36
 ```
 
 ### Step 2. Install package using pip
-Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
+Install package from [PyPI repository](https://pypi.org/project/nuclear) using pip:
 ```bash
-pip3 install cliglue
+pip3 install nuclear
 ```
 Or using explicit python version:
 ```bash
-python3.6 -m pip install cliglue
+python3.6 -m pip install nuclear
 ```
 ### Install package in develop mode
 You can install package in develop mode in order to make any changes for your own:

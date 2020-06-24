@@ -1,5 +1,5 @@
 ## CliBuilder
-`CliBuilder` is a main class of `cliglue` package which allows to build CLI definition.
+`CliBuilder` is a main class of `nuclear` package which allows to build CLI definition.
 It's a builder for Command Line Interface specification.
 After that, you can invoke `.run()` method in order to parse provided arguments and invoke particular actions.
 
@@ -12,7 +12,7 @@ Empty CliBuilder has standard options enabled by default:
 In this step you can create new `CliBuilder` and set a custom configuration for it.
  The constructor is as follows:
 ```python
-from cliglue import CliBuilder
+from nuclear import CliBuilder
 
 CliBuilder(
            name: Optional[str] = None,
@@ -66,7 +66,7 @@ Available rules are:
 
 Example:
 ```python
-from cliglue import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
+from nuclear import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
 
 CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
            with_defaults=True, usage_onerror=False, reraise_error=True).has(
@@ -87,7 +87,7 @@ If actions need some parameters, they will be injected based on the parsed argum
 
 Running empty builder:
 ```python
-from cliglue import CliBuilder
+from nuclear import CliBuilder
 
 CliBuilder().run()
 ```

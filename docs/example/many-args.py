@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from cliglue import CliBuilder, arguments, subcommand
+from nuclear import CliBuilder, arguments, subcommand
 
 
 def run_cmd(cmd: str):

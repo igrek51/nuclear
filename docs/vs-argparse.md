@@ -1,5 +1,5 @@
-## `cliglue` vs `argparse`
-Why use `cliglue`, since Python has already `argparse`? Here are some subjective advantages of `cliglue`:
+## `nuclear` vs `argparse`
+Why use `nuclear`, since Python has already `argparse`? Here are some subjective advantages of `nuclear`:
 
 - declarative way of CLI logic in one place,
 - autocompletion out of the box,
@@ -9,7 +9,7 @@ Why use `cliglue`, since Python has already `argparse`? Here are some subjective
 - simpler & concise CLI building - when reading the code, it's easier to distinguish particular CLI rules between them (i.e. flags from positional arguments, parameters or sub-commands),
 - CLI definition code as a clear documentation.
 
-### Migrating from `argparse` to `cliglue`
+### Migrating from `argparse` to `nuclear`
 
 #### Migrating: Sub-commands
 argparse:
@@ -36,7 +36,7 @@ parser_bar.set_defaults(func=bar)
 args = parser.parse_args()
 args.func(args)
 ```
-with cliglue it's much simpler and more clear:
+with nuclear it's much simpler and more clear:
 ```python
 def foo(x, y):
     print(x * y)
@@ -66,9 +66,9 @@ parser = argparse.ArgumentParser(description='Program description')
 args = parser.parse_args()
 do_something(args)
 ```
-cliglue:
+nuclear:
 ```python
-from cliglue import CliBuilder
+from nuclear import CliBuilder
 
 CliBuilder(help='Program description', run=do_something).has(
     [here come the rules...]
@@ -80,7 +80,7 @@ argparse:
 ```python
 parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
 ```
-cliglue:
+nuclear:
 ```python
 flag("-v", "--verbose", help="increase output verbosity"),
 ```
@@ -90,7 +90,7 @@ argparse:
 ```python
 parser.add_argument("square", help="display a square of a given number", type=int)
 ```
-cliglue:
+nuclear:
 ```python
 argument("square", help="display a square of a given number", type=int),
 ```
@@ -100,7 +100,7 @@ argparse:
 ```python
 do_action(args.square, args.verbose)
 ```
-cliglue:
+nuclear:
 ```python
 CliBuilder(run=do_action)  # invoking actions is done automatically by binding
 ```

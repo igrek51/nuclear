@@ -1,6 +1,6 @@
 import os
 
-from cliglue.parser.error import CliSyntaxError
+from nuclear.parser.error import CliSyntaxError
 
 
 def existing_file(arg: str) -> str:

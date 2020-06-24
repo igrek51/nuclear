@@ -2,9 +2,9 @@ import inspect
 from typing import Any, List
 from typing import Dict, Mapping
 
-from cliglue.args.container import ArgsContainer
-from cliglue.builder.typedef import Action
-from cliglue.utils.output import warn
+from nuclear.args.container import ArgsContainer
+from nuclear.builder.typedef import Action
+from nuclear.utils.output import warn
 
 
 def run_action(action: Action, internal_vars: Dict[str, Any]):

@@ -4,7 +4,7 @@ There are supported both short (`-f`) and long (`--force`) formats.
 
 In order to create flag rule specification, use:
 ```python
-from cliglue import flag
+from nuclear import flag
 
 flag(
         *keywords: str,
@@ -26,7 +26,7 @@ Then flag has int type and stores number of its occurrences
 
 Example:
 ```python
-from cliglue import CliBuilder, flag
+from nuclear import CliBuilder, flag
 
 CliBuilder(run=lambda force: print(force)).has(
     flag('--force', '-f'),
@@ -52,4 +52,4 @@ CliBuilder(run=lambda verbose: print(f'verbosity level: {verbose}')).has(
 ```
 Then `-vvv` should return `3`.
 
-See [flag tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_flag.py) for more detailed use cases.
+See [flag tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_flag.py) for more detailed use cases.

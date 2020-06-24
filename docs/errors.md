@@ -1,5 +1,5 @@
 ## Errors handling
-`cliglue` validates passed CLI arguments on running `CliBuilder.run()`
+`nuclear` validates passed CLI arguments on running `CliBuilder.run()`
 
 ### Handling syntax errors - CliSyntaxError
 In case of syntax error, `CliBuilder.run()` raises `CliSyntaxError`, it's when:
@@ -19,7 +19,7 @@ Then only the error log will be displayed in console stdout.
 #### Erros handling example
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 CliBuilder(usage_onerror=False).has(
     argument('remote', required=True),
@@ -41,7 +41,7 @@ In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError
 #### Wrong CLI Definition example
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 CliBuilder().has(
     argument('remote', required=True, default='def'),
@@ -54,16 +54,16 @@ foo@bar:~$ ./errors.py
 Traceback (most recent call last):
   File "pyt.py", line 4, in <module>
     argument('remote', required=True, default='def'),
-  File "~/cliglue/cliglue/builder/builder.py", line 69, in run
+  File "~/nuclear/nuclear/builder/builder.py", line 69, in run
     self.run_with_args(sys.argv[1:])
-  File "~/cliglue/cliglue/builder/builder.py", line 76, in run_with_args
+  File "~/nuclear/nuclear/builder/builder.py", line 76, in run_with_args
     raise e
-  File "~/cliglue/cliglue/builder/builder.py", line 73, in run_with_args
+  File "~/nuclear/nuclear/builder/builder.py", line 73, in run_with_args
     Parser(self.__subrules).parse_args(args)
-  File "~/cliglue/cliglue/parser/parser.py", line 37, in __init__
+  File "~/nuclear/nuclear/parser/parser.py", line 37, in __init__
     self._init_rules()
-  File "~/cliglue/cliglue/parser/parser.py", line 57, in _init_rules
+  File "~/nuclear/nuclear/parser/parser.py", line 57, in _init_rules
     raise CliDefinitionError('argument value may be either required or have the default value')
-cliglue.parser.error.CliDefinitionError: argument value may be either required or have the default value
+nuclear.parser.error.CliDefinitionError: argument value may be either required or have the default value
 ```
 

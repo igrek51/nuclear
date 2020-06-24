@@ -1,5 +1,5 @@
 ## Quick start
-Let's create a simple command-line application using `cliglue`.
+Let's create a simple command-line application using `nuclear`.
 Let's assume we already have our fancy functions as follows:
 ```python
 def say_hello(name: str, decode: bool, repeat: int):
@@ -26,7 +26,7 @@ We've just identified 2 main commands in a program: `hello` and `calculate` (whi
     * `factorial` subcommand has one positional argument `N`,
     * `primes` subcommand has one positional argument `N`,
 
-So our CLI definition may be declared using `cliglue` in a following way:
+So our CLI definition may be declared using `nuclear` in a following way:
 ```python
 CliBuilder().has(
     subcommand('hello', run=say_hello).has(
@@ -51,7 +51,7 @@ Getting it all together, we've bound our function with a Command-Line Interface:
 #!/usr/bin/env python3
 import base64
 from functools import reduce
-from cliglue import CliBuilder, argument, flag, parameter, subcommand
+from nuclear import CliBuilder, argument, flag, parameter, subcommand
 
 def say_hello(name: str, decode: bool, repeat: int):
     if decode:
@@ -165,5 +165,5 @@ foo@bar:~$ ./quickstart.py calculate primes 50
 
 When you are writing function for your action and you need to access some of the variables (flags, parameters, arguments, etc.),
 just simply add a parameter to the function with a name same as the variable you need.
-Then, the proper value will be parsed and injected by `cliglue`.
+Then, the proper value will be parsed and injected by `nuclear`.
 

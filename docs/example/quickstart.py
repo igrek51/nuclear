@@ -2,7 +2,7 @@
 import base64
 from functools import reduce
 
-from cliglue import CliBuilder, argument, flag, parameter, subcommand
+from nuclear import CliBuilder, argument, flag, parameter, subcommand
 
 
 def main():

@@ -3,14 +3,14 @@ import sys
 from dataclasses import dataclass, field
 from typing import List, Set, Optional
 
-from cliglue.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
+from nuclear.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
     PositionalArgumentRule, ManyArgumentsRule, DictionaryRule, ValueRule
-from cliglue.parser.context import RunContext
-from cliglue.parser.keyword import format_var_names, format_var_name
-from cliglue.parser.parser import Parser
-from cliglue.parser.transform import filter_rules
-from cliglue.parser.value import generate_value_choices
-from cliglue.version import __version__
+from nuclear.parser.context import RunContext
+from nuclear.parser.keyword import format_var_names, format_var_name
+from nuclear.parser.parser import Parser
+from nuclear.parser.transform import filter_rules
+from nuclear.parser.value import generate_value_choices
+from nuclear.version import __version__
 
 
 @dataclass
@@ -120,7 +120,7 @@ def app_name_version(app_name, version):
         version = _normalized_version(version)
         infos += [version]
     if infos:
-        infos += [f'(cliglue v{__version__})']
+        infos += [f'(nuclear v{__version__})']
     return ' '.join(infos)
 
 

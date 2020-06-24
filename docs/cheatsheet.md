@@ -2,7 +2,7 @@
 Here is the cheatsheet for the most important CLI rules:
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, arguments, flag, parameter, subcommand, dictionary
+from nuclear import CliBuilder, argument, arguments, flag, parameter, subcommand, dictionary
 
 
 def main():
@@ -32,9 +32,9 @@ Here's an example of more complex CLI definition tree:
 **multiapp.py**:
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
-from cliglue.types.filesystem import existing_directory
-from cliglue.types.time import iso_datetime
+from nuclear import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
+from nuclear.types.filesystem import existing_directory
+from nuclear.types.time import iso_datetime
 
 
 def main():

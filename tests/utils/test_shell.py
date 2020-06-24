@@ -1,4 +1,4 @@
-from cliglue.utils.shell import shell, shell_error_code, shell_output
+from nuclear.utils.shell import shell, shell_error_code, shell_output
 from tests.asserts import assert_error
 
 

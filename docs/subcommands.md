@@ -17,7 +17,7 @@ So subcommand is just a keyword which narrows down the context.
 ### Sub-commands specification
 In order to create subcommand rule specification, use:
 ```python
-from cliglue import subcommand
+from nuclear import subcommand
 
 subcommand(
         *keywords: str,
@@ -39,7 +39,7 @@ They will be active only when corresponding subcommand is active.
 Subrules can be nested using `.has(*subrules: CliRule)` method.
 It returns itself for further building, so it can be used just like `CliBuilder`:
 ```python
-from cliglue import CliBuilder, argument, subcommand
+from nuclear import CliBuilder, argument, subcommand
 
 CliBuilder().has(
     subcommand('nmcli').has(
@@ -64,7 +64,7 @@ In that manner, the formatted code above is composing a visual tree, which is cl
 ### Sub-commands example: subcommands.py
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, subcommand
+from nuclear import CliBuilder, subcommand
 
 CliBuilder('subcommands-demo', run=lambda: print('default action')).has(
     subcommand('remote', run=lambda: print('action remote')).has(
@@ -104,5 +104,5 @@ Commands:
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
 
-See [sub-commands tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_subcommand.py) for more detailed use cases.
+See [sub-commands tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_subcommand.py) for more detailed use cases.
 

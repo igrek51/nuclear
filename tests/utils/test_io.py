@@ -1,7 +1,7 @@
 import sys
 
-from cliglue.utils.input import input_required
-from cliglue.utils.output import debug, info, warn, error, fatal
+from nuclear.utils.input import input_required
+from nuclear.utils.output import debug, info, warn, error, fatal
 from tests.asserts import MockIO, assert_error
 
 

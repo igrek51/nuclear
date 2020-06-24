@@ -1,7 +1,7 @@
 from pathlib import Path
 
-from cliglue import *
-from cliglue.completers import file_completer
+from nuclear import *
+from nuclear.completers import file_completer
 from tests.asserts import MockIO
 
 
@@ -97,12 +97,12 @@ def test_file_completer_notexisting_dir():
 
 
 def test_complete_absolute_files():
-    Path('/tmp/cliglue_test_autocomplete_425_896').write_text('')
+    Path('/tmp/nuclear_test_autocomplete_425_896').write_text('')
 
-    with MockIO('--autocomplete', '"app /tmp/cliglue_test_autocomplete_425"') as mockio:
+    with MockIO('--autocomplete', '"app /tmp/nuclear_test_autocomplete_425"') as mockio:
         CliBuilder(reraise_error=True).has(
             arguments('f', choices=file_completer),
         ).run()
-        assert mockio.stripped() == '/tmp/cliglue_test_autocomplete_425_896'
+        assert mockio.stripped() == '/tmp/nuclear_test_autocomplete_425_896'
 
-    Path('/tmp/cliglue_test_autocomplete_425_896').unlink()
+    Path('/tmp/nuclear_test_autocomplete_425_896').unlink()

@@ -1,6 +1,6 @@
-from cliglue import *
-from cliglue.types.filesystem import existing_file, existing_directory
-from cliglue.utils.files import script_real_path, script_real_dir
+from nuclear import *
+from nuclear.types.filesystem import existing_file, existing_directory
+from nuclear.utils.files import script_real_path, script_real_dir
 from tests.asserts import MockIO, assert_cli_error
 
 

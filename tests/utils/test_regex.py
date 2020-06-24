@@ -1,5 +1,5 @@
-from cliglue.utils.files import save_file
-from cliglue.utils.regex import *
+from nuclear.utils.files import save_file
+from nuclear.utils.regex import *
 
 
 def test_regex_replace():

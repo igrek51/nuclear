@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from cliglue.builder.rule import CliRule, PositionalArgumentRule, ManyArgumentsRule, \
+from nuclear.builder.rule import CliRule, PositionalArgumentRule, ManyArgumentsRule, \
     OptionalValueRule, ValueRule, ParameterRule
-from cliglue.parser.internal_vars import InternalVars
+from nuclear.parser.internal_vars import InternalVars
 from .error import CliDefinitionError, CliSyntaxError
 from .transform import filter_rules
 from .value import generate_value_choices

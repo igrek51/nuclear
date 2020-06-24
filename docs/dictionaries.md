@@ -10,7 +10,7 @@ e.g. `--config-name` will be injected as `config_name` variable name)
 
 In order to create dictionary rule specification, use:
 ```python
-from cliglue import dictionary
+from nuclear import dictionary
 
 dictionary(
         *keywords: str,
@@ -41,7 +41,7 @@ Then dictionary value is evaluated by passing the string argument value to that 
 
 Basic dictionary example:
 ```python
-from cliglue import CliBuilder, dictionary
+from nuclear import CliBuilder, dictionary
 
 CliBuilder(run=lambda config: print(config)).has(
     dictionary('config', 'c', value_type=int),
@@ -54,5 +54,5 @@ foo@bar:~$ ./example.py
 {}
 ```
 
-See [dictionaries tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_dictionary.py) for more detailed use cases.
+See [dictionaries tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_dictionary.py) for more detailed use cases.
 

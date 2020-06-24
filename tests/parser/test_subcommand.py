@@ -1,4 +1,4 @@
-from cliglue import *
+from nuclear import *
 from tests.asserts import MockIO
 from tests.parser.actions import *
 

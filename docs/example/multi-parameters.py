@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from cliglue import CliBuilder, parameter
+from nuclear import CliBuilder, parameter
 from typing import List
 
 

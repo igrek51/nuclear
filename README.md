@@ -1,39 +1,39 @@
-# cliglue - glue for CLI
-[![GitHub version](https://badge.fury.io/gh/igrek51%2Fcliglue.svg)](https://github.com/igrek51/cliglue)
-[![PyPI version](https://badge.fury.io/py/cliglue.svg)](https://pypi.org/project/cliglue)
-[![Documentation Status](https://readthedocs.org/projects/cliglue/badge/?version=latest)](https://cliglue.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://travis-ci.org/igrek51/cliglue.svg?branch=master)](https://travis-ci.org/igrek51/cliglue)
-[![Coverage Status](https://coveralls.io/repos/github/igrek51/cliglue/badge.svg?branch=master)](https://coveralls.io/github/igrek51/cliglue?branch=master)
-[![codecov](https://codecov.io/gh/igrek51/cliglue/branch/master/graph/badge.svg)](https://codecov.io/gh/igrek51/cliglue)
+# nuclear - binding glue for CLI
+[![GitHub version](https://badge.fury.io/gh/igrek51%2Fnuclear.svg)](https://github.com/igrek51/nuclear)
+[![PyPI version](https://badge.fury.io/py/nuclear.svg)](https://pypi.org/project/nuclear)
+[![Documentation Status](https://readthedocs.org/projects/nuclear-py/badge/?version=latest)](https://nuclear-py.readthedocs.io/en/latest/?badge=latest)
+[![Build Status](https://travis-ci.org/igrek51/nuclear.svg?branch=master)](https://travis-ci.org/igrek51/nuclear)
+[![Coverage Status](https://coveralls.io/repos/github/igrek51/nuclear/badge.svg?branch=master)](https://coveralls.io/github/igrek51/nuclear?branch=master)
+[![codecov](https://codecov.io/gh/igrek51/nuclear/branch/master/graph/badge.svg)](https://codecov.io/gh/igrek51/nuclear)
 
 
-`cliglue` is a declarative parser for command line interfaces in Python.
+`nuclear` is a declarative parser for command line interfaces in Python.
 It's a binding glue between CLI shell arguments and functions being invoked.
 It mostly focuses on building multi level command trees.
 
-`cliglue` parses and validates command line arguments provided by user when running console application.
+`nuclear` parses and validates command line arguments provided by user when running console application.
 Then it automatically triggers matched action, based on the declared Command-Line Interface rules, injecting all needed parameters.
 You don't need to write the "glue" code for binding & parsing parameters every time.
 So it makes writing console aplications simpler and more clear.
 
 ## Features
-- [Auto-generated help and usage](https://cliglue.readthedocs.io/en/latest#auto-generated-help) (`--help`)
-- [Shell autocompletion](https://cliglue.readthedocs.io/en/latest#auto-completion) (getting most relevant hints on hitting `Tab`)
-- [Multilevel sub-commands](https://cliglue.readthedocs.io/en/latest#sub-commands) (e.g. `git remote add ...` syntax)
-- [Named parameters](https://cliglue.readthedocs.io/en/latest#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
-- [Flags](https://cliglue.readthedocs.io/en/latest#flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
-- [Positional arguments](https://cliglue.readthedocs.io/en/latest#positional-arguments) (e.g. `git push <origin> <master>`)
-- [Key-value dictionaries](https://cliglue.readthedocs.io/en/latest#dictionaries) (e.g. `--config key value`)
-- [Invoking matched action function & injecting parameters](https://cliglue.readthedocs.io/en/latest#injecting-parameters)
-- [Custom type validators / parsers](https://cliglue.readthedocs.io/en/latest#custom-type-parsers)
-- [Custom auto-completers](https://cliglue.readthedocs.io/en/latest#custom-completers) (providers of possible values)
-- [Handling syntax errors, parameters validation](https://cliglue.readthedocs.io/en/latest#errors-handling)
-- [Typed values](https://cliglue.readthedocs.io/en/latest#data-types) (int, time, date, file, etc.)
-- [Standard options](https://cliglue.readthedocs.io/en/latest#clibuilder) enabled by default (`--help`, `--version`)
-- [Declarative CLI builder](https://cliglue.readthedocs.io/en/latest#cli-rules-cheatsheet)
+- [Auto-generated help and usage](https://nuclear-py.readthedocs.io/en/latest#auto-generated-help) (`--help`)
+- [Shell autocompletion](https://nuclear-py.readthedocs.io/en/latest#auto-completion) (getting most relevant hints on hitting `Tab`)
+- [Multilevel sub-commands](https://nuclear-py.readthedocs.io/en/latest#sub-commands) (e.g. `git remote add ...` syntax)
+- [Named parameters](https://nuclear-py.readthedocs.io/en/latest#named-parameters): supporting both `--name value` and `--name=value`, multiple parameter occurrences
+- [Flags](https://nuclear-py.readthedocs.io/en/latest#flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
+- [Positional arguments](https://nuclear-py.readthedocs.io/en/latest#positional-arguments) (e.g. `git push <origin> <master>`)
+- [Key-value dictionaries](https://nuclear-py.readthedocs.io/en/latest#dictionaries) (e.g. `--config key value`)
+- [Invoking matched action function & injecting parameters](https://nuclear-py.readthedocs.io/en/latest#injecting-parameters)
+- [Custom type validators / parsers](https://nuclear-py.readthedocs.io/en/latest#custom-type-parsers)
+- [Custom auto-completers](https://nuclear-py.readthedocs.io/en/latest#custom-completers) (providers of possible values)
+- [Handling syntax errors, parameters validation](https://nuclear-py.readthedocs.io/en/latest#errors-handling)
+- [Typed values](https://nuclear-py.readthedocs.io/en/latest#data-types) (int, time, date, file, etc.)
+- [Standard options](https://nuclear-py.readthedocs.io/en/latest#clibuilder) enabled by default (`--help`, `--version`)
+- [Declarative CLI builder](https://nuclear-py.readthedocs.io/en/latest#cli-rules-cheatsheet)
 
 ## Quick start
-Let's create a simple command-line application using `cliglue`.
+Let's create a simple command-line application using `nuclear`.
 Let's assume we already have our fancy functions as follows:
 ```python
 def say_hello(name: str, decode: bool, repeat: int):
@@ -60,7 +60,7 @@ We've just identified 2 main commands in a program: `hello` and `calculate` (whi
     * `factorial` subcommand has one positional argument `N`,
     * `primes` subcommand has one positional argument `N`,
 
-So our CLI definition may be declared using `cliglue` in a following way:
+So our CLI definition may be declared using `nuclear` in a following way:
 ```python
 CliBuilder().has(
     subcommand('hello', run=say_hello).has(
@@ -85,7 +85,7 @@ Getting it all together, we've bound our function with a Command-Line Interface:
 #!/usr/bin/env python3
 import base64
 from functools import reduce
-from cliglue import CliBuilder, argument, flag, parameter, subcommand
+from nuclear import CliBuilder, argument, flag, parameter, subcommand
 
 def say_hello(name: str, decode: bool, repeat: int):
     if decode:
@@ -199,19 +199,19 @@ foo@bar:~$ ./quickstart.py calculate primes 50
 
 When you are writing function for your action and you need to access some of the variables (flags, parameters, arguments, etc.),
 just simply add a parameter to the function with a name same as the variable you need.
-Then, the proper value will be parsed and injected by `cliglue`.
+Then, the proper value will be parsed and injected by `nuclear`.
 
 ## How does it work?
 1. You define all required CLI rules for your program in a declarative tree.
 2. User provides command-line arguments when running program in a shell.
-3. `cliglue` parses and validates all the parameters, flags, sub-commands, positional arguments, etc, and stores them internally.
-4. `cliglue` finds the most relevant action (starting from the most specific) and invokes it.
-5. When invoking a function, `cliglue` injects all its needed parameters based on the previously defined & parsed values.
+3. `nuclear` parses and validates all the parameters, flags, sub-commands, positional arguments, etc, and stores them internally.
+4. `nuclear` finds the most relevant action (starting from the most specific) and invokes it.
+5. When invoking a function, `nuclear` injects all its needed parameters based on the previously defined & parsed values.
 
-You only need to bind the keywords to the rules and `cliglue` will handle all the rest for you.
+You only need to bind the keywords to the rules and `nuclear` will handle all the rest for you.
 
-## `cliglue` vs `argparse`
-Why use `cliglue`, since Python has already `argparse`? Here are some subjective advantages of `cliglue`:
+## `nuclear` vs `argparse`
+Why use `nuclear`, since Python has already `argparse`? Here are some subjective advantages of `nuclear`:
 
 - declarative way of CLI logic in one place,
 - autocompletion out of the box,
@@ -221,7 +221,7 @@ Why use `cliglue`, since Python has already `argparse`? Here are some subjective
 - simpler & concise CLI building - when reading the code, it's easier to distinguish particular CLI rules between them (i.e. flags from positional arguments, parameters or sub-commands),
 - CLI definition code as a clear documentation.
 
-### Migrating from `argparse` to `cliglue`
+### Migrating from `argparse` to `nuclear`
 
 #### Migrating: Sub-commands
 argparse:
@@ -248,7 +248,7 @@ parser_bar.set_defaults(func=bar)
 args = parser.parse_args()
 args.func(args)
 ```
-with cliglue it's much simpler and more clear:
+with nuclear it's much simpler and more clear:
 ```python
 def foo(x, y):
     print(x * y)
@@ -278,9 +278,9 @@ parser = argparse.ArgumentParser(description='Program description')
 args = parser.parse_args()
 do_something(args)
 ```
-cliglue:
+nuclear:
 ```python
-from cliglue import CliBuilder
+from nuclear import CliBuilder
 
 CliBuilder(help='Program description', run=do_something).has(
     [here come the rules...]
@@ -292,7 +292,7 @@ argparse:
 ```python
 parser.add_argument("-v", "--verbose", help="increase output verbosity", action="store_true")
 ```
-cliglue:
+nuclear:
 ```python
 flag("-v", "--verbose", help="increase output verbosity"),
 ```
@@ -302,7 +302,7 @@ argparse:
 ```python
 parser.add_argument("square", help="display a square of a given number", type=int)
 ```
-cliglue:
+nuclear:
 ```python
 argument("square", help="display a square of a given number", type=int),
 ```
@@ -312,7 +312,7 @@ argparse:
 ```python
 do_action(args.square, args.verbose)
 ```
-cliglue:
+nuclear:
 ```python
 CliBuilder(run=do_action)  # invoking actions is done automatically by binding
 ```
@@ -349,13 +349,13 @@ sudo dnf install python36
 ```
 
 ### Step 2. Install package using pip
-Install package from [PyPI repository](https://pypi.org/project/cliglue) using pip:
+Install package from [PyPI repository](https://pypi.org/project/nuclear) using pip:
 ```bash
-pip3 install cliglue
+pip3 install nuclear
 ```
 Or using explicit python version:
 ```bash
-python3.6 -m pip install cliglue
+python3.6 -m pip install nuclear
 ```
 ### Install package in develop mode
 You can install package in develop mode in order to make any changes for your own:
@@ -372,7 +372,7 @@ pip3 install -r requirements.txt -r requirements-dev.txt
 ```
 
 ## CliBuilder
-`CliBuilder` is a main class of `cliglue` package which allows to build CLI definition.
+`CliBuilder` is a main class of `nuclear` package which allows to build CLI definition.
 It's a builder for Command Line Interface specification.
 After that, you can invoke `.run()` method in order to parse provided arguments and invoke particular actions.
 
@@ -385,7 +385,7 @@ Empty CliBuilder has standard options enabled by default:
 In this step you can create new `CliBuilder` and set a custom configuration for it.
  The constructor is as follows:
 ```python
-from cliglue import CliBuilder
+from nuclear import CliBuilder
 
 CliBuilder(
            name: Optional[str] = None,
@@ -439,7 +439,7 @@ Available rules are:
 
 Example:
 ```python
-from cliglue import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
+from nuclear import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
 
 CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
            with_defaults=True, usage_onerror=False, reraise_error=True).has(
@@ -460,7 +460,7 @@ If actions need some parameters, they will be injected based on the parsed argum
 
 Running empty builder:
 ```python
-from cliglue import CliBuilder
+from nuclear import CliBuilder
 
 CliBuilder().run()
 ```
@@ -485,7 +485,7 @@ So subcommand is just a keyword which narrows down the context.
 ### Sub-commands specification
 In order to create subcommand rule specification, use:
 ```python
-from cliglue import subcommand
+from nuclear import subcommand
 
 subcommand(
         *keywords: str,
@@ -507,7 +507,7 @@ They will be active only when corresponding subcommand is active.
 Subrules can be nested using `.has(*subrules: CliRule)` method.
 It returns itself for further building, so it can be used just like `CliBuilder`:
 ```python
-from cliglue import CliBuilder, argument, subcommand
+from nuclear import CliBuilder, argument, subcommand
 
 CliBuilder().has(
     subcommand('nmcli').has(
@@ -532,7 +532,7 @@ In that manner, the formatted code above is composing a visual tree, which is cl
 ### Sub-commands example: subcommands.py
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, subcommand
+from nuclear import CliBuilder, subcommand
 
 CliBuilder('subcommands-demo', run=lambda: print('default action')).has(
     subcommand('remote', run=lambda: print('action remote')).has(
@@ -572,7 +572,7 @@ Commands:
 Run "./subcommands.py COMMAND --help" for more information on a command.
 ```
 
-See [sub-commands tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_subcommand.py) for more detailed use cases.
+See [sub-commands tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_subcommand.py) for more detailed use cases.
 
 ## Flags
 Flag is a boolean parameter which is toggled by single keyword.
@@ -580,7 +580,7 @@ There are supported both short (`-f`) and long (`--force`) formats.
 
 In order to create flag rule specification, use:
 ```python
-from cliglue import flag
+from nuclear import flag
 
 flag(
         *keywords: str,
@@ -602,7 +602,7 @@ Then flag has int type and stores number of its occurrences
 
 Example:
 ```python
-from cliglue import CliBuilder, flag
+from nuclear import CliBuilder, flag
 
 CliBuilder(run=lambda force: print(force)).has(
     flag('--force', '-f'),
@@ -628,7 +628,7 @@ CliBuilder(run=lambda verbose: print(f'verbosity level: {verbose}')).has(
 ```
 Then `-vvv` should return `3`.
 
-See [flag tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_flag.py) for more detailed use cases.
+See [flag tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_flag.py) for more detailed use cases.
 ## Named parameters
 Parameter is a named value, which will be injected to triggered action by its name.
 There are supported both manners for setting parameter value:
@@ -643,7 +643,7 @@ e.g. `--paramater-name` will be injected as `parameter_name`)
 
 In order to create parameter rule specification, use:
 ```python
-from cliglue import parameter
+from nuclear import parameter
 
 parameter(
         *keywords: str,
@@ -686,7 +686,7 @@ Then parameter has list type and stores list of values
 
 Basic parameter example:
 ```python
-from cliglue import CliBuilder, parameter
+from nuclear import CliBuilder, parameter
 
 CliBuilder(run=lambda param: print(param)).has(
     parameter('param', 'p'),
@@ -720,7 +720,7 @@ foo@bar:~$ ./example.py --skip build --skip run
 skipping: ['build', 'run']
 ``` 
 
-See [parameter tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_param.py) for more detailed use cases.
+See [parameter tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_param.py) for more detailed use cases.
 
 ## Positional arguments
 Positional argument is an unnamed parameter, which is recognized only by its position on their order in command line arguments list.
@@ -732,7 +732,7 @@ Let's assume we have CLI syntax: `git push <origin> <master>`.
 
 In order to create positional argument rule specification, use:
 ```python
-from cliglue import argument
+from nuclear import argument
 
 def argument(
         name: str,
@@ -766,7 +766,7 @@ or reference to a function which will be invoked to retrieve such possible value
 #### Example: pos-args.py
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 
 def print_args(remote: str, branch: str):
@@ -806,19 +806,19 @@ foo@bar:~$ ./pos-args.py origin develop
 remote: origin, argument: develop
 ```
 
-See [positional arguments tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_positional_argument.py) as a specification.
+See [positional arguments tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_positional_argument.py) as a specification.
 ## Many positional arguments
-`cliglue` allows to match all remaining (not already matched) arguments.
+`nuclear` allows to match all remaining (not already matched) arguments.
 It can be useful when using syntax like `docker cmd`:
 ```docker run cmd ubuntu /bin/bash -c /script.sh```
 With that syntax all arguments after `ubuntu` - `/bin/bash -c /script.sh` should be matched to one variable. 
 
-You can do it with `cliglue` using `arguments`.
+You can do it with `nuclear` using `arguments`.
 That rule will force parser to store all remaining arguments in a list variable (or in a joined string).
 
 In order to create "multiple arguments" rule specification, use:
 ```python
-from cliglue import arguments
+from nuclear import arguments
 
 def arguments(
         name: str,
@@ -870,7 +870,7 @@ You can use many consecutive `arguments` rules as long as they have `count` or `
 ### Example: many-args.py
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, arguments, subcommand
+from nuclear import CliBuilder, arguments, subcommand
 
 
 def run_cmd(cmd: str):
@@ -906,7 +906,7 @@ foo@bar:~$ ./many-args.py run "/bin/bash -c script.sh"
 cmd: /bin/bash -c script.sh
 ```
 
-See [many arguments tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_many_arguments.py) for more detailed use cases.
+See [many arguments tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_many_arguments.py) for more detailed use cases.
 
 ## Dictionaries
 Dictionary contains key-value pairs.
@@ -920,7 +920,7 @@ e.g. `--config-name` will be injected as `config_name` variable name)
 
 In order to create dictionary rule specification, use:
 ```python
-from cliglue import dictionary
+from nuclear import dictionary
 
 dictionary(
         *keywords: str,
@@ -951,7 +951,7 @@ Then dictionary value is evaluated by passing the string argument value to that 
 
 Basic dictionary example:
 ```python
-from cliglue import CliBuilder, dictionary
+from nuclear import CliBuilder, dictionary
 
 CliBuilder(run=lambda config: print(config)).has(
     dictionary('config', 'c', value_type=int),
@@ -964,12 +964,12 @@ foo@bar:~$ ./example.py
 {}
 ```
 
-See [dictionaries tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_dictionary.py) for more detailed use cases.
+See [dictionaries tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_dictionary.py) for more detailed use cases.
 
 ## Auto-completion
 Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key, while typing a command line.
 
-Auto-completion provided by `cliglue` is enabled by default to all known keywords based on the declared subcommands and options.
+Auto-completion provided by `nuclear` is enabled by default to all known keywords based on the declared subcommands and options.
 
 Defining possible choices may imporove auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
 
@@ -979,8 +979,8 @@ Defining possible choices may imporove auto-completing arguments. You can declar
 import re
 from typing import List
 
-from cliglue import CliBuilder, parameter, default_action
-from cliglue.utils.shell import shell, shell_output
+from nuclear import CliBuilder, parameter, default_action
+from nuclear.utils.shell import shell, shell_output
 
 
 def list_screens() -> List[str]:
@@ -1003,10 +1003,10 @@ CliBuilder('completers-demo').has(
 ).run()
 ```
 
-In order to enable auto-completion, you need to install some extension to bash. Fortunately `cliglue` has built-in tools to do that:
+In order to enable auto-completion, you need to install some extension to bash. Fortunately `nuclear` has built-in tools to do that:
 ```console
 foo@bar:~$ sudo ./completers.py --install-bash completers-demo
-[info]  creating link: /usr/bin/completers-demo -> ~/cliglue/docs/example/completers.py
+[info]  creating link: /usr/bin/completers-demo -> ~/nuclear/docs/example/completers.py
 #!/bin/bash
 _autocomplete_98246661() {
 COMPREPLY=( $(completers-demo --autocomplete "${COMP_LINE}") )
@@ -1059,7 +1059,7 @@ CliBuilder().has(
 
 ### Installing Autocompletion
 In order to enable the autocompletion, there must be a specific script in `/etc/bash_completion.d/`.
-With `cliglue` you just need to run:
+With `nuclear` you just need to run:
 ```console
 # sudo ./sample-app.py --install-bash sample-app
 ```
@@ -1093,7 +1093,7 @@ If there's only one matching proposal, the currently typed word is automatically
 Note that your application is being run each time when trying to get matching arguments proposals.
 
 ## Auto-generated help
-`cliglue` auto-generates help and usage output based on the defined CLI rules.
+`nuclear` auto-generates help and usage output based on the defined CLI rules.
 
 Let's say we have quite complex CLI definition:
 ```python
@@ -1194,11 +1194,11 @@ Run "multiapp.py git COMMAND --help" for more information on a command.
 Use `--version` in order to show your application version:
 ```console
 foo@bar:~$ python3 multiapp.py --version
-multiapp v1.0.0 (cliglue v1.0.1)
+multiapp v1.0.0 (nuclear v1.0.1)
 ```
 
 ## Data types
-`cliglue` supports typed values for parameters or positional arguments.
+`nuclear` supports typed values for parameters or positional arguments.
 By default, all values have string types.
 It can be changed by defining `type` parameter.
 
@@ -1211,7 +1211,7 @@ When argument value has invalid format, there is syntax error raised.
 ### Basic types (int, float, etc.)
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 def print_it(count: int):
     print(count * 2)
@@ -1242,54 +1242,54 @@ Options:
 ```
 
 ### Built-in data types
-`cliglue` has built-in parsers / validators for some types
+`nuclear` has built-in parsers / validators for some types
 
 #### Filesystem types
-- `cliglue.types.filesystem.existing_file` validates if given string is an existing regular file (not a directory).
+- `nuclear.types.filesystem.existing_file` validates if given string is an existing regular file (not a directory).
 After validation, the value is internally stored as `str`.
 ```python
-from cliglue.types.filesystem import existing_file
+from nuclear.types.filesystem import existing_file
 
 argument('file', type=existing_file)
 ```
 
-- `cliglue.types.filesystem.existing_directory` validates if given string is an existing directory.
+- `nuclear.types.filesystem.existing_directory` validates if given string is an existing directory.
 After validation, the value is internally stored as `str`.
 ```python
-from cliglue.types.filesystem import existing_directory
+from nuclear.types.filesystem import existing_directory
 
 argument('file', type=existing_directory)
 ```
 
 #### Datetime types
-- `cliglue.types.time.iso_date` parses / validates given string as a date in ISO format: `%Y-%m-%d`.
+- `nuclear.types.time.iso_date` parses / validates given string as a date in ISO format: `%Y-%m-%d`.
 After validation, the value is internally stored as `datetime.datetime`.
 ```python
-from cliglue.types.time import iso_date
+from nuclear.types.time import iso_date
 
 argument('date', type=iso_date)
 ```
 
-- `cliglue.types.time.iso_time` parses / validates given string as a time in ISO format: `%H:%M:%S`.
+- `nuclear.types.time.iso_time` parses / validates given string as a time in ISO format: `%H:%M:%S`.
 After validation, the value is internally stored as `datetime.datetime`.
 ```python
-from cliglue.types.time import iso_time
+from nuclear.types.time import iso_time
 
 argument('time', type=iso_time)
 ```
 
-- `cliglue.types.time.iso_time` parses / validates given string as a datetime in ISO format: `%Y-%m-%d %H:%M:%S`.
+- `nuclear.types.time.iso_time` parses / validates given string as a datetime in ISO format: `%Y-%m-%d %H:%M:%S`.
 After validation, the value is internally stored as `datetime.datetime`.
 ```python
-from cliglue.types.time import iso_datetime
+from nuclear.types.time import iso_datetime
 
 argument('datetime', type=iso_datetime)
 ```
 Example:
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
-from cliglue.types.time import iso_datetime
+from nuclear import CliBuilder, argument
+from nuclear.types.time import iso_datetime
 from datetime import datetime
 
 def print_it(to: datetime):
@@ -1312,15 +1312,15 @@ foo@bar:~$ ./example.py "2019-07-13 20:00:05"
 2019-07-13 20:00:05
 ```
 
-- `cliglue.types.time.datetime_format` parses / validates given string as a datetime in custom formats specified by user.
+- `nuclear.types.time.datetime_format` parses / validates given string as a datetime in custom formats specified by user.
 You may specify multiple formats and the CLI argument will be parsed sequentially for each format.
 The first successfully parsed datetime is returned.
 After that, the value is internally stored as `datetime.datetime`.
 
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
-from cliglue.types.time import datetime_format
+from nuclear import CliBuilder, argument
+from nuclear.types.time import datetime_format
 from datetime import datetime
 
 def print_it(to: datetime):
@@ -1337,7 +1337,7 @@ foo@bar:~$ ./example.py 2019-07-13
 2019-07-13 00:00:00
 ```
 
-- `cliglue.types.time.today_format` parses / validates given string as a time in custom formats specified by user.
+- `nuclear.types.time.today_format` parses / validates given string as a time in custom formats specified by user.
 It gets time from input and combines it with the today date.
 You may specify multiple formats and the CLI argument will be parsed sequentially for each format.
 The first successfully parsed datetime is returned.
@@ -1345,8 +1345,8 @@ After that, the value is internally stored as `datetime.datetime`.
 
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
-from cliglue.types.time import today_format
+from nuclear import CliBuilder, argument
+from nuclear.types.time import today_format
 from datetime import datetime
 
 def print_it(to: datetime):
@@ -1369,7 +1369,7 @@ It should take one `str` argument and return expected value type.
 #!/usr/bin/env python3
 import re
 from dataclasses import dataclass
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 @dataclass
 class Person:
@@ -1395,7 +1395,7 @@ Person(name='Eric', age=33)
 ```
 
 ## Errors handling
-`cliglue` validates passed CLI arguments on running `CliBuilder.run()`
+`nuclear` validates passed CLI arguments on running `CliBuilder.run()`
 
 ### Handling syntax errors - CliSyntaxError
 In case of syntax error, `CliBuilder.run()` raises `CliSyntaxError`, it's when:
@@ -1415,7 +1415,7 @@ Then only the error log will be displayed in console stdout.
 #### Erros handling example
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 CliBuilder(usage_onerror=False).has(
     argument('remote', required=True),
@@ -1437,7 +1437,7 @@ In case of invalid CLI definition, `CliBuilder.run()` raises `CliDefinitionError
 #### Wrong CLI Definition example
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument
+from nuclear import CliBuilder, argument
 
 CliBuilder().has(
     argument('remote', required=True, default='def'),
@@ -1450,24 +1450,24 @@ foo@bar:~$ ./errors.py
 Traceback (most recent call last):
   File "pyt.py", line 4, in <module>
     argument('remote', required=True, default='def'),
-  File "~/cliglue/cliglue/builder/builder.py", line 69, in run
+  File "~/nuclear/nuclear/builder/builder.py", line 69, in run
     self.run_with_args(sys.argv[1:])
-  File "~/cliglue/cliglue/builder/builder.py", line 76, in run_with_args
+  File "~/nuclear/nuclear/builder/builder.py", line 76, in run_with_args
     raise e
-  File "~/cliglue/cliglue/builder/builder.py", line 73, in run_with_args
+  File "~/nuclear/nuclear/builder/builder.py", line 73, in run_with_args
     Parser(self.__subrules).parse_args(args)
-  File "~/cliglue/cliglue/parser/parser.py", line 37, in __init__
+  File "~/nuclear/nuclear/parser/parser.py", line 37, in __init__
     self._init_rules()
-  File "~/cliglue/cliglue/parser/parser.py", line 57, in _init_rules
+  File "~/nuclear/nuclear/parser/parser.py", line 57, in _init_rules
     raise CliDefinitionError('argument value may be either required or have the default value')
-cliglue.parser.error.CliDefinitionError: argument value may be either required or have the default value
+nuclear.parser.error.CliDefinitionError: argument value may be either required or have the default value
 ```
 
 ## CLI Rules cheatsheet
 Here is the cheatsheet for the most important CLI rules:
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, arguments, flag, parameter, subcommand, dictionary
+from nuclear import CliBuilder, argument, arguments, flag, parameter, subcommand, dictionary
 
 
 def main():
@@ -1497,9 +1497,9 @@ Here's an example of more complex CLI definition tree:
 **multiapp.py**:
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
-from cliglue.types.filesystem import existing_directory
-from cliglue.types.time import iso_datetime
+from nuclear import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
+from nuclear.types.filesystem import existing_directory
+from nuclear.types.time import iso_datetime
 
 
 def main():

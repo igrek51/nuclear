@@ -1,6 +1,6 @@
 from typing import List, Type
 
-from cliglue.builder.rule import CliRule, KeywordRule, TCliRule
+from nuclear.builder.rule import CliRule, KeywordRule, TCliRule
 from .keyword import format_keywords
 
 

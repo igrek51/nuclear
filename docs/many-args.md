@@ -1,15 +1,15 @@
 ## Many positional arguments
-`cliglue` allows to match all remaining (not already matched) arguments.
+`nuclear` allows to match all remaining (not already matched) arguments.
 It can be useful when using syntax like `docker cmd`:
 ```docker run cmd ubuntu /bin/bash -c /script.sh```
 With that syntax all arguments after `ubuntu` - `/bin/bash -c /script.sh` should be matched to one variable. 
 
-You can do it with `cliglue` using `arguments`.
+You can do it with `nuclear` using `arguments`.
 That rule will force parser to store all remaining arguments in a list variable (or in a joined string).
 
 In order to create "multiple arguments" rule specification, use:
 ```python
-from cliglue import arguments
+from nuclear import arguments
 
 def arguments(
         name: str,
@@ -61,7 +61,7 @@ You can use many consecutive `arguments` rules as long as they have `count` or `
 ### Example: many-args.py
 ```python
 #!/usr/bin/env python3
-from cliglue import CliBuilder, arguments, subcommand
+from nuclear import CliBuilder, arguments, subcommand
 
 
 def run_cmd(cmd: str):
@@ -97,5 +97,5 @@ foo@bar:~$ ./many-args.py run "/bin/bash -c script.sh"
 cmd: /bin/bash -c script.sh
 ```
 
-See [many arguments tests](https://github.com/igrek51/cliglue/blob/master/tests/parser/test_many_arguments.py) for more detailed use cases.
+See [many arguments tests](https://github.com/igrek51/nuclear/blob/master/tests/parser/test_many_arguments.py) for more detailed use cases.
 

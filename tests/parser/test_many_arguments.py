@@ -1,6 +1,6 @@
 from typing import List
 
-from cliglue import *
+from nuclear import *
 from tests.asserts import MockIO, assert_cli_error
 
 

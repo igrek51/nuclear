@@ -5,7 +5,7 @@ from typing import Type
 
 import mock
 
-from cliglue.parser.error import CliError
+from nuclear.parser.error import CliError
 
 
 def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str = None):

@@ -3,9 +3,9 @@ import sys
 import zlib
 from typing import Optional
 
-from cliglue.utils.files import script_real_path
-from cliglue.utils.output import warn, info
-from cliglue.utils.shell import shell
+from nuclear.utils.files import script_real_path
+from nuclear.utils.output import warn, info
+from nuclear.utils.shell import shell
 
 
 def install_bash(app_name: str):
@@ -46,7 +46,7 @@ def install_autocomplete(app_name: Optional[str]):
     if not app_name:
         app_name = shell_command_name()
 
-    completion_script_path: str = f'/etc/bash_completion.d/cliglue_{app_name}.sh'
+    completion_script_path: str = f'/etc/bash_completion.d/nuclear_{app_name}.sh'
     app_hash: int = zlib.adler32(app_name.encode('utf-8'))
     # function should be unique across bash env
     function_name: str = f'_autocomplete_{app_hash}'

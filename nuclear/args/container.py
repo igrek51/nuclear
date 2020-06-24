@@ -1,6 +1,6 @@
 from typing import Dict, Any
 
-from cliglue.parser.keyword import format_var_name
+from nuclear.parser.keyword import format_var_name
 
 
 class ArgsContainer(object):

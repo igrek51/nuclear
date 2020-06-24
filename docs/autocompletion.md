@@ -1,7 +1,7 @@
 ## Auto-completion
 Shell autocompletion allows to suggest most relevant hints on hitting `Tab` key, while typing a command line.
 
-Auto-completion provided by `cliglue` is enabled by default to all known keywords based on the declared subcommands and options.
+Auto-completion provided by `nuclear` is enabled by default to all known keywords based on the declared subcommands and options.
 
 Defining possible choices may imporove auto-completing arguments. You can declare explicit possible values list or a function which provides such a list at runtime.
 
@@ -11,8 +11,8 @@ Defining possible choices may imporove auto-completing arguments. You can declar
 import re
 from typing import List
 
-from cliglue import CliBuilder, parameter, default_action
-from cliglue.utils.shell import shell, shell_output
+from nuclear import CliBuilder, parameter, default_action
+from nuclear.utils.shell import shell, shell_output
 
 
 def list_screens() -> List[str]:
@@ -35,10 +35,10 @@ CliBuilder('completers-demo').has(
 ).run()
 ```
 
-In order to enable auto-completion, you need to install some extension to bash. Fortunately `cliglue` has built-in tools to do that:
+In order to enable auto-completion, you need to install some extension to bash. Fortunately `nuclear` has built-in tools to do that:
 ```console
 foo@bar:~$ sudo ./completers.py --install-bash completers-demo
-[info]  creating link: /usr/bin/completers-demo -> ~/cliglue/docs/example/completers.py
+[info]  creating link: /usr/bin/completers-demo -> ~/nuclear/docs/example/completers.py
 #!/bin/bash
 _autocomplete_98246661() {
 COMPREPLY=( $(completers-demo --autocomplete "${COMP_LINE}") )
@@ -91,7 +91,7 @@ CliBuilder().has(
 
 ### Installing Autocompletion
 In order to enable the autocompletion, there must be a specific script in `/etc/bash_completion.d/`.
-With `cliglue` you just need to run:
+With `nuclear` you just need to run:
 ```console
 # sudo ./sample-app.py --install-bash sample-app
 ```

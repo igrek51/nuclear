@@ -2,8 +2,8 @@
 import re
 from typing import List
 
-from cliglue import CliBuilder, flag, parameter, subcommand, argument
-from cliglue.utils.shell import shell, shell_output
+from nuclear import CliBuilder, flag, parameter, subcommand, argument
+from nuclear.utils.shell import shell, shell_output
 
 
 def main():

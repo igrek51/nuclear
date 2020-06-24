@@ -1,4 +1,4 @@
-from cliglue.utils.time import *
+from nuclear.utils.time import *
 
 
 def test_time_conversions():

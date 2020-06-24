@@ -1,8 +1,8 @@
 from typing import Optional, Tuple
 
-from cliglue.args.args_que import ArgsQue
-from cliglue.builder.rule import DictionaryRule
-from cliglue.builder.rule import ParameterRule
+from nuclear.args.args_que import ArgsQue
+from nuclear.builder.rule import DictionaryRule
+from nuclear.builder.rule import ParameterRule
 from .error import CliSyntaxError
 
 

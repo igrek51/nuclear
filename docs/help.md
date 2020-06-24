@@ -1,5 +1,5 @@
 ## Auto-generated help
-`cliglue` auto-generates help and usage output based on the defined CLI rules.
+`nuclear` auto-generates help and usage output based on the defined CLI rules.
 
 Let's say we have quite complex CLI definition:
 ```python
@@ -100,6 +100,6 @@ Run "multiapp.py git COMMAND --help" for more information on a command.
 Use `--version` in order to show your application version:
 ```console
 foo@bar:~$ python3 multiapp.py --version
-multiapp v1.0.0 (cliglue v1.0.1)
+multiapp v1.0.0 (nuclear v1.0.1)
 ```
 

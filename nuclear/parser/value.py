@@ -2,8 +2,8 @@ import inspect
 from collections.abc import Iterable
 from typing import List, Any, Optional
 
-from cliglue.builder.rule import ValueRule
-from cliglue.builder.typedef import TypeOrParser
+from nuclear.builder.rule import ValueRule
+from nuclear.builder.typedef import TypeOrParser
 
 
 def parse_value_rule(rule: ValueRule, arg: str) -> Any:
