@@ -1,3 +1,4 @@
+import os
 import sys
 import traceback
 from contextlib import contextmanager
@@ -39,8 +40,8 @@ def log_error(print_traceback: bool = True):
 
             # hide traceback from this file
             lines = [f'{frame.filename}:{frame.lineno}' for frame in frames
-                     if frame.filename != __file__]
-            # if not frame.filename.endswith('sublog/error_wrap.py') or __file__]
+                     if not os.path.samefile(frame.filename, __file__)]
+
             tb = ','.join(lines)
             e.ctx['traceback'] = tb
 
