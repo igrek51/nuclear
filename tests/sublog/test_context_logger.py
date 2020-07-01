@@ -14,11 +14,11 @@ def test_context_logger():
         log.debug(42)
 
         # datetime
-        mockio.assert_match('^\\[\x1b\\[0;36m\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\x1b\\[0m\\] ')
+        mockio.assert_match('^\\[\x1b\\[36m\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\x1b\\[0m\\] ')
         # log level
-        mockio.assert_match(' \\[\x1b\\[0;32mDEBUG\x1b\\[0m\\] ')
+        mockio.assert_match(' \\[\x1b\\[32mDEBUG\x1b\\[0m\\] ')
         # message with context
-        mockio.assert_match(' got request \x1b\\[0;32mrequest_id=\x1b\\[1;32m3735936685\x1b\\[0m$')
+        mockio.assert_match(' got request \x1b\\[32mrequest_id=\x1b\\[1m3735936685\x1b\\[0m$')
 
         mockio.assert_match_uncolor('] logged in request_id=3735936685 user=igrek page="sweet home"$')
         mockio.assert_match_uncolor('] im a root$')

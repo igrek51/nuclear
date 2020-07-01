@@ -2,13 +2,7 @@ import datetime
 from contextlib import contextmanager
 from typing import Dict, Any, Optional
 
-C_RESET = '\033[0m'
-C_GREEN = '\033[0;32m'
-C_BLUE = '\033[0;34m'
-C_CYAN = '\033[0;36m'
-C_RED_BOLD = '\033[1;31m'
-C_GREEN_BOLD = '\033[1;32m'
-C_YELLOW_BOLD = '\033[1;33m'
+from colorama import Fore, Style
 
 
 class ContextLogger(object):
@@ -16,25 +10,25 @@ class ContextLogger(object):
         self.ctx: Dict[str, Any] = ctx
 
     def error(self, message: str, **ctx):
-        self._print_log(message, f'{C_RED_BOLD}ERROR{C_RESET}', ctx)
+        self._print_log(message, f'{Fore.RED + Style.BRIGHT}ERROR{Style.RESET_ALL}', ctx)
 
     def warn(self, message: str, **ctx):
-        self._print_log(message, f'{C_YELLOW_BOLD}WARN {C_RESET}', ctx)
+        self._print_log(message, f'{Fore.YELLOW + Style.BRIGHT}WARN {Style.RESET_ALL}', ctx)
 
     def info(self, message: str, **ctx):
-        self._print_log(message, f'{C_BLUE}INFO {C_RESET}', ctx)
+        self._print_log(message, f'{Fore.BLUE}INFO {Style.RESET_ALL}', ctx)
 
     def debug(self, message: str, **ctx):
-        self._print_log(message, f'{C_GREEN}DEBUG{C_RESET}', ctx)
+        self._print_log(message, f'{Fore.GREEN}DEBUG{Style.RESET_ALL}', ctx)
 
     def _print_log(self, message: str, level: str, ctx: Dict[str, Any]):
         merged_context = {**self.ctx, **ctx}
         display_context = _display_context(merged_context)
         timestamp_part = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if display_context:
-            print(f'[{C_CYAN}{timestamp_part}{C_RESET}] [{level}] {message} {display_context}')
+            print(f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] [{level}] {message} {display_context}')
         else:
-            print(f'[{C_CYAN}{timestamp_part}{C_RESET}] [{level}] {message}')
+            print(f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] [{level}] {message}')
 
     def __enter__(self):
         return self
@@ -76,6 +70,6 @@ def _display_context(ctx: Dict[str, Any]) -> str:
 def _display_context_var(var: str, val: str) -> str:
     val = str(val)
     if ' ' in val:
-        return f'{C_GREEN}{var}="{C_GREEN_BOLD}{val}{C_GREEN}"{C_RESET}'
+        return f'{Fore.GREEN}{var}="{Style.BRIGHT}{val}{Style.RESET_ALL}{Fore.GREEN}"{Style.RESET_ALL}'
     else:
-        return f'{C_GREEN}{var}={C_GREEN_BOLD}{val}{C_RESET}'
+        return f'{Fore.GREEN}{var}={Style.BRIGHT}{val}{Style.RESET_ALL}'

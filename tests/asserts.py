@@ -56,7 +56,7 @@ class MockIO:
         return self.output().strip()
 
     def uncolor(self) -> str:
-        matcher = re.compile(r'\x1b\[[01](;[0-9]+)?m')
+        matcher = re.compile(r'\x1b\[[0-9]+(;[0-9]+)?m')
         return matcher.sub('', self.output())
 
     def assert_match(self, regex: str):
