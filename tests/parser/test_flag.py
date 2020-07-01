@@ -36,8 +36,11 @@ def test_no_flag_set():
 
 def test_no_flag_defined():
     with MockIO('--force') as mockio:
-        CliBuilder(run=print_flag_force).run()
+        CliBuilder(run=print_flag_force, error_unrecognized=False).run()
         assert 'force: None' in mockio.output()
+    with MockIO('--force') as mockio:
+        CliBuilder(run=print_flag_force, error_unrecognized=True).run()
+        assert 'unrecognized arguments' in mockio.output()
 
 
 def test_adding_flag_by_name():

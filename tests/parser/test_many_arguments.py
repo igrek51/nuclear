@@ -75,7 +75,7 @@ def test_exact_many_arguments_count():
 
 def test_exact_many_arguments_count_and_superfluous():
     with MockIO('all', '2', '3') as mockio:
-        CliBuilder(reraise_error=True, run=lambda components: print(components)).has(
+        CliBuilder(reraise_error=True, error_unrecognized=False, run=lambda components: print(components)).has(
             arguments('components', count=2),
         ).run()
         assert "['all', '2']" in mockio.stripped()
@@ -98,7 +98,7 @@ def test_min_many_arguments_count():
 
 def test_max_many_arguments_count():
     with MockIO('one', 'two') as mockio:
-        CliBuilder(reraise_error=True, run=lambda words: print(len(words))).has(
+        CliBuilder(reraise_error=True, error_unrecognized=False, run=lambda words: print(len(words))).has(
             arguments('words', max_count=1),
         ).run()
         assert '1' in mockio.stripped()

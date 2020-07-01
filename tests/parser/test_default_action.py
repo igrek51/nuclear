@@ -11,18 +11,25 @@ def test_run_default_single_action():
 
 def test_default_builder_action_with_redundant_args():
     with MockIO('push') as mockio:
-        CliBuilder(run=print_ok).has(
+        CliBuilder(run=print_ok, error_unrecognized=False).has(
             subcommand('commit', run=print_bad),
             subcommand('checkout', run=print_bad),
         ).run()
         assert 'ok\n' in mockio.output()
     with MockIO('push') as mockio:
-        CliBuilder().has(
+        CliBuilder(error_unrecognized=False).has(
             subcommand('commit', run=print_bad),
             subcommand('checkout', run=print_bad),
             default_action(run=print_ok),
         ).run()
         assert 'ok\n' in mockio.output()
+    with MockIO('push') as mockio:
+        CliBuilder(run=print_bad, error_unrecognized=True).has(
+            subcommand('commit', run=print_bad),
+            subcommand('checkout', run=print_bad),
+        ).run()
+        assert 'bad' not in mockio.output()
+        assert 'Syntax error: unrecognized arguments' in mockio.output()
 
 
 def test_subcommand_default_action():

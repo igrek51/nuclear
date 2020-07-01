@@ -24,6 +24,7 @@ class Parser(object):
                  parent: Optional['Parser'] = None,
                  dry: bool = False,
                  subcommand: Optional[SubcommandRule] = None,
+                 error_unrecognized: bool = False,
                  ):
         """
         Command line arguments parser
@@ -41,6 +42,7 @@ class Parser(object):
         self.__parent: Optional['Parser'] = parent
         self.__action_triggered = parent.__action_triggered if parent else False
         self.__dry = parent.__dry if parent else dry
+        self.__error_unrecognized = error_unrecognized
 
         self.internal_vars = InternalVars()
         self._init_vars()
@@ -81,6 +83,10 @@ class Parser(object):
         args = ArgsQue(args_list[:])
         run_context: Optional[RunContext] = self._parse_args_queue(args)
         self._check_superfluous_args(args)
+
+        if run_context and run_context.action and not self.__dry:
+            run_action(run_context.action, run_context.internal_vars)
+
         return run_context
 
     def _parse_args_queue(self, args: ArgsQue) -> Optional[RunContext]:
@@ -98,7 +104,7 @@ class Parser(object):
             else:
                 raise e
 
-    def _parse_current_level(self, args):
+    def _parse_current_level(self, args: ArgsQue) -> Optional[RunContext]:
         self._parse_positional_arguments(args)
         self._parse_many_arguments(args)
         if not self.__dry:
@@ -187,6 +193,7 @@ class Parser(object):
                 self.__action_triggered = True
                 subparser = Parser(rule.subrules, rule.run, parent=self)
                 return subparser._parse_args_queue(args)
+        return None
 
     def _parse_subcommand(self, args: ArgsQue) -> Optional[RunContext]:
         if args:
@@ -197,6 +204,7 @@ class Parser(object):
                 args.pop_current()
                 subparser = Parser(rule.subrules, rule.run, parent=self, subcommand=rule)
                 return subparser._parse_args_queue(args)
+        return None
 
     def _parse_positional_arguments(self, args: ArgsQue):
         for arg, rule in zip(args.reset(), self._rules(PositionalArgumentRule)):
@@ -236,17 +244,18 @@ class Parser(object):
             self.__parent._parse_many_arguments(args)
 
     def _run_default_action(self) -> Optional[RunContext]:
-        if self.__dry:
-            return self._build_run_context(self.__run)
-        if self.__run:
-            run_action(self.__run, self._internal_vars_merged())
+        if self.__dry or self.__run:
             return self._build_run_context(self.__run)
         elif self.__parent:
             return self.__parent._run_default_action()
+        return None
 
     def _check_superfluous_args(self, args: ArgsQue):
         if args and not self.__dry:
-            log.warn(f'unrecognized arguments: {" ".join(args)}')
+            if self.__error_unrecognized:
+                raise CliSyntaxError(f'unrecognized arguments: {" ".join(args)}')
+            else:
+                log.warn(f'unrecognized arguments: {" ".join(args)}')
 
     def _check_required_arguments(self):
         check_required_arguments(self.__rules, self.internal_vars)
@@ -275,10 +284,11 @@ class Parser(object):
         return self.internal_vars.vars
 
     def _build_run_context(self, action: Optional[Action]) -> RunContext:
-        args_container = ArgsContainer(self._internal_vars_merged())
+        internal_vars = self._internal_vars_merged()
+        args_container = ArgsContainer(internal_vars)
         active_subcommands = self._active_subcommands()
         active_rules = self._active_rules()
-        return RunContext(args_container, action, active_subcommands, active_rules)
+        return RunContext(args_container, action, active_subcommands, active_rules, internal_vars)
 
     def _active_subcommands(self) -> List[SubcommandRule]:
         subcommands: List[SubcommandRule] = []

@@ -22,6 +22,7 @@ class CliBuilder(object):
                  reraise_error: bool = False,
                  hide_internal: bool = True,
                  help_on_empty: bool = False,
+                 error_unrecognized: bool = True,
                  ):
         """
         A builder for Command Line Interface specification
@@ -40,6 +41,8 @@ class CliBuilder(object):
         Enabling this causes stack trace to be flooded to the user.
         :param hide_internal: wheter internal options (--install-bash, --autocomplete)
         should be hidden on help output.
+        :param help_on_empty: shows help output when no argument is given
+        :param error_unrecognized: raise error when unrecognized argument is found
         """
         self.__name: str = name
         self.__version: str = version
@@ -53,6 +56,7 @@ class CliBuilder(object):
         self.__reraise_error: bool = reraise_error
         self.__hide_internal: bool = hide_internal
         self.__help_on_empty: bool = help_on_empty
+        self.__error_unrecognized: bool = error_unrecognized
         if with_defaults:
             self.__add_default_rules()
 
@@ -95,7 +99,7 @@ class CliBuilder(object):
 
             return Parser([default_action(__print_root_help)])
 
-        return Parser(self.__subrules)
+        return Parser(self.__subrules, error_unrecognized=self.__error_unrecognized)
 
     def print_help(self, subcommands: List[str]):
         print_help(self.__subrules, self.__name, self.__version, self.__help, subcommands, self.__hide_internal)
