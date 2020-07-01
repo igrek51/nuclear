@@ -10,25 +10,25 @@ class ContextLogger(object):
         self.ctx: Dict[str, Any] = ctx
 
     def error(self, message: str, **ctx):
-        self._print_log(message, f'{Fore.RED + Style.BRIGHT}ERROR{Style.RESET_ALL}', ctx)
+        self._print_log(message, f'[{Fore.RED + Style.BRIGHT}ERROR{Style.RESET_ALL}]', ctx)
 
     def warn(self, message: str, **ctx):
-        self._print_log(message, f'{Fore.YELLOW + Style.BRIGHT}WARN {Style.RESET_ALL}', ctx)
+        self._print_log(message, f'[{Fore.YELLOW + Style.BRIGHT}WARN{Style.RESET_ALL} ]', ctx)
 
     def info(self, message: str, **ctx):
-        self._print_log(message, f'{Fore.BLUE}INFO {Style.RESET_ALL}', ctx)
+        self._print_log(message, f'[{Fore.BLUE}INFO{Style.RESET_ALL} ]', ctx)
 
     def debug(self, message: str, **ctx):
-        self._print_log(message, f'{Fore.GREEN}DEBUG{Style.RESET_ALL}', ctx)
+        self._print_log(message, f'[{Fore.GREEN}DEBUG{Style.RESET_ALL}]', ctx)
 
     def _print_log(self, message: str, level: str, ctx: Dict[str, Any]):
         merged_context = {**self.ctx, **ctx}
         display_context = _display_context(merged_context)
         timestamp_part = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if display_context:
-            print(f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] [{level}] {message} {display_context}')
+            print(f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] {level} {message} {display_context}')
         else:
-            print(f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] [{level}] {message}')
+            print(f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] {level} {message}')
 
     def __enter__(self):
         return self
