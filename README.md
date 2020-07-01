@@ -3,7 +3,6 @@
 [![PyPI version](https://badge.fury.io/py/nuclear.svg)](https://pypi.org/project/nuclear)
 [![Documentation Status](https://readthedocs.org/projects/nuclear-py/badge/?version=latest)](https://nuclear-py.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://travis-ci.org/igrek51/nuclear.svg?branch=master)](https://travis-ci.org/igrek51/nuclear)
-[![Coverage Status](https://coveralls.io/repos/github/igrek51/nuclear/badge.svg?branch=master)](https://coveralls.io/github/igrek51/nuclear?branch=master)
 [![codecov](https://codecov.io/gh/igrek51/nuclear/branch/master/graph/badge.svg)](https://codecov.io/gh/igrek51/nuclear)
 
 
