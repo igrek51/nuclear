@@ -23,4 +23,5 @@ nav:
     - Auto-generated help: help.md
     - Data types: data-types.md
     - Errors handling: errors.md
+    - Logging with sublog: sublog.md
     - CLI Rules cheatsheet: cheatsheet.md

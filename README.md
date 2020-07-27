@@ -62,7 +62,7 @@ You only need to bind the keywords to the rules and `nuclear` will handle all th
 - [Custom auto-completers](https://nuclear-py.readthedocs.io/en/latest#custom-completers) (providers of possible values)
 - [Handling syntax errors, parameters validation](https://nuclear-py.readthedocs.io/en/latest#errors-handling)
 - [Parsing data types](https://nuclear-py.readthedocs.io/en/latest#data-types) (int, boolean, time, date, file, etc.)
-- [Sublog logging](https://nuclear-py.readthedocs.io/en/latest#sublog)
+- [Logging with sublog](https://nuclear-py.readthedocs.io/en/latest#sublog)
 - [CLI Rules cheatsheet](https://nuclear-py.readthedocs.io/en/latest#cli-rules-cheatsheet)
 ## Quick start
 Let's create a simple command-line application using `nuclear`.
@@ -1494,6 +1494,24 @@ Traceback (most recent call last):
 nuclear.parser.error.CliDefinitionError: argument value may be either required or have the default value
 ```
 
+## Logging with sublog
+`sublog` is a logging system allowing to:  
+- display variables besides log messages (`log.debug`),
+- wrap errors with context (`wrap_context`),
+- catch errors and show traceback in a concise, pretty format (`logerr`).
+
+```python
+from nuclear.sublog import log, logerr, wrap_context
+
+with logerr():
+    log.debug('checking engine', temperature=85.0, pressure='12kPa')
+    with wrap_context('ignition', request=42):
+        log.info('ignition ready', speed='zero')
+        with wrap_context('liftoff'):
+            raise RuntimeError('explosion')
+```
+
+![sublog demo](https://github.com/igrek51/nuclear/blob/master/docs/img/sublog-demo.png?raw=true)
 ## CLI Rules cheatsheet
 Here is the cheatsheet for the most important CLI rules:
 ```python

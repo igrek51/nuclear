@@ -1,4 +1,4 @@
-## Sublog logging
+## Logging with sublog
 `sublog` is a logging system allowing to:  
 - display variables besides log messages (`log.debug`),
 - wrap errors with context (`wrap_context`),

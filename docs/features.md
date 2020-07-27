@@ -14,5 +14,5 @@
 - [Custom auto-completers](https://nuclear-py.readthedocs.io/en/latest#custom-completers) (providers of possible values)
 - [Handling syntax errors, parameters validation](https://nuclear-py.readthedocs.io/en/latest#errors-handling)
 - [Parsing data types](https://nuclear-py.readthedocs.io/en/latest#data-types) (int, boolean, time, date, file, etc.)
-- [Sublog logging](https://nuclear-py.readthedocs.io/en/latest#sublog)
+- [Logging with sublog](https://nuclear-py.readthedocs.io/en/latest#sublog)
 - [CLI Rules cheatsheet](https://nuclear-py.readthedocs.io/en/latest#cli-rules-cheatsheet)

@@ -21,4 +21,5 @@ cat docs/autocompletion.md >> $OUTPUT
 cat docs/help.md >> $OUTPUT
 cat docs/data-types.md >> $OUTPUT
 cat docs/errors.md >> $OUTPUT
+cat docs/sublog.md >> $OUTPUT
 cat docs/cheatsheet.md >> $OUTPUT
