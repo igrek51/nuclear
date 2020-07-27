@@ -15,3 +15,4 @@ with logerr():
             raise RuntimeError('explosion')
 ```
 
+![sublog demo](https://github.com/igrek51/nuclear/blob/master/docs/img/sublog-demo.png?raw=true)
