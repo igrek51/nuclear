@@ -26,6 +26,22 @@ def wrap_context(context_name: str, **ctx):
 
 @contextmanager
 def log_error(print_traceback: bool = True):
+    """Deprecated, use logerr instead"""
+    try:
+        yield
+    except KeyboardInterrupt:
+        print()
+        log.debug('KeyboardInterrupt')
+        exit(1)
+    except ContextError as e:
+        _print_error_context(str(e), e.ctx, print_traceback)
+    except Exception as e:
+        _print_error_context(str(e), {}, print_traceback)
+
+
+@contextmanager
+def logerr(print_traceback: bool = True):
+    """Catches all exceptions and displays traceback in pretty, concise format"""
     try:
         yield
     except KeyboardInterrupt:
