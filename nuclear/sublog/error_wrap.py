@@ -66,7 +66,7 @@ def _print_error_context(message: str, ctx: Dict[str, Any], print_traceback: boo
         frames = traceback.extract_tb(t1.exc_traceback)
 
         # hide traceback from this file
-        lines = [f'{frame.filename}:{frame.lineno}' for frame in frames
+        lines = [f'{os.path.normpath(frame.filename)}:{frame.lineno}' for frame in frames
                  if not os.path.samefile(frame.filename, __file__)]
 
         tb = ','.join(lines)
