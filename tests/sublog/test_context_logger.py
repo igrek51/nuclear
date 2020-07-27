@@ -1,4 +1,4 @@
-from nuclear.sublog import log_error, log, context_logger, root_context_logger
+from nuclear.sublog import log, context_logger, root_context_logger, logerr
 from tests.asserts import MockIO
 
 
@@ -35,7 +35,7 @@ def test_root_context_logger():
 
             with root_context_logger(user='igrek'):
                 log.info('logged in', page='home')
-                with log_error():
+                with logerr():
                     log.warn('im a root')
                     raise RuntimeError("I'm a pickle")
 
@@ -47,6 +47,7 @@ def test_root_context_logger():
         mockio.assert_match_uncolor('] got request request_id=3735936685$')
         mockio.assert_match_uncolor('] logged in request_id=3735936685 user=igrek page=home$')
         mockio.assert_match_uncolor('] im a root request_id=3735936685 user=igrek$')
-        mockio.assert_match_uncolor('] I\'m a pickle request_id=3735936685 user=igrek traceback=.+:40$')
+        mockio.assert_match_uncolor(
+            '] I\'m a pickle request_id=3735936685 user=igrek cause=RuntimeError traceback=.+:40$')
         mockio.assert_match_uncolor('] logged out request_id=3735936685$')
         mockio.assert_match_uncolor('] exited$')

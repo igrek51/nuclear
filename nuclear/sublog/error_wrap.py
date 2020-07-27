@@ -34,9 +34,9 @@ def log_error(print_traceback: bool = True):
         log.debug('KeyboardInterrupt')
         exit(1)
     except ContextError as e:
-        _print_error_context(str(e), e.ctx, print_traceback)
+        _print_error_context(e, e.ctx, print_traceback)
     except Exception as e:
-        _print_error_context(str(e), {}, print_traceback)
+        _print_error_context(e, {}, print_traceback)
 
 
 @contextmanager
@@ -49,12 +49,12 @@ def logerr(print_traceback: bool = True):
         log.debug('KeyboardInterrupt')
         exit(1)
     except ContextError as e:
-        _print_error_context(str(e), e.ctx, print_traceback)
+        _print_error_context(e, e.ctx, print_traceback)
     except Exception as e:
-        _print_error_context(str(e), {}, print_traceback)
+        _print_error_context(e, {}, print_traceback)
 
 
-def _print_error_context(message: str, ctx: Dict[str, Any], print_traceback: bool):
+def _print_error_context(e: Exception, ctx: Dict[str, Any], print_traceback: bool):
     if print_traceback:
         ex_type, ex, tb = sys.exc_info()
 
@@ -65,17 +65,20 @@ def _print_error_context(message: str, ctx: Dict[str, Any], print_traceback: boo
 
         frames: Collection[traceback.FrameSummary] = traceback.extract_tb(t1.exc_traceback)
 
-        for frame in frames:
-            print(frame.filename, __file__)
-            print(frame.filename, frame.lineno, frame.name, frame.locals, frame.line)
-
         # hide traceback from this file
         lines = [f'{os.path.normpath(frame.filename)}:{frame.lineno}' for frame in frames
                  if _include_traceback_frame(frame)]
 
         tb = ','.join(lines)
+        ctx['cause'] = _root_cause_type(e)
         ctx['traceback'] = tb
-    log.error(message, **ctx)
+    log.error(str(e), **ctx)
+
+
+def _root_cause_type(e: Exception) -> str:
+    while e.__cause__ is not None:
+        e = e.__cause__
+    return type(e).__name__
 
 
 def _include_traceback_frame(frame: traceback.FrameSummary) -> bool:
