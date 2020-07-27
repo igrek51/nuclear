@@ -2,7 +2,7 @@ import os
 import sys
 import traceback
 from contextlib import contextmanager
-from typing import Dict, Any
+from typing import Dict, Any, Collection
 
 from .context_logger import log
 
@@ -63,12 +63,20 @@ def _print_error_context(message: str, ctx: Dict[str, Any], print_traceback: boo
         while t1.__cause__ is not None:
             t1 = t1.__cause__
 
-        frames = traceback.extract_tb(t1.exc_traceback)
+        frames: Collection[traceback.FrameSummary] = traceback.extract_tb(t1.exc_traceback)
+
+        for frame in frames:
+            print(frame.filename, __file__)
+            print(frame.filename, frame.lineno, frame.name, frame.locals, frame.line)
 
         # hide traceback from this file
         lines = [f'{os.path.normpath(frame.filename)}:{frame.lineno}' for frame in frames
-                 if not os.path.samefile(frame.filename, __file__)]
+                 if _include_traceback_frame(frame)]
 
         tb = ','.join(lines)
         ctx['traceback'] = tb
     log.error(message, **ctx)
+
+
+def _include_traceback_frame(frame: traceback.FrameSummary) -> bool:
+    return not os.path.exists(frame.filename) or not os.path.samefile(frame.filename, __file__)
