@@ -45,6 +45,14 @@ Options:
 ### Built-in data types
 `nuclear` has built-in parsers / validators for some types
 
+#### boolean type
+`boolean` converts string value (eg. `true`, `True`, `1`, `yes`) to Pythonic `bool` type.
+```python
+from nuclear.types.boolean import boolean
+
+parameter('enabled', type=boolean)
+```
+
 #### Filesystem types
 - `nuclear.types.filesystem.existing_file` validates if given string is an existing regular file (not a directory).
 After validation, the value is internally stored as `str`.

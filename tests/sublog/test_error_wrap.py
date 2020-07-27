@@ -13,7 +13,7 @@ def test_sublog_wrapping():
             raise ContextError('dupa2', a=5, z='fifteen')
 
         with log_error():
-            raise ContextError('dupa3')
+            raise RuntimeError('dupa3')
 
         log.info('success', param='with_param')
         log.warn('attention')
