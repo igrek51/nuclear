@@ -1,4 +1,7 @@
-## Features
+## Table of contents
+- [Quick start](https://nuclear-py.readthedocs.io/en/latest/#quick-start)
+- [Installation](https://nuclear-py.readthedocs.io/en/latest/#installation)
+- [Nuclear vs argparse](https://nuclear-py.readthedocs.io/en/latest/#nuclear-vs-argparse)
 - [Auto-generated help and usage](https://nuclear-py.readthedocs.io/en/latest#auto-generated-help) (`--help`)
 - [Shell autocompletion](https://nuclear-py.readthedocs.io/en/latest#auto-completion) (getting most relevant hints on hitting `Tab`)
 - [Multilevel sub-commands](https://nuclear-py.readthedocs.io/en/latest#sub-commands) (e.g. `git remote add ...` syntax)
@@ -10,7 +13,6 @@
 - [Custom type validators / parsers](https://nuclear-py.readthedocs.io/en/latest#custom-type-parsers)
 - [Custom auto-completers](https://nuclear-py.readthedocs.io/en/latest#custom-completers) (providers of possible values)
 - [Handling syntax errors, parameters validation](https://nuclear-py.readthedocs.io/en/latest#errors-handling)
-- [Typed values](https://nuclear-py.readthedocs.io/en/latest#data-types) (int, time, date, file, etc.)
-- [Standard options](https://nuclear-py.readthedocs.io/en/latest#clibuilder) enabled by default (`--help`, `--version`)
-- [Declarative CLI builder](https://nuclear-py.readthedocs.io/en/latest#cli-rules-cheatsheet)
-
+- [Parsing data types](https://nuclear-py.readthedocs.io/en/latest#data-types) (int, boolean, time, date, file, etc.)
+- [Sublog logging](https://nuclear-py.readthedocs.io/en/latest#sublog)
+- [CLI Rules cheatsheet](https://nuclear-py.readthedocs.io/en/latest#cli-rules-cheatsheet)
