@@ -1,6 +1,8 @@
 from colorama import init
 
+from .catch import logerr, ContextError
+from .catch import logerr as log_error  # compatibility with deprecated API
 from .context_logger import log, context_logger, root_context_logger
-from .error_wrap import wrap_context, log_error, logerr, ContextError
+from .wrap_error import wrap_context
 
 init()
