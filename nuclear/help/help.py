@@ -309,6 +309,8 @@ def usage_many_arguments(rules: List[ManyArgumentsRule]) -> str:
 
 def shell_command_name():
     _, command = os.path.split(sys.argv[0])
+    if command == '__main__.py':
+        return sys.modules['__main__'].__package__
     return command
 
 
