@@ -1,8 +1,11 @@
 import datetime
+import threading
 from contextlib import contextmanager
 from typing import Dict, Any, Optional
 
 from colorama import Fore, Style
+
+simultaneous_print_lock = threading.Lock()
 
 
 class ContextLogger(object):
@@ -26,9 +29,11 @@ class ContextLogger(object):
         display_context = _display_context(merged_context)
         timestamp_part = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if display_context:
-            print(f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] {level} {message} {display_context}')
+            to_print = f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] {level} {message} {display_context}'
         else:
-            print(f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] {level} {message}')
+            to_print = f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] {level} {message}'
+        with simultaneous_print_lock:
+            print(to_print)
 
     def __enter__(self):
         return self
