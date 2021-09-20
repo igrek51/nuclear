@@ -1,8 +1,4 @@
 ## Table of contents - Our chief weapons are...
-- [How does it work?](https://nuclear-py.readthedocs.io/en/latest/how-it-works/)
-- [Quick start](https://nuclear-py.readthedocs.io/en/latest/quick-start/)
-- [Nuclear vs argparse](https://nuclear-py.readthedocs.io/en/latest/vs-argparse)
-- [Installation](https://nuclear-py.readthedocs.io/en/latest/installation)
 - [Auto-generated help and usage](https://nuclear-py.readthedocs.io/en/latest/help) (`--help`)
 - [Multilevel Sub-commands](https://nuclear-py.readthedocs.io/en/latest/subcommands) (e.g. `git remote add ...` syntax)
 - [Flags](https://nuclear-py.readthedocs.io/en/latest/flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
@@ -13,9 +9,13 @@
 - [Logging with sublog](https://nuclear-py.readthedocs.io/en/latest/sublog)
 - [Shell Auto-completion](https://nuclear-py.readthedocs.io/en/latest/autocompletion) (getting most relevant hints on hitting `Tab`)
 - [Custom auto-completers](https://nuclear-py.readthedocs.io/en/latest/autocompletion/#custom-completers) (providers of possible values)
-- [CLI Builder](https://nuclear-py.readthedocs.io/en/latest/builder)
 - [Parsing data types](https://nuclear-py.readthedocs.io/en/latest/data-types) (int, boolean, time, date, file, etc.)
+- [CLI Builder](https://nuclear-py.readthedocs.io/en/latest/builder)
 - [Custom type validators / parsers](https://nuclear-py.readthedocs.io/en/latest/data-types/#custom-type-parsers)
 - [Errors handling](https://nuclear-py.readthedocs.io/en/latest/errors)
+- [Quick start](https://nuclear-py.readthedocs.io/en/latest/quick-start/)
+- [How does it work?](https://nuclear-py.readthedocs.io/en/latest/how-it-works/)
+- [Nuclear vs argparse](https://nuclear-py.readthedocs.io/en/latest/vs-argparse)
+- [Installation](https://nuclear-py.readthedocs.io/en/latest/installation)
 - [CLI Rules cheatsheet](https://nuclear-py.readthedocs.io/en/latest/cheatsheet)
 
