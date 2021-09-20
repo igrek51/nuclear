@@ -1,4 +1,4 @@
-# nuclear - binding glue for CLI
+# Nuclear - binding glue for CLI
 [![GitHub version](https://badge.fury.io/gh/igrek51%2Fnuclear.svg)](https://github.com/igrek51/nuclear)
 [![PyPI version](https://badge.fury.io/py/nuclear.svg)](https://pypi.org/project/nuclear)
 [![Documentation Status](https://readthedocs.org/projects/nuclear-py/badge/?version=latest)](https://nuclear-py.readthedocs.io/en/latest/?badge=latest)
@@ -10,42 +10,43 @@
 It's a binding glue between CLI shell arguments and functions being invoked.
 It mostly focuses on building multi level command trees.
 
-`nuclear` parses and validates command line arguments provided by user when running console application.
-Then it automatically triggers matched action, based on the declared Command-Line Interface rules, injecting all needed parameters.
-You don't need to write the "glue" code for binding & parsing parameters every time.
-So it makes writing console aplications simpler and more clear.
+`nuclear` parses and validates the command line arguments provided by the user when starting a console application.
+It then automatically invokes the appropriate action, based on the declared Command-Line Interface rules, injecting all the necessary  parameters.
+You don't need to write the "glue" code to bind & parse the parameters each time.
+This makes writing console aplications simpler and clearer.
 
-## Example
-
+## Demo
+[**demo.py**](https://github.com/igrek51/nuclear/blob/master/docs/demo.py)
 ```python
+#!/usr/bin/env python3
 from nuclear import CliBuilder, argument, flag, parameter, subcommand
 
 CliBuilder().has(
     subcommand('hello', run=say_hello).has(
         argument('name'),
-        flag('decode', help='Decode name as base64'),
         parameter('repeat', type=int, default=1),
+        flag('decode', help='Decode name as base64'),
     ),
     subcommand('calculate').has(
         subcommand('factorial', help='Calculate factorial', run=calculate_factorial).has(
             argument('n', type=int),
         ),
         subcommand('primes', help='List prime numbers using Sieve of Eratosthenes', run=calculate_primes).has(
-            argument('n', type=int, required=False, default=100, help='maximum number to check'),
+            argument('n', type=int, required=False, default=100,
+                        help='maximum number to check'),
         ),
     ),
 ).run()
 ```
 
-## How does it work?
-1. You define CLI rules for your program in a declarative tree using `CliBuilder`. Rules can bind your functions to be invoked later.
-2. When running your program in a shell provided with command-line arguments, it starts `.run()` which does the parsing.
-3. `nuclear` parses and validates all the parameters, flags, sub-commands, positional arguments, etc., and stores them internally.
-4. `nuclear` finds the most relevant action (starting from the most specific) and invokes it.
-5. When invoking a function, `nuclear` injects all its needed parameters based on the previously defined & parsed values.
+![sublog demo](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-live.gif?raw=true)
 
-You only need to bind the keywords to the rules and `nuclear` will handle all the rest for you.
+See [demo.py](https://github.com/igrek51/nuclear/blob/master/docs/demo.py) for a complete example.
 
+## Get it now
+```bash
+pip install nuclear
+```
 ## Table of contents
 - [Quick start](https://nuclear-py.readthedocs.io/en/latest/#quick-start)
 - [Installation](https://nuclear-py.readthedocs.io/en/latest/#installation)
@@ -64,6 +65,15 @@ You only need to bind the keywords to the rules and `nuclear` will handle all th
 - [Parsing data types](https://nuclear-py.readthedocs.io/en/latest#data-types) (int, boolean, time, date, file, etc.)
 - [Logging with sublog](https://nuclear-py.readthedocs.io/en/latest#sublog)
 - [CLI Rules cheatsheet](https://nuclear-py.readthedocs.io/en/latest#cli-rules-cheatsheet)
+## How does it work?
+1. You define CLI rules for your program in a declarative tree using `CliBuilder`. Rules can bind your functions to be called later.
+2. When running your program in a shell provided with command-line arguments, it starts `.run()` which does the parsing.
+3. `nuclear` parses and validates all the parameters, flags, sub-commands, positional arguments, etc., and stores them internally.
+4. `nuclear` finds the most relevant action (starting from the most specific) and invokes it.
+5. When invoking a function, `nuclear` injects all its needed parameters based on the previously defined & parsed values.
+
+You just need to bind the keywords with rules and `nuclear` will take care of the rest for you.
+
 ## Quick start
 Let's create a simple command-line application using `nuclear`.
 Let's assume we already have our fancy functions as follows:

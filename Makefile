@@ -15,7 +15,7 @@ test:
 		# show code coverage info
 		$(PYTHON_INTERPRETER) -m coverage report --show-missing --skip-empty --skip-covered
 
-generate-readme:
+readme:
 		cat docs/about.md > $(OUTPUT_README)
 		cat docs/demo.md >> $(OUTPUT_README)
 		cat docs/features.md >> $(OUTPUT_README)
@@ -43,6 +43,6 @@ clean:
 		rm -rf dist/
 		rm -rf ./*.egg-info
 
-release-pypi: clean generate-readme
+release-pypi: clean readme
 		python3 setup.py sdist bdist_wheel
 		python3 -m twine upload dist/*
