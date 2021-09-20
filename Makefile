@@ -17,8 +17,9 @@ test:
 
 generate-readme:
 		cat docs/about.md > $(OUTPUT_README)
-		cat docs/how-it-works.md >> $(OUTPUT_README)
+		cat docs/demo.md >> $(OUTPUT_README)
 		cat docs/features.md >> $(OUTPUT_README)
+		cat docs/how-it-works.md >> $(OUTPUT_README)
 		cat docs/quick-start.md >> $(OUTPUT_README)
 		cat docs/vs-argparse.md >> $(OUTPUT_README)
 		cat docs/installation.md >> $(OUTPUT_README)

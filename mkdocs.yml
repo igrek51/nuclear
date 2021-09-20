@@ -7,6 +7,7 @@ docs_dir: docs
 nav:
     - Single page documentation: README.md
     - About: about.md
+    - Demo: demo.md
     - Features: features.md
     - Quick start: quick-start.md
     - How does it work?: how-it-works.md
