@@ -5,24 +5,24 @@ site_author: igrek51
 docs_dir: docs
 
 nav:
-    - Single page documentation: README.md
+    - Home page: README.md
+    - Chief weapons: toc.md
     - About: about.md
     - Demo: demo.md
-    - Features: features.md
-    - Quick start: quick-start.md
     - How does it work?: how-it-works.md
-    - nuclear vs argparse: vs-argparse.md
+    - Quick start: quick-start.md
+    - Nuclear vs argparse: vs-argparse.md
     - Installation: installation.md
-    - CLI Builder: builder.md
-    - Sub-commands: subcommands.md
+    - Auto-generated help and usage: help.md
+    - Multilevel Sub-commands: subcommands.md
     - Flags: flags.md
     - Named parameters: parameters.md
     - Positional arguments: positional-args.md
     - Many positional arguments: many-args.md
-    - Dictionaries: dictionaries.md
-    - Auto-completion: autocompletion.md
-    - Auto-generated help: help.md
-    - Data types: data-types.md
-    - Errors handling: errors.md
+    - Key-value dictionaries: dictionaries.md
     - Logging with sublog: sublog.md
+    - Shell Auto-completion: autocompletion.md
+    - CLI Builder: builder.md
+    - Parsing data types: data-types.md
+    - Errors handling: errors.md
     - CLI Rules cheatsheet: cheatsheet.md

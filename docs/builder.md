@@ -1,4 +1,4 @@
-## CliBuilder
+## CLI Builder
 `CliBuilder` is a main class of `nuclear` package which allows to build CLI definition.
 It's a builder for Command Line Interface specification.
 After that, you can invoke `.run()` method in order to parse provided arguments and invoke particular actions.

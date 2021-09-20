@@ -1,5 +1,4 @@
 ## Demo
-[**demo.py**](https://github.com/igrek51/nuclear/blob/master/docs/demo.py)
 ```python
 #!/usr/bin/env python3
 from nuclear import CliBuilder, argument, flag, parameter, subcommand
@@ -24,9 +23,10 @@ CliBuilder().has(
 
 ![sublog demo](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-live.gif?raw=true)
 
-See [demo.py](https://github.com/igrek51/nuclear/blob/master/docs/demo.py) for a complete example.
+See [demo.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo.py) for a complete example.
 
 ## Get it now
 ```bash
 pip install nuclear
 ```
+

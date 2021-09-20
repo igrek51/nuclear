@@ -17,26 +17,15 @@ test:
 
 readme:
 		cat docs/about.md > $(OUTPUT_README)
+
 		cat docs/demo.md >> $(OUTPUT_README)
-		cat docs/features.md >> $(OUTPUT_README)
+		cat docs/toc.md >> $(OUTPUT_README)
 		cat docs/how-it-works.md >> $(OUTPUT_README)
 		cat docs/quick-start.md >> $(OUTPUT_README)
-		cat docs/vs-argparse.md >> $(OUTPUT_README)
+		cat docs/vs-argparse-short.md >> $(OUTPUT_README)
 		cat docs/installation.md >> $(OUTPUT_README)
-
-		cat docs/builder.md >> $(OUTPUT_README)
-		cat docs/subcommands.md >> $(OUTPUT_README)
-		cat docs/flags.md >> $(OUTPUT_README)
-		cat docs/parameters.md >> $(OUTPUT_README)
-		cat docs/positional-args.md >> $(OUTPUT_README)
-		cat docs/many-args.md >> $(OUTPUT_README)
-		cat docs/dictionaries.md >> $(OUTPUT_README)
-		cat docs/autocompletion.md >> $(OUTPUT_README)
-		cat docs/help.md >> $(OUTPUT_README)
-		cat docs/data-types.md >> $(OUTPUT_README)
-		cat docs/errors.md >> $(OUTPUT_README)
 		cat docs/sublog.md >> $(OUTPUT_README)
-		cat docs/cheatsheet.md >> $(OUTPUT_README)
+		cat docs/cheatsheet-short.md >> $(OUTPUT_README)
 
 clean:
 		rm -rf build/

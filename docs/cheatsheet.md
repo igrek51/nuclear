@@ -1,5 +1,5 @@
 ## CLI Rules cheatsheet
-Here is the cheatsheet for the most important CLI rules:
+Here is the cheatsheet with the most important CLI rules:
 ```python
 #!/usr/bin/env python3
 from nuclear import CliBuilder, argument, arguments, flag, parameter, subcommand, dictionary

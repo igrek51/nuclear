@@ -1,8 +1,8 @@
 ## Logging with sublog
-`sublog` is a logging system allowing to:  
-- display variables besides log messages (`log.debug`),
-- wrap errors with context (`wrap_context`),
-- catch errors and show traceback in a concise, pretty format (`logerr`).
+`sublog` is a logging system that allows you to:  
+- display variables besides log messages: `log.debug('message', airspeed=20)`,
+- wrap errors with context: `with wrap_context('ignition')`,
+- catch errors and show traceback in a concise, pretty format: `with  logerr()`.
 
 ```python
 from nuclear.sublog import log, logerr, wrap_context
@@ -16,3 +16,4 @@ with logerr():
 ```
 
 ![sublog demo](https://github.com/igrek51/nuclear/blob/master/docs/img/sublog-demo.png?raw=true)
+

@@ -1,4 +1,4 @@
-## Dictionaries
+## Key-value dictionaries
 Dictionary contains key-value pairs.
 You can add multiple values to it by passing arguments in a manner:
 `-c name1 value1 -c name2 value2`.
