@@ -1,14 +1,36 @@
-site_name: nuclear
-theme:
-  name: material
+site_name: Nuclear
+repo_name: igrek51/nuclear
 repo_url: https://github.com/igrek51/nuclear
 site_author: igrek51
 docs_dir: docs
+theme:
+  name: material
+  icon:
+    repo: fontawesome/brands/github
+  palette:
+    - scheme: default
+      primary: indigo
+      accent: blue
+      toggle:
+        icon: material/toggle-switch-off-outline
+        name: Switch to dark mode
+    - scheme: slate
+      primary: black
+      accent: green
+      toggle:
+        icon: material/toggle-switch
+        name: Switch to light mode
+  font:
+    text: Roboto
+    code: Roboto Mono
+markdown_extensions:
+  - admonition
+  - pymdownx.highlight:
+      use_pygments: true
+  - pymdownx.superfences
 
 nav:
-    - Home page: README.md
-    - Chief weapons: toc.md
-    - About: about.md
+    - Home: README.md
     - Demo: demo.md
     - How does it work?: how-it-works.md
     - Quick start: quick-start.md

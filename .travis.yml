@@ -12,4 +12,5 @@ before_script:
 script:
   - make test
 after_success:
-  - CODECOV_TOKEN="8819bc6c-9210-4c43-8588-3b23c1f1f9ec" bash <(curl -s https://codecov.io/bash)
+  - CODECOV_TOKEN="51a23440-eee0-40f8-a91f-94df5966d46a" bash <(curl -s https://codecov.io/bash)
+  - coveralls
