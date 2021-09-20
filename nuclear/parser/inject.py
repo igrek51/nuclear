@@ -13,6 +13,8 @@ def run_action(action: Action, internal_vars: Dict[str, Any]):
         if not args:
             action()
         else:
+            if args and inspect.ismethod(action):
+                args = args[1:]  # drop 'self'
             kwargs = inject_args(args, action, annotations, internal_vars)
             action(**kwargs)
 
