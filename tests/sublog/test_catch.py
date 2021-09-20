@@ -11,9 +11,9 @@ def test_sublog_traceback():
 
         mockio.assert_match_uncolor('ERROR] initializing: liftoff: disaster request_id=42 speed=zero '
                                     'cause=RuntimeError '
-                                    'traceback=(.+)/test_catch.py:10,'
-                                    '(.+)/test_catch.py:20,'
-                                    '(.+)/test_catch.py:24$')
+                                    'traceback="(.+)/test_catch.py:10, '
+                                    '(.+)/test_catch.py:20, '
+                                    '(.+)/test_catch.py:24"$')
 
 
 def disaster():

@@ -3,12 +3,13 @@ language: python
 python:
   - "3.6"
   - "3.7"
+  - "3.8"
 
 install:
   - pip install -r requirements.txt -r requirements-dev.txt
 before_script:
   - python3 setup.py develop
 script:
-  - ./pytest.sh
+  - make test
 after_success:
   - CODECOV_TOKEN="8819bc6c-9210-4c43-8588-3b23c1f1f9ec" bash <(curl -s https://codecov.io/bash)
