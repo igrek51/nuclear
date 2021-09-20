@@ -390,8 +390,9 @@ python3 setup.py develop
 ## Testing
 Running tests:
 ```bash
-pip3 install -r requirements.txt -r requirements-dev.txt
-./pytest.sh
+make setup
+. venv/bin/activate
+make test
 ```
 
 ## CliBuilder
