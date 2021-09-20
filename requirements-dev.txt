@@ -5,3 +5,4 @@ setuptools
 twine
 wheel
 mkdocs
+mkdocs-material

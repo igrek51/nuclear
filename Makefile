@@ -35,3 +35,9 @@ clean:
 release-pypi: clean readme
 		python3 setup.py sdist bdist_wheel
 		python3 -m twine upload dist/*
+
+mkdocs-local:
+		mkdocs serve
+
+mkdocs-push:
+		mkdocs gh-deploy --force

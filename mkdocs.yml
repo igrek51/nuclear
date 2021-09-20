@@ -1,5 +1,6 @@
 site_name: nuclear
-theme: readthedocs
+theme:
+  name: material
 repo_url: https://github.com/igrek51/nuclear
 site_author: igrek51
 docs_dir: docs
