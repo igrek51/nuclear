@@ -44,3 +44,15 @@ def test_catch_with_context_name():
         mockio.assert_match_uncolor('ERROR hacking time: nope '
                                     'cause=RuntimeError '
                                     'traceback=(.+)/test_catch.py:42$')
+
+def test_catch_chained_exception_cause():
+    with MockIO() as mockio:
+        with logerr('hacking time'):
+            try:
+                raise AttributeError('real cause')
+            except AttributeError as e:
+                raise RuntimeError('wrapper') from e
+
+        mockio.assert_match_uncolor('ERROR hacking time: wrapper: real cause '
+                                    'cause=AttributeError '
+                                    'traceback=(.+)/test_catch.py:52$')

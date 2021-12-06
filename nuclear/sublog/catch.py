@@ -47,15 +47,10 @@ def _get_traceback_lines(t1: traceback.TracebackException) -> Iterable[str]:
     while t1.__cause__ is not None:
         t1 = t1.__cause__
 
-    while True:
-        frames: Collection[traceback.FrameSummary] = t1.stack
-        for frame in frames:
-            if _include_traceback_frame(frame):  # hide traceback from this file
-                yield f'{os.path.normpath(frame.filename)}:{frame.lineno}'
-
-        if t1.__cause__ is None:
-            break
-        t1 = t1.__cause__
+    frames: Collection[traceback.FrameSummary] = t1.stack
+    for frame in frames:
+        if _include_traceback_frame(frame):  # hide traceback from this file
+            yield f'{os.path.normpath(frame.filename)}:{frame.lineno}'
 
 
 def _include_traceback_frame(frame: traceback.FrameSummary) -> bool:
@@ -76,6 +71,10 @@ def _include_traceback_frame(frame: traceback.FrameSummary) -> bool:
 
 
 def _error_message(e: Exception, context_name: str):
-    if not context_name:
-        return str(e)
-    return f'{context_name}: {e}'
+    layers = []
+    if context_name:
+        layers.append(context_name)
+    while e is not None:
+        layers.append(str(e))
+        e = e.__cause__
+    return ': '.join(layers)

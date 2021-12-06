@@ -13,6 +13,6 @@ def wrap_context(context_name: str, **ctx):
         yield
     except ContextError as e:
         merged_context = {**ctx, **e.ctx}
-        raise ContextError(f'{context_name}: {e}', **merged_context) from e
+        raise ContextError(context_name, **merged_context) from e
     except Exception as e:
-        raise ContextError(f'{context_name}: {e}', **ctx) from e
+        raise ContextError(context_name, **ctx) from e
