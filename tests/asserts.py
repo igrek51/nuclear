@@ -2,6 +2,7 @@ import re
 import sys
 from io import StringIO
 from typing import Type
+import logging
 
 import mock
 
@@ -35,22 +36,39 @@ class MockIO:
     def __init__(self, *in_args: str):
         # mock cli input
         self._mock_args = mock.patch.object(sys, 'argv', ['glue'] + list(in_args))
+
         # mock output
         self.new_out, self.new_err = StringIO(), StringIO()
         self.old_out, self.old_err = sys.stdout, sys.stderr
 
+        # capture output from loggers
+        self.logger = logging.getLogger('nuclear.sublog')
+        self.old_handler, self.new_handler = None, None
+        if self.logger.hasHandlers():
+            self.old_handler = self.logger.handlers[0]
+            self.new_handler = logging.StreamHandler(self.new_out)
+            self.new_handler.setLevel(self.old_handler.level)
+            self.new_handler.setFormatter(self.old_handler.formatter)
+
+
     def __enter__(self):
         self._mock_args.__enter__()
         sys.stdout, sys.stderr = self.new_out, self.new_err
+        if self.old_handler is not None:
+            self.logger.removeHandler(self.old_handler)
+            self.logger.addHandler(self.new_handler)
         return self
 
     def __exit__(self, exc_type, exc_value, traceback):
         self._mock_args.__exit__(exc_type, exc_value, traceback)
         sys.stdout, sys.stderr = self.old_out, self.old_err
         sys.stdout.write(self.output())
+        if self.old_handler is not None:
+            self.logger.removeHandler(self.new_handler)
+            self.logger.addHandler(self.old_handler)
 
     def output(self) -> str:
-        return self.new_out.getvalue()
+        return self.new_out.getvalue() + self.new_err.getvalue()
 
     def stripped(self) -> str:
         return self.output().strip()

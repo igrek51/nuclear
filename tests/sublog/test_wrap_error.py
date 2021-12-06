@@ -19,13 +19,13 @@ def test_sublog_wrapping():
         log.warn('attention')
         log.debug('trace')
 
-        mockio.assert_match_uncolor('] initializing: liftoff: dupa '
+        mockio.assert_match_uncolor('ERROR initializing: liftoff: dupa '
                                     'request_id=42 speed=zero '
                                     'cause=RuntimeError traceback=(.*)/test_wrap_error.py:10$')
-        mockio.assert_match_uncolor('] dupa2 a=5 z=fifteen '
+        mockio.assert_match_uncolor('ERROR dupa2 a=5 z=fifteen '
                                     'cause=ContextError traceback=(.*)/test_wrap_error.py:13$')
-        mockio.assert_match_uncolor('\\[ERROR] dupa3 '
+        mockio.assert_match_uncolor('ERROR dupa3 '
                                     'cause=RuntimeError traceback=(.*)/test_wrap_error.py:16$')
-        mockio.assert_match_uncolor('\\[INFO ] success param=with_param$')
-        mockio.assert_match_uncolor('\\[WARN ] attention$')
-        mockio.assert_match_uncolor('\\[DEBUG] trace$')
+        mockio.assert_match_uncolor('INFO  success param=with_param$')
+        mockio.assert_match_uncolor('WARN  attention$')
+        mockio.assert_match_uncolor('DEBUG trace$')
