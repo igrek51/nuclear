@@ -1,5 +1,6 @@
 from nuclear.sublog import wrap_context, logerr
 from tests.asserts import MockIO
+import importlib.util
 
 
 def test_sublog_traceback():
@@ -11,9 +12,9 @@ def test_sublog_traceback():
 
         mockio.assert_match_uncolor('ERROR initializing: liftoff: disaster request_id=42 speed=zero '
                                     'cause=RuntimeError '
-                                    'traceback="(.+)/test_catch.py:10, '
-                                    '(.+)/test_catch.py:20, '
-                                    '(.+)/test_catch.py:24"$')
+                                    'traceback="(.+)/test_catch.py:11, '
+                                    '(.+)/test_catch.py:21, '
+                                    '(.+)/test_catch.py:25"$')
 
 
 def disaster():
@@ -43,7 +44,8 @@ def test_catch_with_context_name():
 
         mockio.assert_match_uncolor('ERROR hacking time: nope '
                                     'cause=RuntimeError '
-                                    'traceback=(.+)/test_catch.py:42$')
+                                    'traceback=(.+)/test_catch.py:43$')
+
 
 def test_catch_chained_exception_cause():
     with MockIO() as mockio:
@@ -55,4 +57,22 @@ def test_catch_chained_exception_cause():
 
         mockio.assert_match_uncolor('ERROR hacking time: wrapper: real cause '
                                     'cause=AttributeError '
-                                    'traceback=(.+)/test_catch.py:52$')
+                                    'traceback=(.+)/test_catch.py:54$')
+
+
+def test_recover_from_dynamically_imported_module():
+    with MockIO() as mockio:
+        with logerr('hacking time'):
+
+            spec = importlib.util.spec_from_file_location("dynamic", 'tests/sublog/res/dynamic.py')
+            ext_module = importlib.util.module_from_spec(spec)
+            loader = spec.loader
+            assert loader is not None, 'no module loader'
+            loader.exec_module(ext_module)
+
+        mockio.assert_match_uncolor(r'ERROR hacking time: Fire! '
+                                    r'cause=RuntimeError '
+                                    r'traceback="(.+)/test_catch.py:71, '
+                                    r'<frozen importlib._bootstrap_external>:\d+, '
+                                    r'<frozen importlib._bootstrap>:\d+, '
+                                    r'(.+)/dynamic.py:1"$')
