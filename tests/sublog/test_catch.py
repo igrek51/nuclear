@@ -9,7 +9,7 @@ def test_sublog_traceback():
                 with wrap_context('liftoff', speed='zero'):
                     disaster()
 
-        mockio.assert_match_uncolor('ERROR] initializing: liftoff: disaster request_id=42 speed=zero '
+        mockio.assert_match_uncolor('ERROR initializing: liftoff: disaster request_id=42 speed=zero '
                                     'cause=RuntimeError '
                                     'traceback="(.+)/test_catch.py:10, '
                                     '(.+)/test_catch.py:20, '
@@ -41,6 +41,6 @@ def test_catch_with_context_name():
         with logerr('hacking time'):
             raise RuntimeError('nope')
 
-        mockio.assert_match_uncolor('ERROR] hacking time: nope '
+        mockio.assert_match_uncolor('ERROR hacking time: nope '
                                     'cause=RuntimeError '
                                     'traceback=(.+)/test_catch.py:42$')

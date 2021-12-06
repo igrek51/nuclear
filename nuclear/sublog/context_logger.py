@@ -2,10 +2,47 @@ import datetime
 import threading
 from contextlib import contextmanager
 from typing import Dict, Any, Optional
+import logging
 
 from colorama import Fore, Style
 
 simultaneous_print_lock = threading.Lock()
+
+LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message)s'
+LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+
+def _init_logger(log_level: int = logging.DEBUG) -> logging.Logger:
+    logger = logging.getLogger('nuclear.sublog')
+    logger.setLevel(log_level)
+    logger.propagate = False
+    handler = logging.StreamHandler()
+    handler.setLevel(log_level)
+    logger.addHandler(handler)
+    formatter = logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
+    handler.setFormatter(ColoredFormatter(formatter))
+    return logger
+
+
+class ColoredFormatter(logging.Formatter):
+    def __init__(self, plain_formatter):
+        logging.Formatter.__init__(self)
+        self.plain_formatter = plain_formatter
+
+    log_level_templates = {
+        'CRITICAL': f'{Style.BRIGHT + Fore.RED}CRIT {Style.RESET_ALL}',
+        'ERROR': f'{Style.BRIGHT + Fore.RED}ERROR{Style.RESET_ALL}',
+        'WARNING': f'{Fore.YELLOW}WARN {Style.RESET_ALL}',
+        'INFO': f'{Fore.BLUE}INFO {Style.RESET_ALL}',
+        'DEBUG': f'{Fore.GREEN}DEBUG{Style.RESET_ALL}',
+    }
+
+    def format(self, record: logging.LogRecord):
+        if record.levelname in self.log_level_templates:
+            record.levelname = self.log_level_templates[record.levelname].format(record.levelname)
+        return self.plain_formatter.format(record)
+
+
+_logger = _init_logger()
 
 
 class ContextLogger(object):
@@ -13,27 +50,28 @@ class ContextLogger(object):
         self.ctx: Dict[str, Any] = ctx
 
     def error(self, message: str, **ctx):
-        self._print_log(message, f'[{Fore.RED + Style.BRIGHT}ERROR{Style.RESET_ALL}]', ctx)
+        with simultaneous_print_lock:
+            _logger.error(self._print_log(message, ctx))
 
     def warn(self, message: str, **ctx):
-        self._print_log(message, f'[{Fore.YELLOW + Style.BRIGHT}WARN{Style.RESET_ALL} ]', ctx)
+        with simultaneous_print_lock:
+            _logger.warning(self._print_log(message, ctx))
 
     def info(self, message: str, **ctx):
-        self._print_log(message, f'[{Fore.BLUE}INFO{Style.RESET_ALL} ]', ctx)
+        with simultaneous_print_lock:
+            _logger.info(self._print_log(message, ctx))
 
     def debug(self, message: str, **ctx):
-        self._print_log(message, f'[{Fore.GREEN}DEBUG{Style.RESET_ALL}]', ctx)
+        with simultaneous_print_lock:
+            _logger.debug(self._print_log(message, ctx))
 
-    def _print_log(self, message: str, level: str, ctx: Dict[str, Any]):
+    def _print_log(self, message: str, ctx: Dict[str, Any]) -> str:
         merged_context = {**self.ctx, **ctx}
         display_context = _display_context(merged_context)
-        timestamp_part = datetime.datetime.now().strftime('%Y-%m-%d %H:%M:%S')
         if display_context:
-            to_print = f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] {level} {message} {display_context}'
+            return f'{message} {display_context}'
         else:
-            to_print = f'[{Fore.CYAN}{timestamp_part}{Style.RESET_ALL}] {level} {message}'
-        with simultaneous_print_lock:
-            print(to_print)
+            return message
 
     def __enter__(self):
         return self
