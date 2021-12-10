@@ -27,12 +27,12 @@ def check_required_arguments(rules: List[CliRule], internal_vars: InternalVars):
     for rule in filter_rules(rules, ParameterRule):
         if rule.required:
             for name in rule.var_names():
-                if not internal_vars[name]:
+                if internal_vars[name] is None:
                     raise CliSyntaxError(f'required parameter "{", ".join(rule.keywords)}" is not given')
 
     for rule in filter_rules(rules, PositionalArgumentRule):
         if rule.required:
-            if not internal_vars[rule.name]:
+            if internal_vars[rule.name] is None:
                 raise CliSyntaxError(f'required positional argument "{rule.name}" is not given')
 
     for rule in filter_rules(rules, ManyArgumentsRule):

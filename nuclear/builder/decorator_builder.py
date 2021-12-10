@@ -6,7 +6,9 @@ from .rule_factory import argument, flag, parameter, subcommand
 
 
 def create_decorated_subcommand(function: Callable[..., None], keyword: str) -> SubcommandRule:
-    help = getdoc(function).strip()
+    help = getdoc(function)
+    if help:
+        help = help.strip()
     rule = subcommand(keyword, run=function, help=help)
     _add_subcommand_arguments(rule, function)
     return rule
@@ -47,7 +49,7 @@ def _add_subcommand_optional_parameters(
     for i, arg in enumerate(optional_args):
         typo = annotations.get(arg, str)
         default_value = defaults[i] if defaults is not None else None
-        if typo == bool and (default_value is None or default_value == False):
+        if typo == bool and default_value == False:
             subcommand.has(flag(arg))
         else:
             subcommand.has(parameter(arg, type=typo, default=default_value))

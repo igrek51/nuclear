@@ -107,7 +107,9 @@ class CliBuilder:
 
     def __bind_decorated_command(self, function: Callable[..., None], names: List[str]):
         if not names:
-            raise CliDefinitionError('Command name is required')
+            raise CliDefinitionError('subcommand name is required')
+        if len(names) == 1:
+            names = names[0].split(' ')
 
         last_rule = create_decorated_subcommand(function, names[-1])
 
@@ -121,7 +123,7 @@ class CliBuilder:
                 self.has(current_rule)
 
             for subname in names[1:-1]:
-                next_rule = __find_subcommand_rule(current_rule, subname)
+                next_rule = _find_subcommand_rule(current_rule, subname)
                 if not next_rule:
                     next_rule = subcommand(subname)
                     current_rule.has(next_rule)
@@ -204,7 +206,7 @@ class CliBuilder:
         return any([isinstance(rule, DefaultActionRule) for rule in self.__subrules])
 
 
-def __find_subcommand_rule(subcommand: SubcommandRule, name: str) -> Optional[SubcommandRule]:
+def _find_subcommand_rule(subcommand: SubcommandRule, name: str) -> Optional[SubcommandRule]:
     for rule in subcommand.subrules:
         if isinstance(rule, SubcommandRule) and name in rule.keywords:
             return rule

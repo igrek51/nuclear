@@ -1,5 +1,6 @@
 from nuclear import *
-from tests.asserts import MockIO
+from nuclear.parser.error import CliDefinitionError
+from tests.asserts import MockIO, assert_error
 from functools import reduce
 import base64
 
@@ -21,7 +22,9 @@ def say_hello(name: str, decode: bool = False, repeat: int = 1):
 @cli.add_command('calculate', 'factorial')
 def calculate_factorial(n: int):
     """Calculate factorial"""
-    print(reduce(lambda x, y: x * y, range(1, n + 1)))
+    result = reduce(lambda x, y: x * y, range(1, n + 1))
+    print(result)
+    return result
 
 
 @cli.add_command('calculate', 'primes')
@@ -44,3 +47,47 @@ def test_calling_subcommand():
     with MockIO('calculate', 'primes', '-n=10') as mockio:
         cli.run()
         assert mockio.output() == "[2, 3, 5, 7]\n"
+
+
+def test_bool_flag():
+    @cli.add_command('print very stupid flag')
+    def print_something_very_stupid(force: bool):
+        print(f"argument: {force}")
+
+    @cli.add_command('flaggy default_false')
+    def flaggy_false(force: bool = False):
+        print(f"flag: {force}")
+
+    @cli.add_command('flaggy default_true')
+    def flaggy_true(force: bool = True):
+        print(f"parameter: {force}")
+
+    with MockIO('print', 'very', 'stupid', 'flag', 'false') as mockio:
+        cli.run()
+        assert mockio.output() == "argument: False\n"
+
+    with MockIO('flaggy', 'default_false') as mockio:
+        cli.run()
+        assert mockio.output() == "flag: False\n"
+    with MockIO('flaggy', 'default_false', '--force') as mockio:
+        cli.run()
+        assert mockio.output() == "flag: True\n"
+
+    with MockIO('flaggy', 'default_true') as mockio:
+        cli.run()
+        assert mockio.output() == "parameter: True\n"
+    with MockIO('flaggy', 'default_true', '--force=false') as mockio:
+        cli.run()
+        assert mockio.output() == "parameter: False\n"
+
+
+def test_function_calling_works_after_decorating():
+    assert calculate_factorial(6) == 720
+
+
+def test_no_subcommand_name_error():
+    def do_something_evil():
+        @cli.add_command()
+        def do_nothing(n: int):
+            print('nothing')
+    assert_error(do_something_evil, error_type=CliDefinitionError)

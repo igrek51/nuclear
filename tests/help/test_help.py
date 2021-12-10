@@ -156,7 +156,7 @@ def test_display_dictionary():
 
 
 def test_usage_on_syntax_error():
-    with MockIO('') as mockio:
+    with MockIO() as mockio:
         CliBuilder(usage_onerror=True, reraise_error=False).has(
             argument('req')
         ).run()

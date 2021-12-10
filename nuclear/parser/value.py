@@ -4,6 +4,7 @@ from typing import List, Any, Optional
 
 from nuclear.builder.rule import ValueRule
 from nuclear.builder.typedef import TypeOrParser
+from nuclear.types.boolean import boolean
 
 
 def parse_value_rule(rule: ValueRule, arg: str) -> Any:
@@ -13,6 +14,8 @@ def parse_value_rule(rule: ValueRule, arg: str) -> Any:
 def parse_typed_value(_type: TypeOrParser, arg: str) -> Any:
     if _type is None:
         return arg
+    if _type == bool:
+        return boolean(arg)
     # invoke custom parser or cast to custom type
     return _type(arg)
 
