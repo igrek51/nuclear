@@ -11,8 +11,8 @@ def calculate_factorial(n: int):
     print(reduce(lambda x, y: x * y, range(1, n + 1)))
 
 def calculate_primes(n: int):
-    print(sorted(reduce((lambda r, x: r - set(range(x ** 2, n, x)) if (x in r) else r),
-                        range(2, int(n ** 0.5)), set(range(2, n)))))
+    print(sorted(reduce((lambda r, x: r - set(range(x**2, n, x)) if (x in r) else r), 
+                        range(2, n), set(range(2, n)))))
 ```
 and we need a "glue" which binds them with a CLI (Command-Line Interface).
 We want it to be run with different keywords and parameters provided by user to the terminal shell in a following manner:
@@ -62,8 +62,8 @@ def calculate_factorial(n: int):
     print(reduce(lambda x, y: x * y, range(1, n + 1)))
 
 def calculate_primes(n: int):
-    print(sorted(reduce((lambda r, x: r - set(range(x ** 2, n, x)) if (x in r) else r),
-                        range(2, int(n ** 0.5)), set(range(2, n)))))
+    print(sorted(reduce((lambda r, x: r - set(range(x**2, n, x)) if (x in r) else r), 
+                        range(2, n), set(range(2, n)))))
 
 CliBuilder().has(
     subcommand('hello', run=say_hello).has(

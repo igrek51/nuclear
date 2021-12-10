@@ -35,8 +35,8 @@ def calculate_factorial(n: int):
 
 
 def calculate_primes(n: int):
-    print(sorted(reduce((lambda r, x: r - set(range(x ** 2, n, x)) if (x in r) else r),
-                        range(2, int(n ** 0.5)), set(range(2, n)))))
+    print(sorted(reduce((lambda r, x: r - set(range(x**2, n, x)) if (x in r) else r), 
+                        range(2, n), set(range(2, n)))))
 
 
 if __name__ == '__main__':
