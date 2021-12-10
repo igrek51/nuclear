@@ -1,8 +1,7 @@
-#!/usr/bin/env python3
+from nuclear import *
+from tests.asserts import MockIO
 from functools import reduce
 import base64
-
-from nuclear import CliBuilder
 
 
 cli = CliBuilder()
@@ -35,5 +34,13 @@ def calculate_primes(n: int = 100):
                         range(2, n), set(range(2, n)))))
 
 
-if __name__ == '__main__':
-    cli.run()
+def test_calling_subcommand():
+    with MockIO('hello', 'world') as mockio:
+        cli.run()
+        assert mockio.output() == "I'm a world!\n"
+    with MockIO('calculate', 'factorial', '6') as mockio:
+        cli.run()
+        assert mockio.output() == "720\n"
+    with MockIO('calculate', 'primes', '-n=10') as mockio:
+        cli.run()
+        assert mockio.output() == "[2, 3, 5, 7]\n"

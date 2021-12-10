@@ -7,7 +7,7 @@ from .typedef import Action, ChoiceProvider, TypeOrParser
 
 
 @dataclass
-class CliRule(object):
+class CliRule:
     pass
 
 

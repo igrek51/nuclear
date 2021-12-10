@@ -1,17 +1,18 @@
 import sys
-from typing import Callable, List, Optional
+from typing import Callable, List, Optional, Union
 
 from nuclear.autocomplete.autocomplete import bash_autocomplete
 from nuclear.autocomplete.install import install_bash, install_autocomplete
+from nuclear.builder.decorator_builder import create_decorated_subcommand
 from nuclear.help.help import print_version, print_help, print_usage
 from nuclear.parser.error import CliSyntaxError, CliDefinitionError
 from nuclear.parser.parser import Parser
 from nuclear.sublog import log
-from .rule import DefaultActionRule, CliRule
-from .rule_factory import default_action, primary_option, arguments, argument
+from .rule import DefaultActionRule, CliRule, SubcommandRule
+from .rule_factory import default_action, primary_option, arguments, argument, subcommand
 
 
-class CliBuilder(object):
+class CliBuilder:
     def __init__(self,
                  name: Optional[str] = None,
                  version: Optional[str] = None,
@@ -92,6 +93,48 @@ class CliBuilder(object):
             if self.__reraise_error:
                 raise e
 
+    def add_command(self, *subcommands: str):
+        """
+        Decorator for binding function with a CLI command
+        :param subcommands: multi-part subcommand names composing the full command, eg. "git remote add"
+        """
+        def decorator(function):
+            self.__bind_decorated_command(function, subcommands)
+            def wrapper(*args, **kwargs):
+                return function(*args, **kwargs)
+            return wrapper
+        return decorator
+
+    def __bind_decorated_command(self, function: Callable[..., None], names: List[str]):
+        if not names:
+            raise CliDefinitionError('Command name is required')
+
+        last_rule = create_decorated_subcommand(function, names[-1])
+
+        if len(names) == 1:
+            self.has(last_rule)
+        else:
+            # first command added directly to the builder
+            current_rule: SubcommandRule = self.__find_subcommand_rule(names[0])
+            if not current_rule:
+                current_rule = subcommand(names[0])
+                self.has(current_rule)
+
+            for subname in names[1:-1]:
+                next_rule = __find_subcommand_rule(current_rule, subname)
+                if not next_rule:
+                    next_rule = subcommand(subname)
+                    current_rule.has(next_rule)
+                current_rule = next_rule    
+                
+            current_rule.has(last_rule)
+    
+    def __find_subcommand_rule(self, name: str) -> Optional[SubcommandRule]:
+        for rule in self.__subrules:
+            if isinstance(rule, SubcommandRule) and name in rule.keywords:
+                return rule
+        return None
+
     def __create_parser(self, args: List[str]) -> Parser:
         if not args and self.__help_on_empty:
             def __print_root_help():
@@ -159,3 +202,10 @@ class CliBuilder(object):
 
     def __has_default_action(self) -> bool:
         return any([isinstance(rule, DefaultActionRule) for rule in self.__subrules])
+
+
+def __find_subcommand_rule(subcommand: SubcommandRule, name: str) -> Optional[SubcommandRule]:
+    for rule in subcommand.subrules:
+        if isinstance(rule, SubcommandRule) and name in rule.keywords:
+            return rule
+    return None
