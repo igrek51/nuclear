@@ -54,11 +54,11 @@ def test_bool_flag():
     def print_something_very_stupid(force: bool):
         print(f"argument: {force}")
 
-    @cli.add_command('flaggy default_false')
+    @cli.add_command('test flaggy default_false')
     def flaggy_false(force: bool = False):
         print(f"flag: {force}")
 
-    @cli.add_command('flaggy default_true')
+    @cli.add_command('test flaggy default_true')
     def flaggy_true(force: bool = True):
         print(f"parameter: {force}")
 
@@ -66,17 +66,17 @@ def test_bool_flag():
         cli.run()
         assert mockio.output() == "argument: False\n"
 
-    with MockIO('flaggy', 'default_false') as mockio:
+    with MockIO('test', 'flaggy', 'default_false') as mockio:
         cli.run()
         assert mockio.output() == "flag: False\n"
-    with MockIO('flaggy', 'default_false', '--force') as mockio:
+    with MockIO('test', 'flaggy', 'default_false', '--force') as mockio:
         cli.run()
         assert mockio.output() == "flag: True\n"
 
-    with MockIO('flaggy', 'default_true') as mockio:
+    with MockIO('test', 'flaggy', 'default_true') as mockio:
         cli.run()
         assert mockio.output() == "parameter: True\n"
-    with MockIO('flaggy', 'default_true', '--force=false') as mockio:
+    with MockIO('test', 'flaggy', 'default_true', '--force=false') as mockio:
         cli.run()
         assert mockio.output() == "parameter: False\n"
 
@@ -91,3 +91,13 @@ def test_no_subcommand_name_error():
         def do_nothing(n: int):
             print('nothing')
     assert_error(do_something_evil, error_type=CliDefinitionError)
+
+
+def test_varargs_with_kwonly_args():
+    @cli.add_command('doit')
+    def doit(*numbers: int, temperature = 0, force: bool = False):
+        print(f"args: {numbers}, temperature: {temperature}, force: {force}")
+
+    with MockIO('doit', '1', '2', '--temperature', '36', '--force') as mockio:
+        cli.run()
+        assert mockio.output() == "args: (1, 2), temperature: 36, force: True\n"

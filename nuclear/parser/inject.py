@@ -1,4 +1,4 @@
-import inspect
+from inspect import getfullargspec, ismethod
 from typing import Any, List
 from typing import Dict, Mapping
 
@@ -9,14 +9,19 @@ from nuclear.sublog import log
 
 def run_action(action: Action, internal_vars: Dict[str, Any]):
     if action:
-        (args, _, _, _, _, _, annotations) = inspect.getfullargspec(action)
-        if not args:
+        args, varargs, _, defaults, kwonlyargs, kwonlydefaults, annotations = getfullargspec(action)
+        injectable_args = args + kwonlyargs
+        if not injectable_args and varargs is None:
             action()
         else:
-            if args and inspect.ismethod(action):
-                args = args[1:]  # drop 'self'
-            kwargs = inject_args(args, action, annotations, internal_vars)
-            action(**kwargs)
+            if ismethod(action):
+                injectable_args = injectable_args[1:]  # drop 'self'
+            action_kwargs = inject_args(injectable_args, action, annotations, internal_vars)
+            if varargs is None:
+                action(**action_kwargs)
+            else:
+                action_args = inject_arg(varargs, action, annotations, internal_vars)
+                action(*action_args, **action_kwargs)
 
 
 def inject_args(args: List[str], action: Action, annotations: Mapping[str, Any], internal_vars: Dict[str, Any]
