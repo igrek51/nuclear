@@ -13,10 +13,12 @@ def main():
             flag('decode', help='Decode name as base64'),
         ),
         subcommand('calculate').has(
-            subcommand('factorial', help='Calculate factorial', run=calculate_factorial).has(
+            subcommand('factorial', run=calculate_factorial,
+                       help='Calculate factorial').has(
                 argument('n', type=int),
             ),
-            subcommand('primes', help='List prime numbers using Sieve of Eratosthenes', run=calculate_primes).has(
+            subcommand('primes', run=calculate_primes,
+                       help='List prime numbers using Sieve of Eratosthenes').has(
                 argument('n', type=int, required=False, default=100,
                          help='maximum number to check'),
             ),
@@ -35,7 +37,7 @@ def calculate_factorial(n: int):
 
 
 def calculate_primes(n: int):
-    print(sorted(reduce((lambda r, x: r - set(range(x**2, n, x)) if (x in r) else r), 
+    print(sorted(reduce((lambda r, x: r - set(range(x**2, n, x)) if (x in r) else r),
                         range(2, n), set(range(2, n)))))
 
 
