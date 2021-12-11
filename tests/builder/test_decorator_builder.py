@@ -11,7 +11,8 @@ cli = CliBuilder()
 @cli.add_command('hello')
 def say_hello(name: str, decode: bool = False, repeat: int = 1):
     """
-    Say hello to someone.
+    Say hello to someone
+    :param name: Name to say hello to
     :param decode: Decode name as base64
     """
     if decode:
@@ -31,6 +32,7 @@ def calculate_factorial(n: int):
 def calculate_primes(n: int = 100):
     """
     List prime numbers using Sieve of Eratosthenes
+    
     :param n: maximum number to check
     """
     print(sorted(reduce((lambda r, x: r - set(range(x**2, n, x)) if (x in r) else r), 
@@ -101,3 +103,16 @@ def test_varargs_with_kwonly_args():
     with MockIO('doit', '1', '2', '--temperature', '36', '--force') as mockio:
         cli.run()
         assert mockio.output() == "args: (1, 2), temperature: 36, force: True\n"
+
+
+def test_extract_param_docstring_to_help():
+    with MockIO('--help') as mockio:
+        cli.run()
+        assert 'Say hello to someone' in mockio.output()
+        assert ':param' not in mockio.output()
+
+    with MockIO('hello', '--help') as mockio:
+        cli.run()
+        assert 'Decode name as base64' in mockio.output()
+        assert 'NAME - Name to say hello to' in mockio.output()
+        assert ':param' not in mockio.output()
