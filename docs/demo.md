@@ -11,13 +11,13 @@ CliBuilder().has(
     ),
     subcommand('calculate').has(
         subcommand('factorial', run=calculate_factorial,
-                    help='Calculate factorial').has(
+                   help='Calculate factorial').has(
             argument('n', type=int),
         ),
         subcommand('primes', run=calculate_primes,
-                    help='List prime numbers using Sieve of Eratosthenes').has(
+                   help='List prime numbers using Sieve of Eratosthenes').has(
             argument('n', type=int, required=False, default=100,
-                        help='maximum number to check'),
+                     help='maximum number to check'),
         ),
     ),
 ).run()
