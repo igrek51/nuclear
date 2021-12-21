@@ -80,7 +80,9 @@ CliBuilder().has(
 ).run()
 ```
 
-See [demo-tree.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-tree.py) for a complete example.## Table of contents - Our chief weapons are...
+See [demo-tree.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-tree.py) for a complete example.
+
+## Table of contents - Our chief weapons are...
 - [Auto-generated help and usage](https://nuclear-py.readthedocs.io/en/latest/help) (`--help`)
 - [Multilevel Sub-commands](https://nuclear-py.readthedocs.io/en/latest/subcommands) (e.g. `git remote add ...` syntax)
 - [Flags](https://nuclear-py.readthedocs.io/en/latest/flags): supporting both short (`-f`) and long (`--force`), combining short flags (`-tulpn`), multiple flag occurrences (`-vvv`)
