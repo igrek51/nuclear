@@ -10,9 +10,8 @@ def say_hello(name: str, decode: bool = False, repeat: int = 1):
     Say hello
     :param decode: Decode name as base64
     """
-    if decode:
-        name = base64.b64decode(name).decode('utf-8')
-    print(' '.join([f"I'm a {name}!"] * repeat))
+    message = f"I'm a {b64decode(name).decode() if decode else name}!"
+    print(' '.join([message] * repeat))
 
 @cli.add_command('calculate', 'factorial')
 def calculate_factorial(n: int):
@@ -20,11 +19,8 @@ def calculate_factorial(n: int):
     print(reduce(lambda x, y: x * y, range(1, n + 1)))
 
 @cli.add_command('calculate', 'primes')
-def calculate_primes(n: int = 100):
-    """
-    List prime numbers using Sieve of Eratosthenes
-    :param n: maximum number to check
-    """
+def calculate_primes(n: int):
+    """List prime numbers using Sieve of Eratosthenes"""
     print(sorted(reduce((lambda r, x: r - set(range(x**2, n, x)) if (x in r) else r), range(2, n), set(range(2, n)))))
 
 cli.run()
@@ -32,7 +28,7 @@ cli.run()
 
 ![sublog demo](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-live.gif?raw=true)
 
-See [demo-decorator.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-decorator.py) for a complete example.
+See [demo.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-decorator.py) for a complete example.
 
 ## Get it now
 ```bash
@@ -40,8 +36,8 @@ pip install nuclear
 ```
 
 ## CLI Tree builder
-Apart from decorator syntax style, you can also do the same using tree-builder syntax
-(See [demo-tree.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-tree.py)):
+Apart from decorator syntax style, you can also do the same using tree-builder syntax,
+which is useful in more complex cases:
 
 ```python
 from nuclear import CliBuilder, argument, flag, parameter, subcommand
@@ -65,3 +61,5 @@ CliBuilder().has(
     ),
 ).run()
 ```
+
+See [demo-tree.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-tree.py) for a complete example.

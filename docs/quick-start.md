@@ -3,9 +3,8 @@ Let's create a simple command-line application using `nuclear`.
 Let's assume we already have our fancy functions as follows:
 ```python
 def say_hello(name: str, decode: bool, repeat: int):
-    if decode:
-        name = base64.b64decode(name).decode('utf-8')
-    print(' '.join([f"I'm a {name}!"] * repeat))
+    message = f"I'm a {b64decode(name).decode() if decode else name}!"
+    print(' '.join([message] * repeat))
 
 def calculate_factorial(n: int):
     print(reduce(lambda x, y: x * y, range(1, n + 1)))
@@ -53,14 +52,13 @@ Getting it all together, we've bound our function with a Command-Line Interface:
 **quickstart.py**:
 ```python
 #!/usr/bin/env python3
-import base64
+from base64 import b64decode
 from functools import reduce
 from nuclear import CliBuilder, argument, flag, parameter, subcommand
 
 def say_hello(name: str, decode: bool, repeat: int):
-    if decode:
-        name = base64.b64decode(name).decode('utf-8')
-    print(' '.join([f"I'm a {name}!"] * repeat))
+    message = f"I'm a {b64decode(name).decode() if decode else name}!"
+    print(' '.join([message] * repeat))
 
 def calculate_factorial(n: int):
     print(reduce(lambda x, y: x * y, range(1, n + 1)))
@@ -106,9 +104,8 @@ cli = CliBuilder()
 @cli.add_command('hello')
 def say_hello(name: str, decode: bool = False, repeat: int = 1):
     """Say hello to someone"""
-    if decode:
-        name = base64.b64decode(name).decode('utf-8')
-    print(' '.join([f"I'm a {name}!"] * repeat))
+    message = f"I'm a {b64decode(name).decode() if decode else name}!"
+    print(' '.join([message] * repeat))
 
 
 @cli.add_command('calculate', 'factorial')

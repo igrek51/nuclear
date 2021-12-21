@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-import base64
+from base64 import b64decode
 from functools import reduce
 
 from nuclear import CliBuilder, argument, flag, parameter, subcommand
@@ -24,9 +24,8 @@ def main():
 
 
 def say_hello(name: str, decode: bool, repeat: int):
-    if decode:
-        name = base64.b64decode(name).decode('utf-8')
-    print(' '.join([f"I'm a {name}!"] * repeat))
+    message = f"I'm a {b64decode(name).decode() if decode else name}!"
+    print(' '.join([message] * repeat))
 
 
 def calculate_factorial(n: int):
