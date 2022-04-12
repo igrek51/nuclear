@@ -4,7 +4,7 @@ import time
 import backoff
 
 from nuclear import shell, shell_error_code, shell_output, CommandError
-from nuclear.shell.shell_utils import BackgroundCommand
+from nuclear.shell import BackgroundCommand
 from tests.asserts import assert_error
 
 
@@ -50,8 +50,8 @@ def test_background_command():
 
     cmd = BackgroundCommand(
         'while sleep 0.1; do echo 1; done', 
-        debug=True, 
-        print_stdout=True, 
+        debug=True,
+        print_stdout=True,
         on_next_line=lambda line: live_lines.append(line),
     )
     assert cmd.is_running
@@ -67,10 +67,26 @@ def test_background_command():
     assert '1\n1\n' in cmd.stdout
 
 
-def test_background_command_long_command_without_output():
+def test_background_long_command_without_output():
     test_start = time.time()
     cmd = BackgroundCommand('sleep 10', debug=True, shell=False)
     assert cmd.is_running
+    cmd.terminate()
+    cmd.terminate()
+    assert not cmd.is_running
+    assert time.time() - test_start <= 9, 'test took too long'
+
+
+def test_background_long_shell_command_without_output():
+    test_start = time.time()
+    cmd = BackgroundCommand('echo running && sleep 10', debug=True, shell=True)
+    assert cmd.is_running
+    
+    @backoff.on_exception(backoff.expo, AssertionError, factor=0.1, max_value=0.5, max_time=5, jitter=None)
+    def check():
+        assert cmd.stdout == 'running\n'
+    check()
+
     cmd.terminate()
     cmd.terminate()
     assert not cmd.is_running
