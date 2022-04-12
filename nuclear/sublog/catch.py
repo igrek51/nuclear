@@ -46,6 +46,22 @@ def log_exception(e: BaseException, print_traceback: bool = True):
     _print_error_context(e, {}, print_traceback, '')
 
 
+def short_exception_details(e: BaseException) -> str:
+    """
+    Return concise one-line details of exception, containing message, exception type and short traceback
+    """
+    return _get_exc_info_details(type(e), e, e.__traceback__)
+
+
+def _get_exc_info_details(ex_type, e, tb) -> str:
+    traceback_ex = traceback.TracebackException(ex_type, e, tb, limit=None)
+    traceback_lines = list(_get_traceback_lines(traceback_ex))
+    traceback_str = ', '.join(traceback_lines)
+    cause = _root_cause_type(e)
+    error_msg = _error_message(e).strip()
+    return f'{error_msg}, cause={cause}, traceback={traceback_str}'
+
+
 def _root_cause_type(e: Exception) -> str:
     while e.__cause__ is not None:
         e = e.__cause__
@@ -80,11 +96,14 @@ def _include_traceback_frame(frame: traceback.FrameSummary) -> bool:
     return True
 
 
-def _error_message(e: Exception, context_name: str):
+def _error_message(e: Exception, context_name: str = ''):
     layers = []
     if context_name:
         layers.append(context_name)
     while e is not None:
-        layers.append(str(e))
+        if isinstance(e, ContextError):
+            layers.append(e.context_message)
+        else:
+            layers.append(str(e))
         e = e.__cause__
     return ': '.join(layers)
