@@ -1,13 +1,13 @@
+from genericpath import isdir
 import io
+import os
 import shlex
 import subprocess
 import sys
 import threading
 import signal
 from pathlib import Path
-from typing import Callable, Optional
-
-import psutil
+from typing import Callable, List, Optional
 
 from nuclear.shell.shell_utils import CommandError
 from nuclear.sublog.context_logger import log
@@ -94,12 +94,11 @@ class BackgroundCommand:
         if not self._monitor_thread.is_alive():
             return
 
-        parent = psutil.Process(self._process.pid)
-        children = parent.children(recursive=False)
-        for child in children:
+        children = _get_child_processes(self._process.pid)
+        for child_pid in children:
             if self._debug:
-                log.debug(f'terminating child process', pid=child.pid)
-            child.send_signal(signal.SIGTERM)
+                log.debug(f'terminating child process', pid=child_pid)
+            os.kill(child_pid, signal.SIGTERM)
 
         self._process.terminate()
         self._process.poll()  # wait for subprocess
@@ -121,3 +120,19 @@ class BackgroundCommand:
     def is_running(self) -> bool:
         """Return True if the process is running"""
         return self._monitor_thread.is_alive()
+
+
+def _get_child_processes(pid: int) -> List[int]:
+    children_pids = []
+    proc_task_path = Path(f'/proc/{pid}/task')
+    if not proc_task_path.is_dir():
+        log.warn(f"Can't find process task directory: {proc_task_path}")
+        return []
+    tasks = [t for t in proc_task_path.iterdir()]
+    for task in tasks:
+        task_children = task / 'children'
+        if task_children.is_file():
+            task_children_parts = task_children.read_text().split()
+            task_pids = [int(p.strip()) for p in task_children_parts]
+            children_pids.extend(task_pids)
+    return children_pids
