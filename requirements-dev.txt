@@ -1,8 +1,9 @@
-pytest
-mock
-coverage
-setuptools
-twine
-wheel
-mkdocs; python_version >= '3.7'
-mkdocs-material; python_version >= '3.7'
+pytest==7.1.2
+mock==4.0.3
+coverage==6.3.2
+setuptools==62.2.0
+twine==4.0.0
+wheel==0.37.1
+mkdocs==1.3.0; python_version >= '3.7'
+mkdocs-material==8.2.14; python_version >= '3.7'
+backoff==2.0.1

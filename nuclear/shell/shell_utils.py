@@ -1,12 +1,11 @@
 import io
-import os
-import signal
 import sys
 import select
 from pathlib import Path
 import subprocess
 from typing import Union, Optional, Callable
 import threading
+import time
 
 from nuclear.sublog.context_logger import log
 
@@ -128,16 +127,21 @@ class BackgroundCommand:
     ):
         """Run system shell command in background."""
         self._stop: bool = False
-        self._stdout: str = ''
         self._captured_stream = io.StringIO()
 
         def monitor_output(stream: BackgroundCommand):
             stdout_iter = iter(stream._process.stdout.readline, b'')
+            poll_obj = select.poll()
+            poll_obj.register(self._process.stdout, select.POLLIN)
+
             while True:
                 if stream._stop:
                     break
-                if self._process.poll() is not None:  # process has terminated
-                    break
+                poll_result = poll_obj.poll(0)
+                if not poll_result:
+                    time.sleep(1)
+                    continue
+
                 try:
                     line = next(stdout_iter)
                 except StopIteration:
@@ -151,9 +155,9 @@ class BackgroundCommand:
                 self._captured_stream.write(line_str)
 
             stream._process.wait()
-            stream._stdout = self._captured_stream.getvalue()
             if stream._process.returncode != 0 and on_error is not None and not self._stop:
-                on_error(CommandError(cmd, stream._stdout, stream._process.returncode))
+                stdout = self._captured_stream.getvalue()
+                on_error(CommandError(cmd, stdout, stream._process.returncode))
 
             if debug:
                 log.debug(f'Command finished: {cmd}')
