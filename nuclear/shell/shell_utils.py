@@ -1,11 +1,13 @@
 import io
-import sys
+import os
 import select
-from pathlib import Path
+import shlex
 import subprocess
-from typing import Union, Optional, Callable
+import sys
 import threading
 import time
+from pathlib import Path
+from typing import Callable, Optional, Union
 
 from nuclear.sublog.context_logger import log
 
@@ -124,6 +126,7 @@ class BackgroundCommand:
         on_error: Callable[[CommandError], None] = None,
         print_stdout: bool = False,
         debug: bool = False,
+        shell: bool = True,
     ):
         """Run system shell command in background."""
         self._stop: bool = False
@@ -170,7 +173,18 @@ class BackgroundCommand:
 
         if debug:
             log.debug(f'Command: {cmd}')
-        self._process = subprocess.Popen(cmd, stdout=subprocess.PIPE, stderr=subprocess.STDOUT, shell=True)
+        if shell:
+            process_args = cmd
+        else:
+            process_args = shlex.split(cmd)
+            
+        self._process = subprocess.Popen(
+            process_args, 
+            stdout=subprocess.PIPE, 
+            stderr=subprocess.STDOUT, 
+            shell=shell,
+            preexec_fn=os.setsid,
+        )
 
         self._monitor_thread.start()
 

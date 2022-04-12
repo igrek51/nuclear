@@ -1,4 +1,5 @@
-pytest==7.1.2
+pytest==7.1.2; python_version >= '3.7'
+pytest==7.0.1; python_version < '3.7'
 mock==4.0.3
 coverage==6.3.2
 setuptools==62.2.0

@@ -1,6 +1,6 @@
 import inspect
 from collections.abc import Iterable
-from typing import List, Any, Optional, Union, get_origin, get_args
+from typing import List, Any, Optional
 
 from nuclear.builder.rule import ValueRule
 from nuclear.builder.typedef import TypeOrParser
@@ -17,13 +17,13 @@ def parse_typed_value(_type: TypeOrParser, arg: str) -> Any:
         return arg
     if _type == bool:
         return boolean(arg)
-    typing_origin = get_origin(_type)
-    if typing_origin is Union:
+    _type_name = str(_type)
+    if _type_name.startswith('typing.Union['):
         try:
             return _parse_union_value(_type, arg)
         except _TypeNotMatched:
             raise CliSyntaxError(f"variable '{arg}' didn't match Union type: {_type}")
-    elif typing_origin is not None:
+    elif _type_name.startswith('typing.'):
         return arg
     # invoke custom parser or cast to custom type
     return _type(arg)
@@ -34,7 +34,11 @@ class _TypeNotMatched(RuntimeError):
 
 
 def _parse_union_value(_type: TypeOrParser, arg: str) -> Any:
-    for utype in get_args(_type):
+    try:
+        utypes = _type.__args__
+    except AttributeError:
+        return arg
+    for utype in utypes:
         if utype == type(None) and arg is None:
             return None
         try:

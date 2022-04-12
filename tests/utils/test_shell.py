@@ -69,9 +69,8 @@ def test_background_command():
 
 def test_background_command_long_command_without_output():
     test_start = time.time()
-    cmd = BackgroundCommand('sleep 10', debug=True)
+    cmd = BackgroundCommand('sleep 10', debug=True, shell=False)
     assert cmd.is_running
-    time.sleep(0.5)
     cmd.terminate()
     assert not cmd.is_running
     assert time.time() - test_start <= 9, 'test took too long'
