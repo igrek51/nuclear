@@ -403,7 +403,8 @@ make test
 ```
 
 ## Logging with sublog
-`sublog` is a logging system that allows you to:  
+`sublog` is a logging system that allows you to:
+  
 - display variables besides log messages: `log.debug('message', airspeed=20)`,
 - wrap errors with context: `with wrap_context('ignition')`,
 - catch errors and show traceback in a concise, pretty format: `with  logerr()`.
