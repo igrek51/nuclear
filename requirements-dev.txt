@@ -4,5 +4,5 @@ coverage
 setuptools
 twine
 wheel
-mkdocs
-mkdocs-material
+mkdocs; python_version >= '3.7'
+mkdocs-material; python_version >= '3.7'
