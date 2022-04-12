@@ -2,23 +2,25 @@ import threading
 from contextlib import contextmanager
 from typing import Dict, Any, Optional
 import logging
+import sys
 
 from colorama import Fore, Style
 
 simultaneous_print_lock = threading.Lock()
 
 LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message)s'
-LOG_DATE_FORMAT = '%Y-%m-%d %H:%M:%S'
+LOG_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
 
 def _init_logger(log_level: int = logging.DEBUG) -> logging.Logger:
     logger = logging.getLogger('nuclear.sublog')
     logger.setLevel(log_level)
     logger.propagate = False
-    handler = logging.StreamHandler()
+
+    handler = logging.StreamHandler(stream=sys.stdout)
     handler.setLevel(log_level)
-    logger.addHandler(handler)
-    formatter = logging.Formatter(LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
+    formatter = logging.Formatter(fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
     handler.setFormatter(ColoredFormatter(formatter))
+    logger.addHandler(handler)
     return logger
 
 
@@ -42,6 +44,17 @@ class ColoredFormatter(logging.Formatter):
 
 
 _logger = _init_logger()
+
+
+def get_logger(logger_name: Optional[str] = None) -> logging.Logger:
+    """
+    Get configured logger
+    :param logger_name: Name of the child logger. It's best to keep it __name__
+    """
+    logger = logging.getLogger('nuclear.sublog')
+    if logger_name:
+        return logger.getChild(logger_name)
+    return logger
 
 
 class ContextLogger(object):

@@ -1,5 +1,5 @@
 import sys
-from typing import Callable, List, Optional, Union
+from typing import Callable, List, Optional
 
 from nuclear.autocomplete.autocomplete import bash_autocomplete
 from nuclear.autocomplete.install import install_bash, install_autocomplete

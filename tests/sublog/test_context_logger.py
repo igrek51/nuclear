@@ -1,4 +1,4 @@
-from nuclear.sublog import log, context_logger, root_context_logger, logerr
+from nuclear.sublog import log, context_logger, root_context_logger, logerr, get_logger
 from tests.asserts import MockIO
 
 
@@ -51,3 +51,15 @@ def test_root_context_logger():
             ' I\'m a pickle request_id=3735936685 user=igrek cause=RuntimeError traceback=.+:40$')
         mockio.assert_match_uncolor(' logged out request_id=3735936685$')
         mockio.assert_match_uncolor(' exited$')
+
+
+def test_child_logger():
+    with MockIO() as mockio:
+        logger = get_logger(__name__)
+        logger.warning('beware of Python loggers')
+        mockio.assert_match_uncolor('] WARN  beware of Python loggers$')
+
+    with MockIO() as mockio:
+        logger = get_logger()
+        logger.warning('beware of Python loggers')
+        mockio.assert_match_uncolor('] WARN  beware of Python loggers$')

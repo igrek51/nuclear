@@ -1,3 +1,4 @@
+from nuclear import CliBuilder
 from nuclear.sublog import wrap_context, logerr
 from tests.asserts import MockIO
 import importlib.util
@@ -12,9 +13,9 @@ def test_sublog_traceback():
 
         mockio.assert_match_uncolor('ERROR initializing: liftoff: disaster request_id=42 speed=zero '
                                     'cause=RuntimeError '
-                                    'traceback="(.+)/test_catch.py:11, '
-                                    '(.+)/test_catch.py:21, '
-                                    '(.+)/test_catch.py:25"$')
+                                    'traceback="(.+)/test_catch.py:12, '
+                                    '(.+)/test_catch.py:22, '
+                                    '(.+)/test_catch.py:26"$')
 
 
 def disaster():
@@ -44,7 +45,7 @@ def test_catch_with_context_name():
 
         mockio.assert_match_uncolor('ERROR hacking time: nope '
                                     'cause=RuntimeError '
-                                    'traceback=(.+)/test_catch.py:43$')
+                                    'traceback=(.+)/test_catch.py:44$')
 
 
 def test_catch_chained_exception_cause():
@@ -57,7 +58,7 @@ def test_catch_chained_exception_cause():
 
         mockio.assert_match_uncolor('ERROR hacking time: wrapper: real cause '
                                     'cause=AttributeError '
-                                    'traceback=(.+)/test_catch.py:54$')
+                                    'traceback=(.+)/test_catch.py:55$')
 
 
 def test_recover_from_dynamically_imported_module():
@@ -72,7 +73,20 @@ def test_recover_from_dynamically_imported_module():
 
         mockio.assert_match_uncolor(r'ERROR hacking time: Fire! '
                                     r'cause=RuntimeError '
-                                    r'traceback="(.+)/test_catch.py:71, '
+                                    r'traceback="(.+)/test_catch.py:72, '
                                     r'<frozen importlib._bootstrap_external>:\d+, '
                                     r'<frozen importlib._bootstrap>:\d+, '
                                     r'(.+)/dynamic.py:1"$')
+
+
+def test_catch_and_log_exception_from_builder():
+    with MockIO() as mockio:
+        def doit():
+            raise RuntimeError('fail')
+
+        cli = CliBuilder(log_error=True, run=doit)
+        cli.run()
+
+        mockio.assert_match_uncolor('ERROR fail '
+                                    'cause=RuntimeError '
+                                    'traceback=(.+)/test_catch.py:85"$')
