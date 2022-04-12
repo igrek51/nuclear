@@ -11,6 +11,7 @@ simultaneous_print_lock = threading.Lock()
 LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message)s'
 LOG_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
 
+
 def _init_logger(log_level: int = logging.DEBUG) -> logging.Logger:
     logger = logging.getLogger('nuclear.sublog')
     logger.setLevel(log_level)

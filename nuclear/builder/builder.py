@@ -107,7 +107,8 @@ class CliBuilder:
         :param subcommands: multi-part subcommand names composing the full command, eg. "git remote add"
         """
         def decorator(function):
-            self.__bind_decorated_command(function, subcommands)
+            self.__bind_decorated_command(function, list(subcommands))
+
             def wrapper(*args, **kwargs):
                 return function(*args, **kwargs)
             return wrapper
@@ -214,8 +215,8 @@ class CliBuilder:
         return any([isinstance(rule, DefaultActionRule) for rule in self.__subrules])
 
 
-def _find_subcommand_rule(subcommand: SubcommandRule, name: str) -> Optional[SubcommandRule]:
-    for rule in subcommand.subrules:
+def _find_subcommand_rule(subcommand_rule: SubcommandRule, name: str) -> Optional[SubcommandRule]:
+    for rule in subcommand_rule.subrules:
         if isinstance(rule, SubcommandRule) and name in rule.keywords:
             return rule
     return None

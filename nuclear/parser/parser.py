@@ -41,7 +41,7 @@ class Parser(object):
 
         self.__parent: Optional['Parser'] = parent
         self.__action_triggered = parent.__action_triggered if parent else False
-        self.__dry = parent.__dry if parent else dry
+        self.__dry: bool = parent.__dry if parent else dry
         self.__error_unrecognized = error_unrecognized
 
         self.internal_vars = InternalVars()

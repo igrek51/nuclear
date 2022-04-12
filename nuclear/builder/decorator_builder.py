@@ -40,7 +40,7 @@ def _parse_function_help(docstring: Optional[str]) -> Tuple[Optional[str], Dict[
 
 
 def _add_subcommand_arguments(
-    subcommand: SubcommandRule, 
+    subcommand_rule: SubcommandRule,
     function: Callable[..., None],
     params_help: Dict[str, str],
 ):
@@ -48,12 +48,13 @@ def _add_subcommand_arguments(
     required_args_len = len(args) - len(defaults) if defaults is not None else len(args)
     required_args = args[:required_args_len]
     optional_args = args[required_args_len:]
-    _add_subcommand_required_arguments(subcommand, required_args, varargs, annotations, params_help)
-    _add_subcommand_optional_parameters(subcommand, optional_args, defaults, kwonlyargs, kwonlydefaults, annotations, params_help)
+    _add_subcommand_required_arguments(subcommand_rule, required_args, varargs, annotations, params_help)
+    _add_subcommand_optional_parameters(subcommand_rule, optional_args, defaults, kwonlyargs, kwonlydefaults,
+                                        annotations, params_help)
 
 
 def _add_subcommand_required_arguments(
-    subcommand: SubcommandRule,
+    subcommand_rule: SubcommandRule,
     required_args: List[str],
     varargs: Optional[str],
     annotations: Dict,
@@ -62,16 +63,16 @@ def _add_subcommand_required_arguments(
     for arg in required_args:
         typo = annotations.get(arg, str)
         help = params_help.get(arg)
-        subcommand.has(argument(arg, type=typo, help=help))
+        subcommand_rule.has(argument(arg, type=typo, help=help))
     
     if varargs is not None:
         typo = annotations.get(varargs, str)
         help = params_help.get(varargs)
-        subcommand.has(arguments(varargs, type=typo, help=help))
+        subcommand_rule.has(arguments(varargs, type=typo, help=help))
 
 
 def _add_subcommand_optional_parameters(
-    subcommand: SubcommandRule,
+    subcommand_rule: SubcommandRule,
     optional_args: List[str],
     defaults: Optional[Tuple],
     kwonlyargs: List[str],
@@ -83,10 +84,10 @@ def _add_subcommand_optional_parameters(
         typo = annotations.get(arg, str)
         default_value = defaults[i] if defaults is not None else None
         help = params_help.get(arg)
-        if typo == bool and default_value == False:
-            subcommand.has(flag(arg, help=help))
+        if typo == bool and default_value is False:
+            subcommand_rule.has(flag(arg, help=help))
         else:
-            subcommand.has(parameter(arg, type=typo, default=default_value, help=help))
+            subcommand_rule.has(parameter(arg, type=typo, default=default_value, help=help))
 
     if not kwonlydefaults:
         kwonlydefaults = dict()
@@ -94,7 +95,7 @@ def _add_subcommand_optional_parameters(
         typo = annotations.get(arg, str)
         default_value = kwonlydefaults.get(arg)
         help = params_help.get(arg)
-        if typo == bool and (default_value is None or default_value == False):
-            subcommand.has(flag(arg, help=help))
+        if typo == bool and (default_value is None or default_value is False):
+            subcommand_rule.has(flag(arg, help=help))
         else:
-            subcommand.has(parameter(arg, type=typo, default=default_value, help=help))
+            subcommand_rule.has(parameter(arg, type=typo, default=default_value, help=help))
