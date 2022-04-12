@@ -1,6 +1,8 @@
 from pathlib import Path
+import time
 
 from nuclear import shell, shell_error_code, shell_output, CommandError
+from nuclear.shell.shell_utils import BackgroundCommand
 from tests.asserts import assert_error
 
 
@@ -39,3 +41,39 @@ def test_write_stdout_to_file():
     assert tmpfile.read_text() == 'test stdout\n'
 
     tmpfile.unlink()
+
+
+def test_background_command():
+    cmd = BackgroundCommand(
+        'while sleep 0.1; do echo 1; done', 
+        debug=True, 
+        print_stdout=True, 
+        on_next_line=lambda line: print(line*2),
+    )
+    assert cmd.is_running
+    time.sleep(0.2)
+    assert '1' in cmd.stdout
+    cmd.terminate()
+    assert not cmd.is_running
+    assert '1' in cmd.stdout
+
+
+def test_background_command_long_command_without_output():
+    cmd = BackgroundCommand('sleep 10', debug=True)
+    assert cmd.is_running
+    time.sleep(0.5)
+    cmd.terminate()
+    assert not cmd.is_running
+
+
+def test_background_command_failed():
+    error = None
+    
+    def on_error(e: CommandError):
+        nonlocal error
+        error = e
+
+    cmd = BackgroundCommand('shiiiiit', on_error=on_error)
+    cmd.wait()
+    assert not cmd.is_running
+    assert 'command error: shiiiiit' in str(error)
