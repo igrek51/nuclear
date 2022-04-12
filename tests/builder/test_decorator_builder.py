@@ -109,41 +109,6 @@ def test_varargs_with_kwonly_args():
         assert mockio.output() == "args: (1, 2), temperature: 36, force: True\n"
 
 
-def test_optional_type_param():
-    cli = CliBuilder()
-    @cli.add_command("run")
-    def run(backend: Optional[str] = None):
-        print(f"backend: {backend}")
-
-    with MockIO('run', '--backend', 'jack') as mockio:
-        cli.run()
-        assert mockio.output() == "backend: jack\n"
-    with MockIO('run') as mockio:
-        cli.run()
-        assert mockio.output() == "backend: None\n"
-
-
-def test_union_type_param():
-    cli = CliBuilder(reraise_error=True)
-    @cli.add_command("run")
-    def run(temperature: Optional[Union[int, float]] = None):
-        print(f"temperature: {temperature}")
-
-    with MockIO('run', '--temperature', '1.0') as mockio:
-        cli.run()
-        assert mockio.output() == "temperature: 1.0\n"
-    with MockIO('run', '--temperature', '5') as mockio:
-        cli.run()
-        assert mockio.output() == "temperature: 5\n"
-    with MockIO('run') as mockio:
-        cli.run()
-        assert mockio.output() == "temperature: None\n"
-    with MockIO('run', '--temperature', 'hot') as mockio:
-        with pytest.raises(CliSyntaxError) as excinfo:
-            cli.run()
-        assert "variable 'hot' didn't match Union type" in str(excinfo.value)
-
-
 def test_extract_param_docstring_to_help():
     with MockIO('--help') as mockio:
         cli.run()

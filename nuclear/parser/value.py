@@ -35,11 +35,6 @@ class _TypeNotMatched(RuntimeError):
 
 def _parse_union_value(_type: TypeOrParser, arg: str) -> Any:
     for utype in get_args(_type):
-        if get_origin(utype) is Union:
-            try:
-                return _parse_union_value(utype, arg)
-            except _TypeNotMatched:
-                pass
         if utype == type(None) and arg is None:
             return None
         try:
