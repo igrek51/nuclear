@@ -1,9 +1,10 @@
 import inspect
 from collections.abc import Iterable
-from typing import List, Any, Optional
+from typing import List, Any, Optional, Union, get_origin, get_args
 
 from nuclear.builder.rule import ValueRule
 from nuclear.builder.typedef import TypeOrParser
+from nuclear.parser.error import CliSyntaxError
 from nuclear.types.boolean import boolean
 
 
@@ -16,8 +17,36 @@ def parse_typed_value(_type: TypeOrParser, arg: str) -> Any:
         return arg
     if _type == bool:
         return boolean(arg)
+    typing_origin = get_origin(_type)
+    if typing_origin is Union:
+        try:
+            return _parse_union_value(_type, arg)
+        except _TypeNotMatched:
+            raise CliSyntaxError(f"variable '{arg}' didn't match Union type: {_type}")
+    elif typing_origin is not None:
+        return arg
     # invoke custom parser or cast to custom type
     return _type(arg)
+
+
+class _TypeNotMatched(RuntimeError):
+    pass
+
+
+def _parse_union_value(_type: TypeOrParser, arg: str) -> Any:
+    for utype in get_args(_type):
+        if get_origin(utype) is Union:
+            try:
+                return _parse_union_value(utype, arg)
+            except _TypeNotMatched:
+                pass
+        if utype == type(None) and arg is None:
+            return None
+        try:
+            return utype(arg)
+        except BaseException:
+            pass
+    raise _TypeNotMatched()
 
 
 def generate_value_choices(rule: ValueRule, current: Optional[str] = None) -> List[Any]:

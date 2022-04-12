@@ -1,5 +1,8 @@
+from typing import Optional, Union
+
+import pytest
 from nuclear import *
-from nuclear.parser.error import CliDefinitionError
+from nuclear.parser.error import CliDefinitionError, CliSyntaxError
 from tests.asserts import MockIO, assert_error
 from functools import reduce
 import base64
@@ -96,6 +99,7 @@ def test_no_subcommand_name_error():
 
 
 def test_varargs_with_kwonly_args():
+    cli = CliBuilder()
     @cli.add_command('doit')
     def doit(*numbers: int, temperature = 0, force: bool = False):
         print(f"args: {numbers}, temperature: {temperature}, force: {force}")
@@ -103,6 +107,41 @@ def test_varargs_with_kwonly_args():
     with MockIO('doit', '1', '2', '--temperature', '36', '--force') as mockio:
         cli.run()
         assert mockio.output() == "args: (1, 2), temperature: 36, force: True\n"
+
+
+def test_optional_type_param():
+    cli = CliBuilder()
+    @cli.add_command("run")
+    def run(backend: Optional[str] = None):
+        print(f"backend: {backend}")
+
+    with MockIO('run', '--backend', 'jack') as mockio:
+        cli.run()
+        assert mockio.output() == "backend: jack\n"
+    with MockIO('run') as mockio:
+        cli.run()
+        assert mockio.output() == "backend: None\n"
+
+
+def test_union_type_param():
+    cli = CliBuilder(reraise_error=True)
+    @cli.add_command("run")
+    def run(temperature: Optional[Union[int, float]] = None):
+        print(f"temperature: {temperature}")
+
+    with MockIO('run', '--temperature', '1.0') as mockio:
+        cli.run()
+        assert mockio.output() == "temperature: 1.0\n"
+    with MockIO('run', '--temperature', '5') as mockio:
+        cli.run()
+        assert mockio.output() == "temperature: 5\n"
+    with MockIO('run') as mockio:
+        cli.run()
+        assert mockio.output() == "temperature: None\n"
+    with MockIO('run', '--temperature', 'hot') as mockio:
+        with pytest.raises(CliSyntaxError) as excinfo:
+            cli.run()
+        assert "variable 'hot' didn't match Union type" in str(excinfo.value)
 
 
 def test_extract_param_docstring_to_help():
