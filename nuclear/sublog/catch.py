@@ -10,7 +10,11 @@ from .wrap_error import ContextError
 
 @contextmanager
 def logerr(context_name: str = '', print_traceback: bool = True):
-    """Catches all exceptions and displays traceback in pretty, concise format"""
+    """
+    Catch all exceptions and display traceback in pretty, concise format
+    :param context_name: description of the operation to show in case of error
+    :param print_traceback: whether to print traceback or not in case of error
+    """
     try:
         yield
     except KeyboardInterrupt:

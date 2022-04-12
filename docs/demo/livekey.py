@@ -3,7 +3,7 @@ import random
 import time
 
 from nuclear.sublog import log
-from nuclear.utils.shell import shell
+from nuclear import shell
 
 
 def key_type(text):

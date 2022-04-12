@@ -3,7 +3,7 @@ from pathlib import Path
 
 from nuclear import *
 from nuclear.utils.files import script_real_path
-from nuclear.utils.shell import shell
+from nuclear import shell
 from tests.asserts import MockIO
 
 

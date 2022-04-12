@@ -5,7 +5,7 @@ from typing import Optional
 
 from nuclear.sublog import log
 from nuclear.utils.files import script_real_path
-from nuclear.utils.shell import shell
+from nuclear.shell.shell_utils import shell
 
 
 def install_bash(app_name: str):

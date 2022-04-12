@@ -2,8 +2,7 @@
 import re
 from typing import List
 
-from nuclear import CliBuilder, flag, parameter, subcommand, argument
-from nuclear.utils.shell import shell, shell_output
+from nuclear import CliBuilder, flag, parameter, subcommand, argument, shell, shell_output
 
 
 def main():
