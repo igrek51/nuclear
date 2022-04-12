@@ -1,13 +1,15 @@
 import io
-import os
 import select
 import shlex
 import subprocess
 import sys
 import threading
 import time
+import signal
 from pathlib import Path
 from typing import Callable, Optional, Union
+
+import psutil
 
 from nuclear.sublog.context_logger import log
 
@@ -131,6 +133,7 @@ class BackgroundCommand:
         """Run system shell command in background."""
         self._stop: bool = False
         self._captured_stream = io.StringIO()
+        self._debug = debug
 
         def monitor_output(stream: BackgroundCommand):
             stdout_iter = iter(stream._process.stdout.readline, b'')
@@ -179,19 +182,30 @@ class BackgroundCommand:
             process_args = shlex.split(cmd)
             
         self._process = subprocess.Popen(
-            process_args, 
-            stdout=subprocess.PIPE, 
-            stderr=subprocess.STDOUT, 
+            process_args,
+            stdout=subprocess.PIPE,
+            stderr=subprocess.STDOUT,
             shell=shell,
-            preexec_fn=os.setsid,
         )
 
         self._monitor_thread.start()
 
     def terminate(self):
         self._stop = True
+        if not self._monitor_thread.is_alive():
+            return
+
+        parent = psutil.Process(self._process.pid)
+        children = parent.children(recursive=False)
+        for child in children:
+            if self._debug:
+                log.debug(f'terminating child process', pid=child.pid)
+            child.send_signal(signal.SIGTERM)
+
         self._process.terminate()
         self._process.poll()  # wait for subprocess
+        if self._debug:
+            log.debug(f'subprocess terminated', pid=self._process.pid)
         self._monitor_thread.join()  # wait for thread is finished
 
     def wait(self):
