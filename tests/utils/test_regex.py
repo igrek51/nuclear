@@ -1,5 +1,6 @@
-from nuclear.utils.files import save_file
-from nuclear.utils.regex import *
+from pathlib import Path
+
+from nuclear.utils.regex import regex_replace, regex_match, regex_replace_list, regex_search_file, regex_replace_file, regex_filter_list
 
 
 def test_regex_replace():
@@ -24,5 +25,5 @@ def test_regex_list():
     assert regex_search_file('tests/utils/res/findme', r'\t*<author>(\w*)</author>', 1) == 'Anonim'
     assert regex_search_file('tests/utils/res/findme', r'\t*<name>(\w*)</name><sur>(\w*)</sur>', 2) == 'Sur'
     # regexReplaceFile
-    save_file('tests/utils/res/replaceme', 'dupa\n123')
+    Path('tests/utils/res/replaceme').write_text('dupa\n123')
     assert regex_replace_file('tests/utils/res/replaceme', r'[a-z]+', 'letters') == 'letters\n123'

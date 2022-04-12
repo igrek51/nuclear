@@ -1,7 +1,7 @@
 import re
+from pathlib import Path
 
 from .strings import nonempty_lines
-from .files import read_file
 
 
 def regex_match(str_in, regex_match_pattern):
@@ -32,7 +32,7 @@ def regex_search_file(file_path, regex_match_pattern, group_number):
 
 
 def regex_replace_file(file_path, regex_match_pattern, regex_replace_pattern):
-    file_content = read_file(file_path)
+    file_content = Path(file_path).read_text()
     lines = nonempty_lines(file_content)
     lines = regex_replace_list(lines, regex_match_pattern, regex_replace_pattern)
     return '\n'.join(lines)
