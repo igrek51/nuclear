@@ -1,5 +1,4 @@
 import os
-import sys
 import traceback
 from contextlib import contextmanager
 from typing import Dict, Any, Collection, Iterable

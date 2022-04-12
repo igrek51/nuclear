@@ -8,6 +8,7 @@ from nuclear.help.help import print_version, print_help, print_usage
 from nuclear.parser.error import CliSyntaxError, CliDefinitionError
 from nuclear.parser.parser import Parser
 from nuclear.sublog import log
+from nuclear.sublog.catch import logerr
 from .rule import DefaultActionRule, CliRule, SubcommandRule
 from .rule_factory import default_action, primary_option, arguments, argument, subcommand
 
@@ -24,6 +25,7 @@ class CliBuilder:
                  hide_internal: bool = True,
                  help_on_empty: bool = False,
                  error_unrecognized: bool = True,
+                 log_error: bool = False,
                  ):
         """
         A builder for Command Line Interface specification
@@ -44,6 +46,7 @@ class CliBuilder:
         should be hidden on help output.
         :param help_on_empty: shows help output when no argument is given
         :param error_unrecognized: raise error when unrecognized argument is found
+        :param log_error: whether to catch exceptions and display traceback in a concise format
         """
         self.__name: str = name
         self.__version: str = version
@@ -58,6 +61,7 @@ class CliBuilder:
         self.__hide_internal: bool = hide_internal
         self.__help_on_empty: bool = help_on_empty
         self.__error_unrecognized: bool = error_unrecognized
+        self.__log_error: bool = log_error
         if with_defaults:
             self.__add_default_rules()
 
@@ -77,7 +81,11 @@ class CliBuilder:
         Then invoke triggered action which were defined before.
         If actions need some parameters, they will be injected based on the parsed arguments.
         """
-        self.run_with_args(sys.argv[1:])
+        if self.__log_error:
+            with logerr():
+                self.run_with_args(sys.argv[1:])
+        else:
+            self.run_with_args(sys.argv[1:])
 
     def run_with_args(self, args: List[str]):
         try:
