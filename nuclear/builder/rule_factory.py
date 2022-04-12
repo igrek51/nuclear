@@ -72,7 +72,7 @@ def parameter(
     :param name: explicit internal paramter name (can be used to distinguish it from any keyword)
     :param help: description of the parameter displayed in help output
     :param required: whether parameter is required.
-    If it's required but it's not given, the syntax error will be raised.
+    If it's required, but it's not given, the syntax error will be raised.
     :param default: default value for the parameter, if it's not given (and it's not required)
     :param type: type of parameter value (e.g. str, int, float)
     Reference to a parser function may be provided here as well.
@@ -99,7 +99,7 @@ def dictionary(
     Dictionary contains key-value pairs.
     You can add multiple values to it by passing arguments in a manner:
     '-c name1 value1 -c name2 value2'.
-    By default it stores empty Python dict.
+    By default, it stores empty Python dict.
     These values may be later referenced as dict by its explicit name or keywords
     (in lowercase format without hyphen prefix and with underscores instead of dashes,
     e.g. '--config-name' will be injected as 'config_name')
@@ -137,7 +137,7 @@ def argument(
     :param name: internal argument name, which will be used to reference argument value
     :param help: description of the argument displayed in help output
     :param required: whether positional argument is required.
-    If it's required but it's not given, the syntax error will be raised.
+    If it's required, but it's not given, the syntax error will be raised.
     :param default: default value for the argument, if it's not given (and it's not required)
     :param type: explicit type of argument value (e.g. str, int, float)
     Reference to a parser function may be provided here as well.
@@ -163,7 +163,7 @@ def arguments(
 ) -> ManyArgumentsRule:
     """
     Create 'Multiple arguments' rule specification.
-    It allows to retrieve specific number of CLI argumetns or all remaining arguments.
+    It allows retrieving specific number of CLI argumetns or all remaining arguments.
     All matched arguments will be extracted to a list of arguments or a string (depending on joined_with parameter)
     :param name: internal variable name, which will be used to reference matched arguments
     :param type: explicit type of arguments values (e.g. str, int, float)
@@ -181,7 +181,7 @@ def arguments(
     If undefined, there is no upper limit for arguments count.
     :param joined_with: optional string joiner for arguments.
     If it's set, all matched arguments will be joined to string with that joiner.
-    It it's not given, matched arguments will be passed as list of strings.
+    If it's not given, matched arguments will be passed as list of strings.
     This value (string or list) can be accessed by specified name, when it's being injected to a function.
     :param help: description of the arguments displayed in help output
     :return: new many arguments rule specification

@@ -265,7 +265,7 @@ def _param_display_name(rule: ParameterRule) -> str:
     if rule.name:
         return format_var_name(rule.name).upper()
     else:
-        # get name from longest keyword
+        # get name from the longest keyword
         names: Set[str] = format_var_names(rule.keywords)
         return max(names, key=lambda n: len(n)).upper()
 
