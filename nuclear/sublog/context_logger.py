@@ -57,6 +57,9 @@ class ContextLogger(object):
         with simultaneous_print_lock:
             _logger.warning(self._print_log(message, ctx))
 
+    def warning(self, message: str, **ctx):
+        self.warn(message, **ctx)
+
     def info(self, message: str, **ctx):
         with simultaneous_print_lock:
             _logger.info(self._print_log(message, ctx))

@@ -36,7 +36,7 @@ def test_root_context_logger():
             with root_context_logger(user='igrek'):
                 log.info('logged in', page='home')
                 with logerr():
-                    log.warn('im a root')
+                    log.warning('im a root')
                     raise RuntimeError("I'm a pickle")
 
             log.debug('logged out')
