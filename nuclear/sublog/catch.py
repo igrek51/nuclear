@@ -39,6 +39,13 @@ def _print_error_context(e: Exception, ctx: Dict[str, Any], print_traceback: boo
     log.error(error_msg, **ctx)
 
 
+def log_exception(e: BaseException, print_traceback: bool = True):
+    """
+    Log exception in concise one-line format containing message, exception type and short traceback
+    """
+    _print_error_context(e, {}, print_traceback, '')
+
+
 def _root_cause_type(e: Exception) -> str:
     while e.__cause__ is not None:
         e = e.__cause__

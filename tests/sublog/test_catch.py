@@ -1,5 +1,5 @@
 from nuclear import CliBuilder
-from nuclear.sublog import wrap_context, logerr
+from nuclear.sublog import wrap_context, logerr, log_exception
 from tests.asserts import MockIO
 import importlib.util
 
@@ -15,7 +15,7 @@ def test_sublog_traceback():
                                     'cause=RuntimeError '
                                     'traceback="(.+)/test_catch.py:12, '
                                     '(.+)/test_catch.py:22, '
-                                    '(.+)/test_catch.py:26"$')
+                                    '(.+)/test_catch.py:26"?$')
 
 
 def disaster():
@@ -45,7 +45,7 @@ def test_catch_with_context_name():
 
         mockio.assert_match_uncolor('ERROR hacking time: nope '
                                     'cause=RuntimeError '
-                                    'traceback=(.+)/test_catch.py:44$')
+                                    'traceback=(.+)/test_catch.py:44"?$')
 
 
 def test_catch_chained_exception_cause():
@@ -58,7 +58,7 @@ def test_catch_chained_exception_cause():
 
         mockio.assert_match_uncolor('ERROR hacking time: wrapper: real cause '
                                     'cause=AttributeError '
-                                    'traceback=(.+)/test_catch.py:55$')
+                                    'traceback=(.+)/test_catch.py:55"?$')
 
 
 def test_recover_from_dynamically_imported_module():
@@ -89,4 +89,16 @@ def test_catch_and_log_exception_from_builder():
 
         mockio.assert_match_uncolor('ERROR fail '
                                     'cause=RuntimeError '
-                                    'traceback=(.+)/test_catch.py:85"$')
+                                    'traceback=(.+)/test_catch.py:85"?$')
+
+
+def test_log_exception():
+    with MockIO() as mockio:
+        try:
+            raise RuntimeError('fail')
+        except Exception as e:
+            log_exception(e)
+
+        mockio.assert_match_uncolor('ERROR fail '
+                                    'cause=RuntimeError '
+                                    'traceback=(.+)/test_catch.py:98"?$')
