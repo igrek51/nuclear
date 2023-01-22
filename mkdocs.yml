@@ -7,6 +7,7 @@ theme:
   name: material
   icon:
     repo: fontawesome/brands/github
+    logo: fontawesome/solid/circle-radiation
   palette:
     - scheme: default
       primary: indigo
