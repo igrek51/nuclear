@@ -119,8 +119,6 @@ def app_name_version(app_name, version):
     if version:
         version = _normalized_version(version)
         infos += [version]
-    if infos:
-        infos += [f'(nuclear v{__version__})']
     return ' '.join(infos)
 
 
