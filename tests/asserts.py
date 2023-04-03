@@ -96,3 +96,20 @@ class MockIO:
         for line in self.output().splitlines():
             if matcher.search(line):
                 assert False, f'Regex: "{regex}" should not match the output: {self.output()}'
+
+
+def assert_multiline_match(text: str, regex_pattern: str):
+    regex_lines = regex_pattern.strip().splitlines()
+    text_lines = text.strip().splitlines()
+
+    if len(text_lines) < len(regex_lines):
+        missing_lines = "\n".join(regex_lines[len(text_lines):])
+        assert False, f'Actual text has less lines than a pattern. Missing lines:\n{missing_lines}'
+    
+    if len(text_lines) > len(regex_lines):
+        extra_lines = "\n".join(text_lines[len(regex_lines):])
+        assert False, f'Actual text has more lines than a pattern. Extra lines:\n{extra_lines}'
+
+    for index, (regex_line, text_line) in enumerate(zip(regex_lines, text_lines)):
+        match = re.fullmatch(regex_line, text_line)
+        assert match, f'Actual Line #{index+1}:\n{text_line}\n does not match the Regex pattern:\n{regex_line}'
