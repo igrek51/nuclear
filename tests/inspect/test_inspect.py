@@ -25,6 +25,9 @@ Public attributes:
   def reverse(): Reverse *IN PLACE*.
   def sort(*, key=None, reverse=False): Sort the list in ascending order and return None.
 """.strip()
+    
+    output = inspect_format([5], dunder=True)
+    assert "def __eq__(value, /): Return self==value." in output
 
 
 def test_inspect_object():
@@ -33,6 +36,7 @@ def test_inspect_object():
             self.a = name
         
         def shout(self, loudness: int) -> str:
+            """Do something very very very very very very very very very very very very very very very very very stupid"""
             return self.a * loudness
     
     instance = Hero('batman')
@@ -44,7 +48,7 @@ type: <class 'test_inspect\.test_inspect_object\.<locals>\.Hero'>
 Public attributes:
   a: <class 'str'> = batman
 
-  def shout\(loudness: int\) -> str
+  def shout\(loudness: int\) -> str: Do something very very very very very very very very very very very very very very very very very st\.\.\.
 ''')
 
 

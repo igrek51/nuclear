@@ -3,6 +3,14 @@ import inspect as std_inspect
 from typing import Any, List, Optional, Type, Iterable
 
 
+def inspect(
+    obj: Any,
+    dunder: bool = False,
+):
+    """Inspect object type and value and print its attributes and methods"""
+    print(inspect_format(obj, dunder))
+
+
 def inspect_format(
     obj: Any,
     dunder: bool = False,
@@ -18,14 +26,6 @@ def inspect_format(
     output.extend(_format_attrs_section(attributes, config))
 
     return '\n'.join(line for line in output if line is not None)
-
-
-def inspect(
-    obj: Any,
-    dunder: bool = False,
-):
-    """Inspect object type and value and print its attributes and methods"""
-    print(inspect_format(obj, dunder))
 
 
 @dataclass
@@ -52,7 +52,7 @@ def _iter_attributes(obj: Any) -> Iterable[InspectAttribute]:
         callable_ = callable(value)
         dunder = key.startswith('__') and key.endswith('__')
         private = key.startswith('_') and not dunder
-        signature = _callable_signature(key, value) if callable_ else None
+        signature = _get_callable_signature(key, value) if callable_ else None
         doc = _get_doc(value) if callable_ else None
         yield InspectAttribute(
             name=key,
@@ -66,12 +66,10 @@ def _iter_attributes(obj: Any) -> Iterable[InspectAttribute]:
         )
 
 
-def _callable_signature(name: str, obj: Any) -> Optional[str]:
+def _get_callable_signature(name: str, obj: Any) -> Optional[str]:
     try:
         _signature = str(std_inspect.signature(obj))
-    except ValueError:
-        _signature = ""
-    except TypeError:
+    except (ValueError, TypeError):
         _signature = ""
     
     if std_inspect.isclass(obj):
