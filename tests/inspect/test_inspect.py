@@ -1,5 +1,5 @@
 from nuclear import CliBuilder, argument, inspect
-from nuclear.inspection.inspect import inspect_format
+from nuclear.inspection.inspection import inspect_format
 from tests.asserts import assert_multiline_match
 
 
@@ -11,6 +11,7 @@ def test_inspect_primitive_var():
     assert output == """
 str: [5]
 type: <class 'list'>
+doc: Built-in mutable sequence.
 
 Public attributes:
   def append(object, /): Append object to the end of the list.

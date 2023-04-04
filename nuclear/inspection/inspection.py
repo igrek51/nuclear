@@ -3,33 +3,9 @@ import inspect as std_inspect
 from typing import Any, List, Optional, Type, Iterable
 
 
-def inspect(
-    obj: Any,
-    dunder: bool = False,
-):
-    """Inspect object type and value and print its attributes and methods"""
-    print(inspect_format(obj, dunder))
-
-
-def inspect_format(
-    obj: Any,
-    dunder: bool = False,
-) -> str:
-    config = InspectConfig(dunder)
-
-    output: List[str] = [
-        f'str: {str(obj)}',
-        f'type: {type(obj)}',
-    ]
-    attributes = sorted(_iter_attributes(obj), key=lambda attr: attr.name)
-
-    output.extend(_format_attrs_section(attributes, config))
-
-    return '\n'.join(line for line in output if line is not None)
-
-
 @dataclass
 class InspectConfig:
+    attrs: bool
     dunder: bool
 
 
@@ -43,6 +19,49 @@ class InspectAttribute:
     private: bool
     signature: Optional[str]
     doc: Optional[str]
+
+
+def inspect(
+    obj: Any,
+    attrs: bool = True,
+    dunder: bool = False,
+):
+    """Inspect object type and value and print its variables and methods"""
+    print(inspect_format(obj, attrs=attrs, dunder=dunder))
+
+
+ins = inspect  # alias
+
+
+def inss(obj: Any):  # inspect short
+    inspect(obj, attrs=False, dunder=False)
+
+
+def insa(obj: Any):  # inspect all
+    inspect(obj, attrs=True, dunder=True)
+
+
+def inspect_format(
+    obj: Any,
+    *,
+    attrs: bool = True,
+    dunder: bool = False,
+) -> str:
+    config = InspectConfig(attrs=attrs, dunder=dunder)
+
+    output: List[str] = [
+        f'str: {str(obj)}',
+        f'type: {type(obj)}',
+    ]
+    doc = _get_doc(obj)
+    if doc:
+        output.append(f'doc: {doc}')
+
+    if config.attrs:
+        attributes = sorted(_iter_attributes(obj), key=lambda attr: attr.name)
+        output.extend(_format_attrs_section(attributes, config))
+
+    return '\n'.join(line for line in output if line is not None)
 
 
 def _iter_attributes(obj: Any) -> Iterable[InspectAttribute]:
