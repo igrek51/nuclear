@@ -41,3 +41,7 @@ mkdocs-local:
 
 mkdocs-push:
 	mkdocs gh-deploy --force
+
+
+nuclear-inspect-dump:
+	python3 nuclear/inspection/insta/dump.py nuclear/inspection/inspection.py
