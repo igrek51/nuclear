@@ -30,6 +30,13 @@ Public attributes:
     output = inspect_format([5], dunder=True)
     assert "def __eq__(value, /): Return self==value." in output
 
+    output = inspect_format('poo', attrs=False)
+    assert_multiline_match(output, r'''
+str: 'poo'
+type: <class 'str'>
+''')
+
+
 
 def test_inspect_object():
     class Hero:
@@ -87,4 +94,21 @@ Private attributes:
   def _CliBuilder__create_parser\(args: List\[str\]\) -> nuclear.parser.parser.Parser
   def _CliBuilder__find_subcommand_rule\(name: str\) -> Optional\[nuclear.builder.rule.SubcommandRule\]
   def _CliBuilder__has_default_action\(\) -> bool
+''')
+
+
+def test_inspect_function():
+    def foo(a: int, b: str = 'bar') -> str:
+        """Do something dumb"""
+        return a * b
+  
+    output = inspect_format(foo)
+    assert_multiline_match(output, r'''
+str: <function test_inspect\.test_inspect_function\.foo at .*>
+type: <class 'function'>
+
+Public attributes:
+  def __call__\(a: int, b: str = 'bar'\) -> str: Do something dumb
+  def __get__\(obj: Optional\[object\], objtype: Optional\[type\]\) -> Callable\[\.\.\., Any\]
+  def __init__\(a: int, b: str = 'bar'\) -> str: Do something dumb
 ''')
