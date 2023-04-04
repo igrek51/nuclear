@@ -39,17 +39,24 @@ def inspect(
     print(inspect_format(obj, attrs=attrs, dunder=dunder, full=full))
 
 
-ins = inspect  # alias
-
-
-def inss(obj: Any, **kwargs):
-    """Inspect short"""
+def ins(obj: Any, **kwargs):
+    """Inspect object, short output (without attributes)"""
     inspect(obj, attrs=False, **kwargs)
 
 
+def insp(obj: Any, **kwargs):
+    """Inspect object, show attributes (variables and methods)"""
+    inspect(obj, attrs=True, **kwargs)
+
+
+def insf(obj: Any, **kwargs):
+    """Inspect object, no attributes, full docs and values"""
+    inspect(obj, attrs=False, full=True, **kwargs)
+
+
 def insa(obj: Any, **kwargs):
-    """Inspect all"""
-    inspect(obj, attrs=True, dunder=True, **kwargs)
+    """Inspect object, show all: attributes, dunder attributes, full docs and values"""
+    inspect(obj, attrs=True, full=True, dunder=True, **kwargs)
 
 
 def inspect_format(
