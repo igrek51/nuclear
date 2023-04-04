@@ -152,12 +152,15 @@ def _format_value(value: Any, config: InspectConfig) -> str:
     if value is False:
         return f'{STYLE_RED}False{RESET}'
     if isinstance(value, (int, float)):
-        return f'{STYLE_YELLOW}{value}{RESET}'
+        return f'{STYLE_RED}{value}{RESET}'
     return _shorten_string(str(value), config)
 
 
 def _format_type(type_: Type) -> str:
-    return f'{STYLE_YELLOW}{type_.__name__}{RESET}'
+    module = type_.__module__
+    if module is None or module == str.__class__.__module__:  # built-in type
+        return f'{STYLE_YELLOW}{type_.__name__}{RESET}'
+    return f'{STYLE_YELLOW}{module}.{type_.__name__}{RESET}'
 
 
 def _shorten_string(text: str, config: InspectConfig) -> str:
