@@ -202,9 +202,11 @@ def _format_dict_value(dic: Dict, indent: int) -> str:
         value_str = _format_value(value, indent)
         lines.append(f'{indentation}{key_str}: {value_str},')
     if lines:
-        return '{\n' + '\n'.join(lines) + f'\n{"    " * (indent-1)}}}'
+        small_indent = "    " * (indent-1)
+        middle_lines = '\n'.join(lines)
+        return f'{STYLE_YELLOW}{{{RESET}\n{middle_lines}\n{small_indent}{STYLE_YELLOW}}}{RESET}'
     else:
-        return '{}'
+        return f'{STYLE_YELLOW}{{}}{RESET}'
 
 
 def _format_list_value(l: List, indent: int) -> str:
@@ -213,9 +215,11 @@ def _format_list_value(l: List, indent: int) -> str:
         value_str = _format_value(value, indent)
         lines.append('    ' * indent + f'{value_str},')
     if lines:
-        return '[\n' + '\n'.join(lines) + f'\n{"    " * (indent-1)}]'
+        small_indent = "    " * (indent-1)
+        middle_lines = '\n'.join(lines)
+        return f'{STYLE_YELLOW}[{RESET}\n{middle_lines}\n{small_indent}{STYLE_YELLOW}]{RESET}'
     else:
-        return '[]'
+        return f'{STYLE_YELLOW}[]{RESET}'
 
 
 def _format_type(type_: Type) -> str:

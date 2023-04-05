@@ -4,8 +4,9 @@ import sys
 import zlib
 
 
-def dump_snippet(filename: str = 'inspection.py') -> str:
+def dump_snippet(filename: str) -> str:
     text: str = Path(filename).read_text()
+    text = '\n'.join([s for s in text.splitlines() if s.strip()])  # remove empty lines
     code: str = encode_text(text)
     return code
 
