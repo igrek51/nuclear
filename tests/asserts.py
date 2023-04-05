@@ -104,11 +104,11 @@ def assert_multiline_match(text: str, regex_pattern: str):
 
     if len(text_lines) < len(regex_lines):
         missing_lines = "\n".join(regex_lines[len(text_lines):])
-        assert False, f'Actual text has less lines than a pattern. Missing lines:\n{missing_lines}'
+        assert False, f'Actual text has {len(regex_lines) - len(text_lines)} less lines than a pattern.\nActual text:\n{text}'
     
     if len(text_lines) > len(regex_lines):
         extra_lines = "\n".join(text_lines[len(regex_lines):])
-        assert False, f'Actual text has more lines than a pattern. Extra lines:\n{extra_lines}'
+        assert False, f'Actual text has {len(text_lines) - len(regex_lines)} more lines than a pattern.\nActual text:\n{text}'
 
     for index, (regex_line, text_line) in enumerate(zip(regex_lines, text_lines)):
         match = re.fullmatch(regex_line, text_line)

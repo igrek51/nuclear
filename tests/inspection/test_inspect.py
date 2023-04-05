@@ -12,7 +12,9 @@ type: NoneType
 
     output = inspect_format([5])
     assert remove_ansi_sequences(output) == """
-value: [5]
+value: [
+    5,
+]
 type: list
 # Built-in mutable sequence.…
 
@@ -88,7 +90,7 @@ Private attributes:
   _CliBuilder__log_error: bool = False
   _CliBuilder__name: NoneType = None
   _CliBuilder__reraise_error: bool = False
-  _CliBuilder__subrules: list = \[PrimaryOptionRule\(help='Display this help and exit', keywords={.*}, run=<function CliBu…
+  _CliBuilder__subrules: list = \[…
   _CliBuilder__usage_onerror: bool = True
   _CliBuilder__version: NoneType = None
 
@@ -113,4 +115,37 @@ value: <function test_inspect_function\.<locals>\.foo at .*>
 type: function
 signature: def foo\(a: int, b: str = 'bar'\) -> str
 \# Do something dumb
+''')
+
+
+def test_inspect_nested_dict():
+    output = inspect_format({
+        'a': {
+            'b': {
+                'values': [2,5,3],
+            },
+            "empty_dict": {},
+            "empty_list": [],
+            40: None,
+            None: 42,
+        },
+    }, attrs=False)
+    assert_multiline_match(output, r'''
+value: {
+    'a': {
+        'b': {
+            'values': \[
+                2,
+                5,
+                3,
+            \],
+        },
+        'empty_dict': {},
+        'empty_list': \[\],
+        40: None,
+        None: 42,
+    },
+}
+type: dict
+\# dict\(\) -> new empty dictionary…
 ''')

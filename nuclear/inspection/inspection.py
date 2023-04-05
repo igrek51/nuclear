@@ -1,13 +1,17 @@
 from dataclasses import dataclass
 import inspect as std_inspect
-from typing import Any, List, Optional, Type, Iterable
+import re
+import sys
+from typing import Any, Dict, List, Optional, Type, Iterable
 
 
 @dataclass
 class InspectConfig:
     attrs: bool
     dunder: bool
-    full: bool
+    docs: bool
+    long: bool
+    long_docs: bool
 
 
 @dataclass
@@ -27,16 +31,22 @@ def inspect(
     *,
     attrs: bool = True,
     dunder: bool = False,
-    full: bool = False,
+    docs: bool = True,
+    long: bool = False,
+    long_docs: bool = False,
+    all: bool = False,
 ):
     """
     Inspect object type and value and print its variables and methods
     :param obj: object to inspect
     :param attrs: whether to print attributes (variables and methods)
     :param dunder: whether to print dunder attributes
-    :param full: whether to print non-abbreviated docs and values
+    :param docs: whether to print documentation for attributes
+    :param long: whether to print non-abbreviated docs and values
+    :param long_docs: whether to print non-abbreviated documentation
+    :param all: whether to print all information (implies attrs, dunder, long, docs, long_docs)
     """
-    print(inspect_format(obj, attrs=attrs, dunder=dunder, full=full))
+    print(inspect_format(obj, attrs=attrs, dunder=dunder, long=long, docs=docs, long_docs=long_docs, all=all))
 
 
 def ins(obj: Any, **kwargs):
@@ -49,14 +59,14 @@ def insp(obj: Any, **kwargs):
     inspect(obj, attrs=True, **kwargs)
 
 
-def insf(obj: Any, **kwargs):
-    """Inspect object, no attributes, full docs and values"""
-    inspect(obj, attrs=False, full=True, **kwargs)
+def insl(obj: Any, **kwargs):
+    """Inspect object, show attributes, long values and docs"""
+    inspect(obj, long=True, long_docs=True, **kwargs)
 
 
 def insa(obj: Any, **kwargs):
-    """Inspect object, show all: attributes, dunder attributes, full docs and values"""
-    inspect(obj, attrs=True, full=True, dunder=True, **kwargs)
+    """Inspect object, show all: attributes, dunder attributes, long values and docs"""
+    inspect(obj, all=True, **kwargs)
 
 
 def inspect_format(
@@ -64,11 +74,14 @@ def inspect_format(
     *,
     attrs: bool = True,
     dunder: bool = False,
-    full: bool = False,
+    docs: bool = True,
+    long: bool = False,
+    long_docs: bool = False,
+    all: bool = False,
 ) -> str:
-    config = InspectConfig(attrs=attrs, dunder=dunder, full=full)
+    config = InspectConfig(attrs=attrs or all, dunder=dunder or all, docs=docs or all, long=long or all, long_docs=long_docs or all)
 
-    str_value = _format_value(obj, config)
+    str_value = _format_value(obj)
     str_type = _format_type(type(obj))
     output: List[str] = [
         f'{STYLE_BRIGHT_BLUE}value:{RESET} {str_value}',
@@ -79,15 +92,18 @@ def inspect_format(
         signature = _get_callable_signature(obj.__name__, obj)
         output.append(f'{STYLE_BRIGHT_BLUE}signature:{RESET} {signature}')
 
-    doc = _get_doc(obj, config)
-    if doc:
+    doc = _get_doc(obj, long=config.long_docs)
+    if doc and config.docs:
         output.append(f'{STYLE_GRAY}# {doc}{RESET}')
 
     if config.attrs:
         attributes = sorted(_iter_attributes(obj, config), key=lambda attr: attr.name)
         output.extend(_format_attrs_section(attributes, config))
 
-    return '\n'.join(line for line in output if line is not None)
+    text = '\n'.join(line for line in output if line is not None)
+    if not sys.stdout.isatty():
+        text = _strip_color(text)
+    return text
 
 
 def _iter_attributes(obj: Any, config: InspectConfig) -> Iterable[InspectAttribute]:
@@ -98,7 +114,7 @@ def _iter_attributes(obj: Any, config: InspectConfig) -> Iterable[InspectAttribu
         dunder = key.startswith('__') and key.endswith('__')
         private = key.startswith('_') and not dunder
         signature = _get_callable_signature(key, value) if callable_ else None
-        doc = _get_doc(value, config) if callable_ else None
+        doc = _get_doc(value, long=config.long_docs) if callable_ else None
         yield InspectAttribute(
             name=key,
             value=value,
@@ -127,15 +143,19 @@ def _get_callable_signature(name: str, obj: Any) -> Optional[str]:
     return f'{STYLE_BLUE}{prefix} {STYLE_BRIGHT_GREEN}{name}{STYLE_GREEN}{_signature}{RESET}'
 
 
-def _get_doc(obj: Any, config: InspectConfig) -> Optional[str]:
+def _get_doc(obj: Any, long: bool) -> Optional[str]:
     doc = std_inspect.getdoc(obj)
     if doc is None:
         return None
-    return _shorten_string(doc.strip(), config)
+    doc = doc.strip()
+    if long:
+        return doc
+    else:
+        return _shorten_string(doc)
 
 
 def _format_attr_variable(attr: InspectAttribute, config: InspectConfig) -> str:
-    value_str = _format_value(attr.value, config)
+    value_str = _format_short_value(attr.value, long=config.long)
     type_str = _format_type(attr.type)
     return f'  {STYLE_BRIGHT_YELLOW}{attr.name}{STYLE_YELLOW}: {type_str} = {value_str}'
 
@@ -149,9 +169,16 @@ def _format_attr_method(attr: InspectAttribute) -> str:
         return f'  {attr.signature}'
 
 
-def _format_value(value: Any, config: InspectConfig) -> str:
+def _format_short_value(value: Any, long: bool) -> str:
+    value_str = _format_value(value)
+    if long:
+        return value_str
+    return _shorten_string(value_str)
+
+
+def _format_value(value: Any, indent: int = 0) -> str:
     if isinstance(value, str):
-        return f"{STYLE_GREEN}'{_shorten_string(value, config)}'{RESET}"
+        return f"{STYLE_GREEN}'{value}'{RESET}"
     if value is None:
         return f'{STYLE_MAGENTA}None{RESET}'
     if value is True:
@@ -160,7 +187,35 @@ def _format_value(value: Any, config: InspectConfig) -> str:
         return f'{STYLE_RED}False{RESET}'
     if isinstance(value, (int, float)):
         return f'{STYLE_RED}{value}{RESET}'
-    return _shorten_string(str(value), config)
+    if isinstance(value, dict):
+        return _format_dict_value(value, indent=indent+1)
+    if isinstance(value, list):
+        return _format_list_value(value, indent=indent+1)
+    return str(value)
+
+
+def _format_dict_value(dic: Dict, indent: int) -> str:
+    lines: List[str] = []
+    indentation = '    ' * indent
+    for key, value in dic.items():
+        key_str = _format_value(key, indent)
+        value_str = _format_value(value, indent)
+        lines.append(f'{indentation}{key_str}: {value_str},')
+    if lines:
+        return '{\n' + '\n'.join(lines) + f'\n{"    " * (indent-1)}}}'
+    else:
+        return '{}'
+
+
+def _format_list_value(l: List, indent: int) -> str:
+    lines: List[str] = []
+    for value in l:
+        value_str = _format_value(value, indent)
+        lines.append('    ' * indent + f'{value_str},')
+    if lines:
+        return '[\n' + '\n'.join(lines) + f'\n{"    " * (indent-1)}]'
+    else:
+        return '[]'
 
 
 def _format_type(type_: Type) -> str:
@@ -170,16 +225,13 @@ def _format_type(type_: Type) -> str:
     return f'{STYLE_YELLOW}{module}.{type_.__name__}{RESET}'
 
 
-def _shorten_string(text: str, config: InspectConfig) -> str:
-    if config.full:
-        return text
-    
+def _shorten_string(text: str) -> str:
     first_line, _, rest = text.partition('\n')
     if rest:
         first_line = first_line + '…'
     if len(first_line) > 100:
         first_line = first_line[:100] + '…'
-    return first_line
+    return first_line + RESET
 
 
 def _format_attrs_section(attributes: List[InspectAttribute], config: InspectConfig) -> Iterable[str]:
@@ -223,6 +275,10 @@ def _format_attrs_section(attributes: List[InspectAttribute], config: InspectCon
             yield ""
         for attr in dunder_methods:
             yield _format_attr_method(attr)
+
+
+def _strip_color(text: str) -> str:
+    return re.sub(r'\x1b\[\d+(;\d+)?m', '', text)
 
 
 RESET ='\033[0m'
