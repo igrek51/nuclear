@@ -1,5 +1,6 @@
 from dataclasses import dataclass
 import inspect as std_inspect
+import os
 import re
 import sys
 from typing import Any, Dict, List, Optional, Type, Iterable
@@ -99,6 +100,11 @@ def inspect_format(
     if config.attrs:
         attributes = sorted(_iter_attributes(obj, config), key=lambda attr: attr.name)
         output.extend(_format_attrs_section(attributes, config))
+
+    if sys.stdout.isatty():  # horizontal bar
+        terminal_width = os.get_terminal_size().columns
+        output.insert(0, STYLE_BLUE + '─' * terminal_width + RESET)
+        output.append(STYLE_BLUE + '─' * terminal_width + RESET)
 
     text = '\n'.join(line for line in output if line is not None)
     if not sys.stdout.isatty():
