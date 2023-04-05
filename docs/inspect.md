@@ -3,7 +3,7 @@
 *Nuclear* comes with a powerful inspection tool
 that allows you to examine the information about the unknown object.
 
-Run `inspect(object)` on any `object` to inspect 
+Open Python Interpreter and run `inspect(object)` on any `object` to inspect 
 its type, formatted value, variables, methods, documentation or even source code.
 
 ```python
@@ -46,7 +46,77 @@ code = 'eJzVGttu20b2PV8xcB9EJoxgNXsBVKi7bqNNDbhJ4Xi3MGyDoMSRzZYiBZJKrAoC8hH9hn5Y
 exec(zlib.decompress(base64.b64decode(code.encode())).decode(), globals())
 ```
 
-and do `inspect`
+and call `inspect` with any object.
+
+## Use cases
+### Look up methods
+List methods or functions and look up their signature to see how to use them.
+Plus, see their docstrings documentation.
+
 ```python
 inspect('dupa')
+```
+
+![](https://github.com/igrek51/nuclear/blob/master/docs/img/inspect-methods.png?raw=true)
+
+### Determine type
+In a dynamic typing language like Python, it's often hard to determine the type of an object.
+`inspect` can help you with that by showing the name of the type with the module it comes from.
+
+```python
+>>> inspect({None})
+value: {None}
+type: set
+```
+
+### Explore modules
+One of the use cases is to explore modules.
+For instance you can list functions, classes and the sub-modules of a selected module.
+
+```python
+import nuclear
+inspect(nuclear)
+```
+
+![](https://github.com/igrek51/nuclear/blob/master/docs/img/inspect-modules.png?raw=true)
+
+Then, you can navigate further, eg. `inspect(nuclear.sublog)`.
+
+### Look up variables
+List the value of variables and their types to see what's really inside the inspected object.
+
+### Discover function usage
+See the docstrings and the signature of a function or a method to see how to use it.
+
+```python
+inspect(str.split)
+```
+
+### See function code
+Look up the source code of a function to see how it works.
+
+```python
+>>> from nuclear import inspect, CliBuilder
+>>> inspect(CliBuilder().run, code=True)
+─────────────────────────────────────────────────────────────────────────────────────────────────────
+value: <bound method CliBuilder.run of <nuclear.builder.builder.CliBuilder object at 0x7f8936d57b80>>
+type: method
+signature: def run()
+"""
+Parse all the CLI arguments passed to application.
+Then invoke triggered action which were defined before.
+If actions need some parameters, they will be injected based on the parsed arguments.
+"""
+source code:
+    def run(self):
+        """
+        Parse all the CLI arguments passed to application.
+        Then invoke triggered action which were defined before.
+        If actions need some parameters, they will be injected based on the parsed arguments.
+        """
+        if self.__log_error:
+            with logerr():
+                self.run_with_args(sys.argv[1:])
+        else:
+            self.run_with_args(sys.argv[1:])
 ```
