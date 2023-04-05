@@ -1,10 +1,10 @@
 # Nuclear - binding glue for CLI
 [![GitHub version](https://badge.fury.io/gh/igrek51%2Fnuclear.svg)](https://github.com/igrek51/nuclear)
 [![PyPI version](https://badge.fury.io/py/nuclear.svg)](https://pypi.org/project/nuclear)
+[![Github Pages](https://img.shields.io/badge/docs-github.io-blue)](https://igrek51.github.io/nuclear)
 [![Documentation Status](https://readthedocs.org/projects/nuclear-py/badge/?version=latest)](https://nuclear-py.readthedocs.io/en/latest/?badge=latest)
 [![Build Status](https://app.travis-ci.com/igrek51/nuclear.svg?branch=master)](https://app.travis-ci.com/igrek51/nuclear)
 [![codecov](https://codecov.io/gh/igrek51/nuclear/branch/master/graph/badge.svg)](https://codecov.io/gh/igrek51/nuclear)
-[![Github Pages](https://img.shields.io/badge/github.io-ok-brightgreen)](https://igrek51.github.io/nuclear)
 
 
 `nuclear` is a declarative parser for command line interfaces in Python.
