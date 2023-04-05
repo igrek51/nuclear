@@ -1,7 +1,6 @@
 #!/usr/bin/env python3
-from nuclear import CliBuilder, inspect
+from nuclear import CliBuilder, inspect, insp, ins
 
 
 if __name__ == '__main__':
-    cli = CliBuilder()
-    inspect(inspect)
+    ins(ins)

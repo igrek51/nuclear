@@ -57,22 +57,22 @@ def inspect(
 
 
 def insp(obj: Any, **kwargs):
-    """Inspect object, show attributes (variables and methods)"""
+    """Examine object's attributes (variables and methods)"""
     inspect(obj, **kwargs)
 
 
 def ins(obj: Any, **kwargs):
-    """Inspect object, short output (without attributes)"""
+    """Examine object's elementary data"""
     inspect(obj, attrs=False, **kwargs)
 
 
 def insl(obj: Any, **kwargs):
-    """Inspect object, show attributes, long values and docs"""
+    """Examine object's attributes, long (non-abbreviated) values and docs"""
     inspect(obj, long=True, long_docs=True, **kwargs)
 
 
 def insa(obj: Any, **kwargs):
-    """Inspect object, show all: attributes, dunder attributes, long values and docs"""
+    """Examine all object's information"""
     inspect(obj, all=True, **kwargs)
 
 

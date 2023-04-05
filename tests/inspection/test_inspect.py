@@ -10,13 +10,12 @@ value: None
 type: NoneType
 """.strip()
 
-    output = inspect_format([5])
+    output = inspect_format([5], docs=False)
     assert remove_ansi_sequences(output) == """
 value: [
     5,
 ]
 type: list
-docs: # Built-in mutable sequence.…
 
 Public attributes:
   def append(object, /): # Append object to the end of the list.
@@ -35,11 +34,10 @@ Public attributes:
     output = inspect_format([5], dunder=True)
     assert "def __eq__(value, /): # Return self==value." in remove_ansi_sequences(output)
 
-    output = inspect_format('poo', attrs=False)
+    output = inspect_format('poo', attrs=False, docs=False)
     assert_multiline_match(output, r'''
 value: 'poo'
 type: str
-docs: \# str\(object=''\) -> str…
 ''')
 
 
@@ -114,7 +112,9 @@ def test_inspect_function():
 value: <function test_inspect_function\.<locals>\.foo at .*>
 type: function
 signature: def foo\(a: int, b: str = 'bar'\) -> str
-docs: \# Do something dumb
+"""
+Do something dumb
+"""
 ''')
 
 
@@ -129,7 +129,7 @@ def test_inspect_nested_dict():
             40: None,
             None: 42,
         },
-    }, attrs=False)
+    }, attrs=False, docs=False)
     assert_multiline_match(output, r'''
 value: {
     'a': {
@@ -147,5 +147,4 @@ value: {
     },
 }
 type: dict
-docs: \# dict\(\) -> new empty dictionary…
 ''')
