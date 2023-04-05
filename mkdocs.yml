@@ -44,7 +44,8 @@ nav:
     - Positional arguments: positional-args.md
     - Many positional arguments: many-args.md
     - Key-value dictionaries: dictionaries.md
-    - Logging with sublog: sublog.md
+    - Sublog Logging: sublog.md
+    - Inspect: inspect.md
     - Shell Auto-completion: autocompletion.md
     - CLI Builder: builder.md
     - Parsing data types: data-types.md

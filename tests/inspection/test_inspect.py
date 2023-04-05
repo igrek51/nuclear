@@ -16,7 +16,7 @@ value: [
     5,
 ]
 type: list
-# Built-in mutable sequence.…
+docs: # Built-in mutable sequence.…
 
 Public attributes:
   def append(object, /): # Append object to the end of the list.
@@ -39,7 +39,7 @@ Public attributes:
     assert_multiline_match(output, r'''
 value: 'poo'
 type: str
-\# str\(object=''\) -> str…
+docs: \# str\(object=''\) -> str…
 ''')
 
 
@@ -114,7 +114,7 @@ def test_inspect_function():
 value: <function test_inspect_function\.<locals>\.foo at .*>
 type: function
 signature: def foo\(a: int, b: str = 'bar'\) -> str
-\# Do something dumb
+docs: \# Do something dumb
 ''')
 
 
@@ -147,5 +147,5 @@ value: {
     },
 }
 type: dict
-\# dict\(\) -> new empty dictionary…
+docs: \# dict\(\) -> new empty dictionary…
 ''')
