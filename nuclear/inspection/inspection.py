@@ -59,7 +59,7 @@ def insp(obj: Any, **kwargs):
 
 
 def ins(obj: Any, **kwargs):
-    """Inspect object's elementary data: value, type, signature"""
+    """Inspect object's short, elementary data: value, type, signature"""
     inspect(obj, attr=False, **kwargs)
 
 
@@ -334,11 +334,9 @@ options are:
     def __call__(self, *args: Any, **kwargs: Any):
         if args:
             inspect(*args, **kwargs)
-        elif kwargs:
+        else:
             self._params = kwargs
             return self
-        else:
-            self._print_help()
 
     def __truediv__(self, other: Any) -> 'Wat': return self._add_reactant(other) # /
 

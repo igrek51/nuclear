@@ -4,5 +4,5 @@ from nuclear import inspect, insp, ins, wat
 
 if __name__ == '__main__':
     repr(
-        wat(attr=False) / 4
+        wat / 42
     )

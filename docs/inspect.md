@@ -1,40 +1,57 @@
 # Inspect
 
-*Nuclear* comes with a powerful inspection tool
+**Nuclear** comes with a powerful inspection tool
 that allows you to examine the information about the unknown object.
 
 Open Python Interpreter and run `inspect(object)` on any `object` to inspect 
 its type, formatted value, variables, methods, documentation or even source code.
 
+Import inspection tools:
 ```python
-from nuclear import inspect
-
-def inspect(
-    obj,  # object to inspect
-    attr: bool = True,  # whether to print attributes (variables and methods)
-    dunder: bool = False,  # whether to print dunder attributes
-    docs: bool = True,  # whether to print documentation
-    long: bool = False,  # whether to print non-abbreviated values and documentation
-    code: bool = False, # whether to print source code of a function, method or class
-    all: bool = False, # whether to include all information
-)
+from nuclear import inspect, insp, ins, wat
 ```
+
+Now, you can call `inspect(object, **options)` with the following `options`:
+
+- `attr=False` to hide attributes (variables and methods)
+- `dunder=True` to print dunder attributes
+- `docs=False` to hide documentation for functions and classes
+- `long=True` to print non-abbreviated values and documentation
+- `code=True` to print source code of a function, method or class
+- `all=True` to include all information
 
 Run `inspect(inspect)` to see more about this function itself.
 
-## Aliases
-There's bunch of short aliases for `inspect` variants:
+## Wat inspector
+There's a special `wat` object to quickly inspect things, avoiding typing parentheses.
 
 ```python
-from nuclear import inspect, insp, ins, insl, insa
+>>> from nuclear import wat
+>>> obj = {None}
+>>> wat / obj  # Equivalent to: inspect(obj)
+>>> wat(all=True) / obj  # Equivalent to: inspect(obj, all=True)
+```
 
-inspect(obj)
+## Aliases
+Couple of short aliases for `inspect` variants:
+
+```python
+from nuclear import inspect, insp, ins
+
 insp(obj)  # Equivalent to: inspect(obj)
 ins(obj)  # Short output. Equivalent to: inspect(obj, attr=False)
 ```
 
-## Insta-Load
-If you want to debug quickly, you don't even need to install *nuclear* package to use `inspect` function.
+## Import
+Import inspection tools from **nuclear** package.
+```python
+from nuclear import inspect, insp, ins, wat
+```
+
+Alternatively, use **Insta-Load** in the section below.
+
+### Insta-Load
+If you want to debug something quickly, you don't even need to install **nuclear** package to use `inspect` and `wat` functions.
 
 Load it on the fly by pasting this snippet to your Python interpreter:
 ```python
@@ -47,8 +64,8 @@ and call `inspect` with any object.
 
 ## Use cases
 ### Look up methods
-List methods or functions and look up their signature to see how to use them.
-Plus, see their docstrings documentation.
+Listing methods, functions and looking up their signature is extremely beneficial to see how to use them.
+Plus, you can see their docstrings documentation.
 
 ```python
 inspect('dupa')
@@ -82,6 +99,10 @@ Then, you can navigate further, eg. `inspect(nuclear.sublog)`.
 ### Look up variables
 List the value of variables and their types to see what's really inside the inspected object.
 
+```python
+wat / 42
+```
+
 ### Discover function usage
 See the docstrings and the signature of a function or a method to see how to use it.
 
@@ -89,8 +110,8 @@ See the docstrings and the signature of a function or a method to see how to use
 inspect(str.split)
 ```
 
-### See function code
-Look up the source code of a function to see how it works.
+### Review the code
+Look up the source code of a function to see how it really works.
 
 ```python
 >>> from nuclear import inspect, CliBuilder

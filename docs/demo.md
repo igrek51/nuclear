@@ -32,7 +32,7 @@ See [demo.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-deco
 
 ## Get it now
 ```bash
-pip install nuclear
+python3 -m pip install --upgrade nuclear
 ```
 
 ## CLI Tree builder
