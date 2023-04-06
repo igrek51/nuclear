@@ -8,11 +8,10 @@ from typing import Any, Dict, List, Optional, Type, Iterable
 
 @dataclass
 class InspectConfig:
-    attrs: bool
+    attr: bool
     dunder: bool
     docs: bool
     long: bool
-    full_docs: bool
     code: bool
 
 
@@ -31,11 +30,10 @@ class InspectAttribute:
 def inspect(
     obj: Any,
     *,
-    attrs: bool = True,
+    attr: bool = True,
     dunder: bool = False,
     docs: bool = True,
     long: bool = False,
-    full_docs: bool = False,
     code: bool = False,
     all: bool = False,
 ):
@@ -43,50 +41,38 @@ def inspect(
     Examine the object's information, such as its type, formatted value, variables, methods,
     documentation or source code.
     :param obj: object to inspect
-    :param attrs: whether to print attributes (variables and methods)
+    :param attr: whether to print attributes (variables and methods)
     :param dunder: whether to print dunder attributes
     :param docs: whether to print documentation for functions and classes
-    :param long: whether to print non-abbreviated values
-    :param full_docs: whether to print non-abbreviated documentation
+    :param long: whether to print non-abbreviated values and documentation
     :param code: whether to print source code of a function, method or class
     :param all: whether to include all information
     """
     print(inspect_format(
-        obj, attrs=attrs or all, dunder=dunder or all, long=long or all, docs=docs or all,
-        full_docs=full_docs or all, code=code or all))
+        obj, attr=attr or all, dunder=dunder or all, long=long or all, docs=docs or all,
+        code=code or all))
 
 
 def insp(obj: Any, **kwargs):
-    """Examine object's attributes (variables and methods)"""
+    """Inspect object's attributes (variables and methods)"""
     inspect(obj, **kwargs)
 
 
 def ins(obj: Any, **kwargs):
-    """Examine object's elementary data"""
-    inspect(obj, attrs=False, **kwargs)
-
-
-def insl(obj: Any, **kwargs):
-    """Examine object's attributes, long (non-abbreviated) values and docs"""
-    inspect(obj, long=True, full_docs=True, **kwargs)
-
-
-def insa(obj: Any, **kwargs):
-    """Examine all object's information"""
-    inspect(obj, all=True, **kwargs)
+    """Inspect object's elementary data: value, type, signature"""
+    inspect(obj, attr=False, **kwargs)
 
 
 def inspect_format(
     obj: Any,
     *,
-    attrs: bool = True,
+    attr: bool = True,
     dunder: bool = False,
     docs: bool = True,
     long: bool = False,
-    full_docs: bool = False,
     code: bool = False,
 ) -> str:
-    config = InspectConfig(attrs=attrs, dunder=dunder, docs=docs, long=long, full_docs=full_docs, code=code)
+    config = InspectConfig(attr=attr, dunder=dunder, docs=docs, long=long, code=code)
 
     str_value = _format_value(obj)
     str_type = _format_type(type(obj))
@@ -111,7 +97,7 @@ def inspect_format(
         if source:
             output.append(f'{STYLE_BRIGHT_BLUE}source code:{RESET}\n{source}')
 
-    if config.attrs:
+    if config.attr:
         attributes = sorted(_iter_attributes(obj, config), key=lambda attr: attr.name)
         output.extend(_render_attrs_section(attributes, config))
 
@@ -134,7 +120,7 @@ def _iter_attributes(obj: Any, config: InspectConfig) -> Iterable[InspectAttribu
         dunder = key.startswith('__') and key.endswith('__')
         private = key.startswith('_') and not dunder
         signature = _get_callable_signature(key, value) if callable_ else None
-        doc = _get_doc(value, long=config.full_docs) if callable_ else None
+        doc = _get_doc(value, long=config.long) if callable_ else None
         yield InspectAttribute(
             name=key,
             value=value,
@@ -191,7 +177,10 @@ def _render_attr_method(attr: InspectAttribute) -> str:
     if not attr.signature:
         return f'  {attr.name}(…)'
     if attr.doc:
-        return f'  {attr.signature}: {STYLE_GRAY}# {attr.doc}{RESET}'
+        if attr.doc.count('\n') == 0:
+            return f'  {attr.signature} {STYLE_GRAY}# {attr.doc}{RESET}'
+        else:
+            return f'  {attr.signature}:\n{STYLE_GRAY}"""\n{attr.doc}\n"""{RESET}'
     else:
         return f'  {attr.signature}'
 
@@ -306,6 +295,60 @@ def _render_attrs_section(attributes: List[InspectAttribute], config: InspectCon
             yield ""
         for attr in dunder_methods:
             yield _render_attr_method(attr)
+
+
+class Wat:
+    """Reactive Inspector instance to examine unknown objects"""
+    def __init__(self):
+        self._reactant = None
+        self._reactant_set = False
+        self._params = {}
+
+    def __repr__(self) -> str:
+        if self._reactant_set:
+            inspect(self._reactant, **self._params)
+        else:
+            self._print_help()
+        return ''
+        
+    def __str__(self) -> str:
+        return '<nuclear Wat Inspector object>'
+    
+    def _print_help(self):
+        print("""
+Try `wat / object`, `wat(**options) / object` or `wat(object, **options)` to inspect an object.
+options are:
+  attr=False to hide attributes (variables and methods)
+  dunder=True to print dunder attributes
+  docs=False to hide documentation for functions and classes
+  long=True to print non-abbreviated values and documentation
+  code=True to print source code of a function, method or class
+  all=True to include all information
+""".strip())
+
+    def _add_reactant(self, other: Any) -> 'Wat':
+        self._reactant = other
+        self._reactant_set = True
+        return self
+    
+    def __call__(self, *args: Any, **kwargs: Any):
+        if args:
+            inspect(*args, **kwargs)
+        elif kwargs:
+            self._params = kwargs
+            return self
+        else:
+            self._print_help()
+
+    def __truediv__(self, other: Any) -> 'Wat': return self._add_reactant(other) # /
+
+    def __lshift__(self, other: Any) -> 'Wat': return self._add_reactant(other)  # <<
+
+    def __or__(self, other: Any) -> 'Wat': return self._add_reactant(other)  # |
+
+    def __lt__(self, other: Any) -> 'Wat': return self._add_reactant(other)  # <
+
+wat = Wat()
 
 
 def _strip_color(text: str) -> str:

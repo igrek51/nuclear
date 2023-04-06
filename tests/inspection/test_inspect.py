@@ -34,7 +34,7 @@ Public attributes:
     output = inspect_format([5], dunder=True)
     assert "def __eq__(value, /): # Return self==value." in remove_ansi_sequences(output)
 
-    output = inspect_format('poo', attrs=False)
+    output = inspect_format('poo', attr=False)
     assert_multiline_match(output, r'''
 value: 'poo'
 type: str
@@ -146,7 +146,7 @@ def test_inspect_nested_dict():
             40: None,
             None: 42,
         },
-    }, attrs=False)
+    }, attr=False)
     assert_multiline_match(output, r'''
 value: {
     'a': {

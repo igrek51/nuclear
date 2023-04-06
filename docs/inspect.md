@@ -11,11 +11,10 @@ from nuclear import inspect
 
 def inspect(
     obj,  # object to inspect
-    attrs: bool = True,  # whether to print attributes (variables and methods)
+    attr: bool = True,  # whether to print attributes (variables and methods)
     dunder: bool = False,  # whether to print dunder attributes
     docs: bool = True,  # whether to print documentation
-    long: bool = False,  # whether to print non-abbreviated values
-    full_docs: bool = False,  # whether to print non-abbreviated documentation
+    long: bool = False,  # whether to print non-abbreviated values and documentation
     code: bool = False, # whether to print source code of a function, method or class
     all: bool = False, # whether to include all information
 )
@@ -31,9 +30,7 @@ from nuclear import inspect, insp, ins, insl, insa
 
 inspect(obj)
 insp(obj)  # Equivalent to: inspect(obj)
-ins(obj)  # Short output. Equivalent to: inspect(obj, attrs=False)
-insl(obj)  # Long output. Equivalent to: inspect(obj, long=True, full_docs=True)
-insa(obj)  # Show all. Equivalent to: inspect(obj, all=True)
+ins(obj)  # Short output. Equivalent to: inspect(obj, attr=False)
 ```
 
 ## Insta-Load
