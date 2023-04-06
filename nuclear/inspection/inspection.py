@@ -12,7 +12,7 @@ class InspectConfig:
     dunder: bool
     docs: bool
     long: bool
-    long_docs: bool
+    full_docs: bool
     code: bool
 
 
@@ -35,7 +35,7 @@ def inspect(
     dunder: bool = False,
     docs: bool = True,
     long: bool = False,
-    long_docs: bool = False,
+    full_docs: bool = False,
     code: bool = False,
     all: bool = False,
 ):
@@ -45,15 +45,15 @@ def inspect(
     :param obj: object to inspect
     :param attrs: whether to print attributes (variables and methods)
     :param dunder: whether to print dunder attributes
-    :param docs: whether to print documentation
+    :param docs: whether to print documentation for functions and classes
     :param long: whether to print non-abbreviated values
-    :param long_docs: whether to print non-abbreviated documentation
+    :param full_docs: whether to print non-abbreviated documentation
     :param code: whether to print source code of a function, method or class
     :param all: whether to include all information
     """
     print(inspect_format(
         obj, attrs=attrs or all, dunder=dunder or all, long=long or all, docs=docs or all,
-        long_docs=long_docs or all, code=code or all))
+        full_docs=full_docs or all, code=code or all))
 
 
 def insp(obj: Any, **kwargs):
@@ -68,7 +68,7 @@ def ins(obj: Any, **kwargs):
 
 def insl(obj: Any, **kwargs):
     """Examine object's attributes, long (non-abbreviated) values and docs"""
-    inspect(obj, long=True, long_docs=True, **kwargs)
+    inspect(obj, long=True, full_docs=True, **kwargs)
 
 
 def insa(obj: Any, **kwargs):
@@ -83,16 +83,16 @@ def inspect_format(
     dunder: bool = False,
     docs: bool = True,
     long: bool = False,
-    long_docs: bool = False,
+    full_docs: bool = False,
     code: bool = False,
 ) -> str:
-    config = InspectConfig(attrs=attrs, dunder=dunder, docs=docs, long=long, long_docs=long_docs, code=code)
+    config = InspectConfig(attrs=attrs, dunder=dunder, docs=docs, long=long, full_docs=full_docs, code=code)
 
     str_value = _format_value(obj)
     str_type = _format_type(type(obj))
     output: List[str] = [
         f'{STYLE_BRIGHT_BLUE}value:{RESET} {str_value}',
-        f'{STYLE_BRIGHT_BLUE}type:{RESET} {STYLE_YELLOW}{str_type}{RESET}',
+        f'{STYLE_BRIGHT_BLUE}type:{RESET} {STYLE_BRIGHT_YELLOW}{str_type}{RESET}',
     ]
  
     if callable(obj):
@@ -100,8 +100,11 @@ def inspect_format(
         output.append(f'{STYLE_BRIGHT_BLUE}signature:{RESET} {signature}')
 
     doc = _get_doc(obj, long=True)
-    if doc and config.docs:
-        output.append(f'{STYLE_GRAY}"""\n{doc}\n"""{RESET}')
+    if doc and config.docs and callable(obj):
+        if doc.count('\n') == 0:
+            output.append(f'{STYLE_GRAY}"""{doc}"""{RESET}')
+        else:
+            output.extend([f'{STYLE_GRAY}"""', doc, f'"""{RESET}'])
 
     if config.code and (std_inspect.isclass(obj) or callable(obj)):
         source = _get_source_code(obj)
@@ -131,7 +134,7 @@ def _iter_attributes(obj: Any, config: InspectConfig) -> Iterable[InspectAttribu
         dunder = key.startswith('__') and key.endswith('__')
         private = key.startswith('_') and not dunder
         signature = _get_callable_signature(key, value) if callable_ else None
-        doc = _get_doc(value, long=config.long_docs) if callable_ else None
+        doc = _get_doc(value, long=config.full_docs) if callable_ else None
         yield InspectAttribute(
             name=key,
             value=value,

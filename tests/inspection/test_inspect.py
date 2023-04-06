@@ -10,7 +10,7 @@ value: None
 type: NoneType
 """.strip()
 
-    output = inspect_format([5], docs=False)
+    output = inspect_format([5])
     assert remove_ansi_sequences(output) == """
 value: [
     5,
@@ -34,16 +34,18 @@ Public attributes:
     output = inspect_format([5], dunder=True)
     assert "def __eq__(value, /): # Return self==value." in remove_ansi_sequences(output)
 
-    output = inspect_format('poo', attrs=False, docs=False)
+    output = inspect_format('poo', attrs=False)
     assert_multiline_match(output, r'''
 value: 'poo'
 type: str
 ''')
 
 
-
-def test_inspect_object():
+def test_inspect_instance():
     class Hero:
+        """
+        A hero
+        """
         def __init__(self, name: str):
             self.a = name
         
@@ -54,13 +56,24 @@ def test_inspect_object():
     instance = Hero('batman')
     output = inspect_format(instance)
     assert_multiline_match(output, r'''
-value: <test_inspect\.test_inspect_object\.<locals>\.Hero object at .*>
+value: <test_inspect\.test_inspect_instance\.<locals>\.Hero object at .*>
 type: test_inspect\.Hero
 
 Public attributes:
   a: str = 'batman'
 
   def shout\(loudness: int\) -> str: \# Do something very very very very very very very very very very very very very very very very very st…
+''')
+                           
+    output = inspect_format(Hero)
+    assert_multiline_match(output, r'''
+value: <class 'test_inspect\.test_inspect_instance\.<locals>\.Hero'>
+type: type
+signature: class Hero\(name: str\)
+"""A hero"""
+
+Public attributes:
+  def shout\(self, loudness: int\) -> str: \# Do something very very very very very very very very very very very very very very very very very st…
 ''')
 
 
@@ -103,7 +116,10 @@ Private attributes:
 
 def test_inspect_function():
     def foo(a: int, b: str = 'bar') -> str:
-        """Do something dumb"""
+        """
+        Do something
+        dumb
+        """
         return a * b
   
     output = inspect_format(foo)
@@ -113,7 +129,8 @@ value: <function test_inspect_function\.<locals>\.foo at .*>
 type: function
 signature: def foo\(a: int, b: str = 'bar'\) -> str
 """
-Do something dumb
+Do something
+dumb
 """
 ''')
 
@@ -129,7 +146,7 @@ def test_inspect_nested_dict():
             40: None,
             None: 42,
         },
-    }, attrs=False, docs=False)
+    }, attrs=False)
     assert_multiline_match(output, r'''
 value: {
     'a': {
