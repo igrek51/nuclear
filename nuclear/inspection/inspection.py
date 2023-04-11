@@ -3,7 +3,7 @@ import inspect as std_inspect
 import os
 import re
 import sys
-from typing import Any, Dict, List, Optional, Type, Iterable
+from typing import Any, Dict, List, Optional, Type, Iterable, Union
 
 
 @dataclass
@@ -82,7 +82,8 @@ def inspect_format(
     ]
  
     if callable(obj):
-        signature = _get_callable_signature(obj.__name__, obj)
+        name = getattr(obj, '__name__', '…')
+        signature = _get_callable_signature(name, obj)
         output.append(f'{STYLE_BRIGHT_BLUE}signature:{RESET} {signature}')
 
     doc = _get_doc(obj, long=True)
@@ -140,13 +141,15 @@ def _get_callable_signature(name: str, obj: Any) -> Optional[str]:
         _signature = "(…)"
     
     if std_inspect.isclass(obj):
-        prefix = "class"
+        prefix = "class "
     elif std_inspect.iscoroutinefunction(obj):
-        prefix = "async def"
+        prefix = "async def "
+    elif std_inspect.isfunction(obj):
+        prefix = "def "
     else:
-        prefix = "def"
+        prefix = ""
 
-    return f'{STYLE_BLUE}{prefix} {STYLE_BRIGHT_GREEN}{name}{STYLE_GREEN}{_signature}{RESET}'
+    return f'{STYLE_BLUE}{prefix}{STYLE_BRIGHT_GREEN}{name}{STYLE_GREEN}{_signature}{RESET}'
 
 
 def _get_source_code(obj: Any) -> Optional[str]:
@@ -299,16 +302,11 @@ def _render_attrs_section(attributes: List[InspectAttribute], config: InspectCon
 
 class Wat:
     """Reactive Inspector instance to examine unknown objects"""
-    def __init__(self):
-        self._reactant = None
-        self._reactant_set = False
-        self._params = {}
+    def __init__(self, **kwargs):
+        self._params = kwargs
 
     def __repr__(self) -> str:
-        if self._reactant_set:
-            inspect(self._reactant, **self._params)
-        else:
-            self._print_help()
+        self._print_help()
         return ''
         
     def __str__(self) -> str:
@@ -326,25 +324,20 @@ options are:
   all=True to include all information
 """.strip())
 
-    def _add_reactant(self, other: Any) -> 'Wat':
-        self._reactant = other
-        self._reactant_set = True
-        return self
+    def _react_with(self, other: Any) -> None:
+        inspect(other, **self._params)
     
-    def __call__(self, *args: Any, **kwargs: Any):
+    def __call__(self, *args: Any, **kwargs: Any) -> Union['Wat', None]:
         if args:
             inspect(*args, **kwargs)
         else:
-            self._params = kwargs
-            return self
+            return Wat(**kwargs)
 
-    def __truediv__(self, other: Any) -> 'Wat': return self._add_reactant(other) # /
-
-    def __lshift__(self, other: Any) -> 'Wat': return self._add_reactant(other)  # <<
-
-    def __or__(self, other: Any) -> 'Wat': return self._add_reactant(other)  # |
-
-    def __lt__(self, other: Any) -> 'Wat': return self._add_reactant(other)  # <
+    def __truediv__(self, other: Any): return self._react_with(other) # /
+    def __lshift__(self, other: Any): return self._react_with(other)  # <<
+    def __rshift__(self, other: Any): return self._react_with(other)  # >>
+    def __or__(self, other: Any): return self._react_with(other)  # |
+    def __lt__(self, other: Any): return self._react_with(other)  # <
 
 wat = Wat()
 
