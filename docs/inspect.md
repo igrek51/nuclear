@@ -63,6 +63,7 @@ exec(zlib.decompress(base64.b64decode(code.encode())).decode(), globals())
 and call `inspect` with any object.
 
 ## Use cases
+
 ### Look up methods
 Listing methods, functions and looking up their signature is extremely beneficial to see how to use them.
 Plus, you can see their docstrings documentation.
@@ -137,4 +138,21 @@ source code:
                 self.run_with_args(sys.argv[1:])
         else:
             self.run_with_args(sys.argv[1:])
+```
+
+### Usage with breakpoint
+You can use Python's `breakpoint()` keyword to launch an interactive debugger in your program:
+
+```python
+logger.debug('init')
+x = {'what is it?'}
+breakpoint()
+logger.debug('done')
+```
+
+```python
+(Pdb) from nuclear import wat
+(Pdb) wat / x  # inspect
+...
+(Pdb) c  # continue execution
 ```

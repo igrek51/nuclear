@@ -3,4 +3,6 @@ from nuclear import inspect, insp, ins, wat
 
 
 if __name__ == '__main__':
-    wat(long=True) / wat
+    a = [5]
+    a.append(7)
+    breakpoint()
