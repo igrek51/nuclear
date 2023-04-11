@@ -146,6 +146,12 @@ def _get_callable_signature(name: str, obj: Any) -> Optional[str]:
         prefix = "async def "
     elif std_inspect.isfunction(obj):
         prefix = "def "
+    elif std_inspect.ismethod(obj):
+        prefix = "def "
+    elif std_inspect.isbuiltin(obj):
+        prefix = "def "
+    elif hasattr(obj, '__name__'):
+        prefix = "def "
     else:
         prefix = ""
 

@@ -18,21 +18,21 @@ value: [
 type: list
 
 Public attributes:
-  def append(object, /): # Append object to the end of the list.
-  def clear(): # Remove all items from list.
-  def copy(): # Return a shallow copy of the list.
-  def count(value, /): # Return number of occurrences of value.
-  def extend(iterable, /): # Extend list by appending elements from the iterable.
-  def index(value, start=0, stop=9223372036854775807, /): # Return first index of value.…
-  def insert(index, object, /): # Insert object before index.
-  def pop(index=-1, /): # Remove and return item at index (default last).…
-  def remove(value, /): # Remove first occurrence of value.…
-  def reverse(): # Reverse *IN PLACE*.
-  def sort(*, key=None, reverse=False): # Sort the list in ascending order and return None.…
+  def append(object, /) # Append object to the end of the list.
+  def clear() # Remove all items from list.
+  def copy() # Return a shallow copy of the list.
+  def count(value, /) # Return number of occurrences of value.
+  def extend(iterable, /) # Extend list by appending elements from the iterable.
+  def index(value, start=0, stop=9223372036854775807, /) # Return first index of value.…
+  def insert(index, object, /) # Insert object before index.
+  def pop(index=-1, /) # Remove and return item at index (default last).…
+  def remove(value, /) # Remove first occurrence of value.…
+  def reverse() # Reverse *IN PLACE*.
+  def sort(*, key=None, reverse=False) # Sort the list in ascending order and return None.…
 """.strip()
     
     output = inspect_format([5], dunder=True)
-    assert "def __eq__(value, /): # Return self==value." in remove_ansi_sequences(output)
+    assert "def __eq__(value, /) # Return self==value." in remove_ansi_sequences(output)
 
     output = inspect_format('poo', attr=False)
     assert_multiline_match(output, r'''
@@ -62,7 +62,7 @@ type: test_inspect\.Hero
 Public attributes:
   a: str = 'batman'
 
-  def shout\(loudness: int\) -> str: \# Do something very very very very very very very very very very very very very very very very very st…
+  def shout\(loudness: int\) -> str \# Do something very very very very very very very very very very very very very very very very very st…
 ''')
                            
     output = inspect_format(Hero)
@@ -73,7 +73,7 @@ signature: class Hero\(name: str\)
 """A hero"""
 
 Public attributes:
-  def shout\(self, loudness: int\) -> str: \# Do something very very very very very very very very very very very very very very very very very st…
+  def shout\(self, loudness: int\) -> str \# Do something very very very very very very very very very very very very very very very very very st…
 ''')
 
 
@@ -86,11 +86,11 @@ value: <nuclear\.builder\.builder\.CliBuilder object at .*>
 type: nuclear.builder.builder.CliBuilder
 
 Public attributes:
-  def add_command\(\*subcommands: str\): \# Decorator for binding function with a CLI command…
-  def has\(\*subrules: nuclear.builder.rule.CliRule\) -> 'CliBuilder': \# Add more CLI rules for the particular level…
+  def add_command\(\*subcommands: str\) \# Decorator for binding function with a CLI command…
+  def has\(\*subrules: nuclear.builder.rule.CliRule\) -> 'CliBuilder' \# Add more CLI rules for the particular level…
   def print_help\(subcommands: List\[str\]\)
   def print_usage\(\)
-  def run\(\): \# Parse all the CLI arguments passed to application.…
+  def run\(\) \# Parse all the CLI arguments passed to application.…
   def run_with_args\(args: List\[str\]\)
 
 Private attributes:
