@@ -13,7 +13,7 @@ from nuclear import inspect, insp, ins, wat
 
 Now, you can call `inspect(object, **options)` with the following `options`:
 
-- `attr=False` to hide attributes (variables and methods)
+- `short=True` to hide attributes (variables and methods)
 - `dunder=True` to print dunder attributes
 - `docs=False` to hide documentation for functions and classes
 - `long=True` to print non-abbreviated values and documentation
@@ -39,7 +39,7 @@ Couple of short aliases for `inspect` variants:
 from nuclear import inspect, insp, ins
 
 insp(obj)  # Equivalent to: inspect(obj)
-ins(obj)  # Short output. Equivalent to: inspect(obj, attr=False)
+ins(obj)  # Short output. Equivalent to: inspect(obj, short=True)
 ```
 
 ## Import

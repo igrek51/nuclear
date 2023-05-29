@@ -8,7 +8,7 @@ from typing import Any, Dict, List, Optional, Type, Iterable, Union
 
 @dataclass
 class InspectConfig:
-    attr: bool
+    short: bool
     dunder: bool
     docs: bool
     long: bool
@@ -30,7 +30,7 @@ class InspectAttribute:
 def inspect(
     obj: Any,
     *,
-    attr: bool = True,
+    short: bool = False,
     dunder: bool = False,
     docs: bool = True,
     long: bool = False,
@@ -41,7 +41,7 @@ def inspect(
     Examine the object's information, such as its type, formatted value, variables, methods,
     documentation or source code.
     :param obj: object to inspect
-    :param attr: whether to print attributes (variables and methods)
+    :param short: whether to print short output without attributes (neither variables nor methods)
     :param dunder: whether to print dunder attributes
     :param docs: whether to print documentation for functions and classes
     :param long: whether to print non-abbreviated values and documentation
@@ -49,7 +49,7 @@ def inspect(
     :param all: whether to include all information
     """
     print(inspect_format(
-        obj, attr=attr or all, dunder=dunder or all, long=long or all, docs=docs or all,
+        obj, short=short or all, dunder=dunder or all, long=long or all, docs=docs or all,
         code=code or all))
 
 
@@ -60,19 +60,19 @@ def insp(obj: Any, **kwargs):
 
 def ins(obj: Any, **kwargs):
     """Inspect object's short, elementary data: value, type, signature"""
-    inspect(obj, attr=False, **kwargs)
+    inspect(obj, short=True, **kwargs)
 
 
 def inspect_format(
     obj: Any,
     *,
-    attr: bool = True,
+    short: bool = False,
     dunder: bool = False,
     docs: bool = True,
     long: bool = False,
     code: bool = False,
 ) -> str:
-    config = InspectConfig(attr=attr, dunder=dunder, docs=docs, long=long, code=code)
+    config = InspectConfig(short=short, dunder=dunder, docs=docs, long=long, code=code)
 
     str_value = _format_value(obj)
     str_type = _format_type(type(obj))
@@ -98,7 +98,7 @@ def inspect_format(
         if source:
             output.append(f'{STYLE_BRIGHT_BLUE}source code:{RESET}\n{source}')
 
-    if config.attr:
+    if not config.short:
         attributes = sorted(_iter_attributes(obj, config), key=lambda attr: attr.name)
         output.extend(_render_attrs_section(attributes, config))
 
@@ -207,9 +207,9 @@ def _format_value(value: Any, indent: int = 0) -> str:
     if value is None:
         return f'{STYLE_MAGENTA}None{RESET}'
     if value is True:
-        return f'{STYLE_GREEN}True{RESET}'
+        return f'{STYLE_BRIGHT_GREEN}True{RESET}'
     if value is False:
-        return f'{STYLE_RED}False{RESET}'
+        return f'{STYLE_BRIGHT_RED}False{RESET}'
     if isinstance(value, (int, float)):
         return f'{STYLE_RED}{value}{RESET}'
     if isinstance(value, dict):
@@ -319,16 +319,18 @@ class Wat:
         return '<nuclear Wat Inspector object>'
     
     def _print_help(self):
-        print("""
-Try `wat / object`, `wat(**options) / object` or `wat(object, **options)` to inspect an object.
-options are:
-  attr=False to hide attributes (variables and methods)
-  dunder=True to print dunder attributes
-  docs=False to hide documentation for functions and classes
-  long=True to print non-abbreviated values and documentation
-  code=True to print source code of a function, method or class
-  all=True to include all information
-""".strip())
+        text = f"""
+Try `{STYLE_YELLOW}wat / object{RESET}`, `{STYLE_YELLOW}wat(**options) / object{RESET}` or `{STYLE_YELLOW}wat(object, **options){RESET}` to inspect an {STYLE_YELLOW}object{RESET}. Options are:
+  {STYLE_GREEN}short={STYLE_BRIGHT_GREEN}True{RESET} to hide attributes (variables and methods)
+  {STYLE_GREEN}dunder={STYLE_BRIGHT_GREEN}True{RESET} to print dunder attributes
+  {STYLE_GREEN}docs={STYLE_BRIGHT_RED}False{RESET} to hide documentation for functions and classes
+  {STYLE_GREEN}long={STYLE_BRIGHT_GREEN}True{RESET} to print non-abbreviated values and documentation
+  {STYLE_GREEN}code={STYLE_BRIGHT_GREEN}True{RESET} to print source code of a function, method or class
+  {STYLE_GREEN}all={STYLE_BRIGHT_GREEN}True{RESET} to include all information
+""".strip()
+        if not sys.stdout.isatty():
+            text = _strip_color(text)
+        print(text)
 
     def _react_with(self, other: Any) -> None:
         inspect(other, **self._params)
