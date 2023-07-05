@@ -49,8 +49,8 @@ def inspect(
     :param all: whether to include all information
     """
     print(inspect_format(
-        obj, short=short or all, dunder=dunder or all, long=long or all, docs=docs or all,
-        code=code or all))
+        obj, short=short, dunder=dunder or all, long=long or all, docs=docs or all, code=code or all
+    ))
 
 
 def insp(obj: Any, **kwargs):
@@ -116,10 +116,12 @@ def inspect_format(
 def _iter_attributes(obj: Any, config: InspectConfig) -> Iterable[InspectAttribute]:
     keys = dir(obj)
     for key in keys:
-        value = getattr(obj, key)
-        callable_ = callable(value)
         dunder = key.startswith('__') and key.endswith('__')
+        if dunder and not config.dunder:
+            continue
         private = key.startswith('_') and not dunder
+        value = _get_attribute_value(obj, key)
+        callable_ = callable(value)
         signature = _get_callable_signature(key, value) if callable_ else None
         doc = _get_doc(value, long=config.long) if callable_ else None
         yield InspectAttribute(
@@ -132,6 +134,13 @@ def _iter_attributes(obj: Any, config: InspectConfig) -> Iterable[InspectAttribu
             signature=signature,
             doc=doc,
         )
+
+
+def _get_attribute_value(obj: Any, key: str) -> Any:
+    try:
+        return getattr(obj, key)
+    except AttributeError as e:
+        return e
 
 
 def _get_callable_signature(name: str, obj: Any) -> Optional[str]:
