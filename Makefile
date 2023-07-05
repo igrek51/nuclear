@@ -45,3 +45,6 @@ mkdocs-push:
 
 nuclear-inspect-dump:
 	python3 nuclear/inspection/insta/dump.py nuclear/inspection/inspection.py
+	@echo
+	@echo "paste it to: docs/inspect.md"
+	@echo "paste it to: nuclear/inspection/insta/instaload.py"

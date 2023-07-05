@@ -16,6 +16,7 @@ value: [
     5,
 ]
 type: list
+len: 1
 
 Public attributes:
   def append(object, /) # Append object to the end of the list.
@@ -38,6 +39,7 @@ Public attributes:
     assert_multiline_match(output, r'''
 value: 'poo'
 type: str
+len: 3
 ''')
 
 
@@ -164,4 +166,5 @@ value: {
     },
 }
 type: dict
+len: 1
 ''')

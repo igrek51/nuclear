@@ -80,6 +80,9 @@ def inspect_format(
         f'{STYLE_BRIGHT_BLUE}value:{RESET} {str_value}',
         f'{STYLE_BRIGHT_BLUE}type:{RESET} {STYLE_BRIGHT_YELLOW}{str_type}{RESET}',
     ]
+
+    if isinstance(obj, (list, dict, str, bytes, bytearray, tuple, set, frozenset, range)):
+        output.append(f'{STYLE_BRIGHT_BLUE}len:{RESET} {_format_value(len(obj))}')
  
     if callable(obj):
         name = getattr(obj, '__name__', '…')
