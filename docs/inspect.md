@@ -8,7 +8,7 @@ its type, formatted value, variables, methods, documentation or even source code
 
 Import inspection tools:
 ```python
-from nuclear import inspect, insp, ins, wat
+from nuclear import inspect, ins, wat, wats
 ```
 
 Now, you can call `inspect(object, **options)` with the following `options`:

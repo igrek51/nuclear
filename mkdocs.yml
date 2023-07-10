@@ -31,23 +31,25 @@ markdown_extensions:
   - pymdownx.superfences
 
 nav:
-    - Home: README.md
+  - Home: README.md
+  - CLI:
     - Demo: demo.md
-    - How does it work?: how-it-works.md
     - Quick start: quick-start.md
+    - How does it work?: how-it-works.md
     - Nuclear vs argparse: vs-argparse.md
-    - Installation: installation.md
     - Auto-generated help and usage: help.md
-    - Multilevel Sub-commands: subcommands.md
-    - Flags: flags.md
-    - Named parameters: parameters.md
-    - Positional arguments: positional-args.md
-    - Many positional arguments: many-args.md
-    - Key-value dictionaries: dictionaries.md
-    - Sublog Logging: sublog.md
-    - Inspect: inspect.md
-    - Shell Auto-completion: autocompletion.md
     - CLI Builder: builder.md
+    - CLI Rules:
+      - Multilevel Sub-commands: subcommands.md
+      - Flags: flags.md
+      - Named parameters: parameters.md
+      - Positional arguments: positional-args.md
+      - Many positional arguments: many-args.md
+      - Key-value dictionaries: dictionaries.md
+      - CLI Rules cheatsheet: cheatsheet.md
+    - Shell Auto-completion: autocompletion.md
     - Parsing data types: data-types.md
     - Errors handling: errors.md
-    - CLI Rules cheatsheet: cheatsheet.md
+  - Inspect: inspect.md
+  - Sublog: sublog.md
+  - Installation: installation.md
