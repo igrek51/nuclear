@@ -43,7 +43,7 @@ mkdocs-push:
 	mkdocs gh-deploy --force
 
 
-nuclear-inspect-dump:
+dump-inspect:
 	python3 nuclear/inspection/insta/dump.py nuclear/inspection/inspection.py
 	@echo
 	@echo "paste it to: docs/inspect.md"

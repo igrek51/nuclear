@@ -360,6 +360,7 @@ Try `{STYLE_YELLOW}wat / object{RESET}`, `{STYLE_YELLOW}wat(**options) / object{
     def __lt__(self, other: Any): return self._react_with(other)  # <
 
 wat = Wat()
+wats = Wat(short=True)
 
 
 def _strip_color(text: str) -> str:
