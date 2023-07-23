@@ -6,7 +6,7 @@ from .shell.background_cmd import BackgroundCommand
 from .sublog.catch import logerr, ContextError, log_exception
 from .sublog.context_logger import log
 from .sublog.wrap_error import wrap_context
-from .inspection.inspection import inspect, wat, ins, insp
+from .inspection.inspection import inspect, ins, wat, wats
 
 from .version import __version__
 
