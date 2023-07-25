@@ -6,7 +6,7 @@ that allows you to examine the information about the unknown object at runtime.
 Open Python Interpreter and run `wat / object` on any `object` to inspect 
 its type, formatted value, variables, methods, documentation or even source code.
 
-<video width="100%" src="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect.mp4" controls="true" allowfullscreen="true" poster="./demo/demo-inspect-poster.png"></video>
+<video width="100%" src="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect.mp4" controls="true" allowfullscreen="true" poster="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect-poster.png"></video>
 
 You can call `inspect(object, **options)` or `wat(**options) / object` with the following `options`:
 
