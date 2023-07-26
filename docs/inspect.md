@@ -1,23 +1,23 @@
 # Nuclear Inspect
 
 **Nuclear** comes with a powerful inspection tool
-that allows you to examine the information about the unknown object at runtime.
+that allows you to delve into and examine unknown objects at runtime.
 
-Open Python Interpreter and run `wat / object` on any `object` to inspect 
-its type, formatted value, variables, methods, documentation or even source code.
+Start the Python Interpreter and execute `wat / object` on any `object` to investigate
+its type, formatted value, variables, methods, documentation, and even source code.
 
 <video width="100%" src="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect.mp4" controls="true" allowfullscreen="true" poster="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect-poster.png"></video>
 
 You can call `inspect(object, **options)` or `wat(**options) / object` with the following `options`:
 
 - `short=True` to hide attributes (variables and methods)
-- `dunder=True` to print dunder attributes
+- `dunder=True` to display dunder attributes
 - `docs=False` to hide documentation for functions and classes
-- `long=True` to print non-abbreviated values and documentation
-- `code=True` to print source code of a function, method or class
-- `all=True` to include all information
+- `long=True` to show non-abbreviated values and documentation
+- `code=True` to reveal the source code of a function, method, or class
+- `all=True` to include all available information
 
-Run `inspect(inspect)` to see more about this function itself.
+Execute `inspect(inspect)` to learn more about this function itself.
 
 ## Import
 Import inspection tools from **nuclear** package.
