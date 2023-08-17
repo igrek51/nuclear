@@ -62,6 +62,7 @@ def test_background_command():
         assert '1\n' in live_lines
     check()
 
+    assert cmd.is_running
     cmd.terminate()
     assert not cmd.is_running
     assert '1\n1\n' in cmd.stdout

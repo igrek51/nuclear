@@ -1,8 +1,8 @@
 from datetime import datetime
 
-from nuclear import CliBuilder, argument, inspect, ins
+from nuclear import CliBuilder, argument, inspect, ins, wat, wats
 from nuclear.inspection.inspection import inspect_format
-from tests.asserts import assert_multiline_match, remove_ansi_sequences
+from tests.asserts import assert_multiline_match, remove_ansi_sequences, StdoutCap
 
 
 def test_inspect_primitive_var():
@@ -179,4 +179,50 @@ def test_inspect_datetime_repr():
 str: 2023-08-01 00:00:00
 repr: datetime.datetime\(2023, 8, 1, 0, 0\)
 type: datetime.datetime
+''')
+
+
+def test_inspect_source_code():
+    output = inspect_format(datetime, long=True, code=True)
+    lines = output.splitlines()
+    assert "value: <class 'datetime.datetime'>" in lines
+    assert "type: type" in lines
+    assert "signature: class datetime(…)" in lines
+    assert "datetime(year, month, day[, hour[, minute[, second[, microsecond[,tzinfo]]]]])" in lines
+    assert "class datetime(date):" in lines
+
+
+def test_inspect_async_def():
+    async def looper():
+        pass
+    output = inspect_format(looper, short=True)
+    assert_multiline_match(output, r'''
+value: <function test_inspect_async_def.<locals>.looper at .*>
+type: function
+signature: async def looper\(\)
+''')
+
+
+def test_wat_with_nothing():
+    assert str(wat) == '<nuclear Wat Inspector object>'
+    with StdoutCap() as capture:
+        assert repr(wat) == ''
+    assert 'Try `wat / object`, `wat(**options) / object` or `wat(object, **options)` to inspect an object. Options are:' in capture.uncolor().splitlines()
+
+
+def test_wat_with_object():
+    with StdoutCap() as capture:
+        wat(short=True) / 'moo'
+    assert_multiline_match(capture.output(), r'''
+value: 'moo'
+type: str
+len: 3
+''')
+
+    with StdoutCap() as capture:
+        wat('moo', short=True)
+    assert_multiline_match(capture.output(), r'''
+value: 'moo'
+type: str
+len: 3
 ''')

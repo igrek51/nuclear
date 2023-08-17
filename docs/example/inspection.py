@@ -3,4 +3,4 @@ from nuclear import inspect, ins, wat, wats
 
 
 if __name__ == '__main__':
-    wats / 'poo'
+    wats / repr(wat)

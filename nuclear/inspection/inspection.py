@@ -319,7 +319,7 @@ def _render_attrs_section(attributes: List[InspectAttribute], config: InspectCon
 
 
 class Wat:
-    """Reactive Inspector instance to examine unknown objects"""
+    """Inspector instance to examine unknown objects with division operator"""
     def __init__(self, **kwargs):
         self._params = kwargs
 
