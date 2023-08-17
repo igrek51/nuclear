@@ -68,13 +68,18 @@ def inspect_format(
     code: bool = False,
 ) -> str:
     config = InspectConfig(short=short, dunder=dunder, docs=docs, long=long, code=code)
+    output: List[str] = []
 
     str_value = _format_value(obj)
+    repr_value: str = repr(obj)
+    if repr_value == str(obj) or repr_value == _strip_color(str_value):
+        output.append(f'{STYLE_BRIGHT_BLUE}value:{RESET} {str_value}')
+    else:
+        output.append(f'{STYLE_BRIGHT_BLUE}str:{RESET} {str_value}')
+        output.append(f'{STYLE_BRIGHT_BLUE}repr:{RESET} {repr_value}')
+
     str_type = _format_type(type(obj))
-    output: List[str] = [
-        f'{STYLE_BRIGHT_BLUE}value:{RESET} {str_value}',
-        f'{STYLE_BRIGHT_BLUE}type:{RESET} {STYLE_BRIGHT_YELLOW}{str_type}{RESET}',
-    ]
+    output.append(f'{STYLE_BRIGHT_BLUE}type:{RESET} {STYLE_BRIGHT_YELLOW}{str_type}{RESET}')
 
     if isinstance(obj, (list, dict, str, bytes, bytearray, tuple, set, frozenset, range)):
         output.append(f'{STYLE_BRIGHT_BLUE}len:{RESET} {_format_value(len(obj))}')

@@ -1,4 +1,6 @@
-from nuclear import CliBuilder, argument, inspect
+from datetime import datetime
+
+from nuclear import CliBuilder, argument, inspect, ins
 from nuclear.inspection.inspection import inspect_format
 from tests.asserts import assert_multiline_match, remove_ansi_sequences
 
@@ -81,6 +83,7 @@ Public attributes:
 
 def test_inspect_clibuilder():
     cli = CliBuilder().has(argument('n', type=int))
+    ins(cli)
     inspect(cli)
     output = inspect_format(cli)
     assert_multiline_match(output, r'''
@@ -167,4 +170,13 @@ value: {
 }
 type: dict
 len: 1
+''')
+
+
+def test_inspect_datetime_repr():
+    output = inspect_format(datetime(2023, 8, 1), short=True)
+    assert_multiline_match(output, r'''
+str: 2023-08-01 00:00:00
+repr: datetime.datetime\(2023, 8, 1, 0, 0\)
+type: datetime.datetime
 ''')
