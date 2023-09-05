@@ -96,9 +96,15 @@ class BackgroundCommand:
 
         children = _get_child_processes(self._process.pid)
         for child_pid in children:
-            if self._debug:
+            if self._debug or True:
                 log.debug(f'terminating child process', pid=child_pid)
-            os.kill(child_pid, signal.SIGTERM)
+            try:
+                os.kill(child_pid, signal.SIGTERM)
+            except ProcessLookupError as e:
+                if e.errno == 3:
+                    log.debug('child process has gone while terminating', error=e.strerror, pid=child_pid)
+                else:
+                    raise e
 
         self._process.terminate()
         self._process.poll()  # wait for subprocess
