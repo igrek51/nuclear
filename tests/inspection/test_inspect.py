@@ -1,6 +1,9 @@
 from datetime import datetime
+from enum import Enum
 
-from nuclear import CliBuilder, argument, inspect, ins, wat, wats
+from pydantic import BaseModel
+
+from nuclear import CliBuilder, argument, inspect, ins, wat
 from nuclear.inspection.inspection import inspect_format
 from tests.asserts import assert_multiline_match, remove_ansi_sequences, StdoutCap
 
@@ -179,6 +182,7 @@ def test_inspect_datetime_repr():
 str: 2023-08-01 00:00:00
 repr: datetime.datetime\(2023, 8, 1, 0, 0\)
 type: datetime.datetime
+parents: datetime\.date
 ''')
 
 
@@ -225,4 +229,31 @@ len: 3
 value: 'moo'
 type: str
 len: 3
+''')
+
+
+def test_list_parent_classes():
+    class Parent(str, Enum):
+        FIRST = 'first'
+
+    output = inspect_format(Parent.FIRST, short=True)
+    assert_multiline_match(output, r'''
+str: 'Parent.FIRST'
+repr: <Parent\.FIRST: 'first'>
+type: test_inspect\.Parent
+parents: str, enum\.Enum
+len: 5
+''')
+
+
+def test_pydantic_class():
+    class Person(BaseModel):
+        name: str
+
+    output = inspect_format(Person(name='george'), short=True)
+    assert_multiline_match(output, r'''
+str: name='george'
+repr: Person\(name='george'\)
+type: test_inspect\.Person
+parents: pydantic\.main\.BaseModel
 ''')

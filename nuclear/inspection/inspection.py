@@ -80,6 +80,10 @@ def inspect_format(
 
     str_type = _format_type(type(obj))
     output.append(f'{STYLE_BRIGHT_BLUE}type:{RESET} {STYLE_BRIGHT_YELLOW}{str_type}{RESET}')
+    parents = _format_parent_types(obj)
+    if parents:
+        output.append(f'{STYLE_BRIGHT_BLUE}parents:{RESET} {parents}')
+
 
     if isinstance(obj, (list, dict, str, bytes, bytearray, tuple, set, frozenset, range)):
         output.append(f'{STYLE_BRIGHT_BLUE}len:{RESET} {_format_value(len(obj))}')
@@ -264,6 +268,18 @@ def _format_type(type_: Type) -> str:
     if module is None or module == str.__class__.__module__:  # built-in type
         return f'{STYLE_YELLOW}{type_.__name__}{RESET}'
     return f'{STYLE_YELLOW}{module}.{type_.__name__}{RESET}'
+
+
+def _get_parent_types(type_: Type) -> Iterable[str]:
+    if hasattr(type_, '__bases__'):
+        for base_type in type_.__bases__:
+            if base_type == object:
+                continue
+            yield _format_type(base_type)
+
+
+def _format_parent_types(obj: Any) -> str:
+    return ', '.join(_get_parent_types(type(obj)))
 
 
 def _shorten_string(text: str) -> str:
