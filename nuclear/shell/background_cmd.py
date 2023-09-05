@@ -96,7 +96,7 @@ class BackgroundCommand:
 
         children = _get_child_processes(self._process.pid)
         for child_pid in children:
-            if self._debug or True:
+            if self._debug:
                 log.debug(f'terminating child process', pid=child_pid)
             try:
                 os.kill(child_pid, signal.SIGTERM)

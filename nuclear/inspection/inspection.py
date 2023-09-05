@@ -76,10 +76,10 @@ def inspect_format(
         output.append(f'{STYLE_BRIGHT_BLUE}value:{RESET} {str_value}')
     else:
         output.append(f'{STYLE_BRIGHT_BLUE}str:{RESET} {str_value}')
-        output.append(f'{STYLE_BRIGHT_BLUE}repr:{RESET} {repr_value}')
+        output.append(f'{STYLE_BRIGHT_BLUE}repr:{RESET} {STYLE_BRIGHT}{repr_value}{RESET}')
 
     str_type = _format_type(type(obj))
-    output.append(f'{STYLE_BRIGHT_BLUE}type:{RESET} {STYLE_BRIGHT_YELLOW}{str_type}{RESET}')
+    output.append(f'{STYLE_BRIGHT_BLUE}type:{RESET} {str_type}')
     parents = _format_parent_types(obj)
     if parents:
         output.append(f'{STYLE_BRIGHT_BLUE}parents:{RESET} {parents}')
@@ -232,7 +232,7 @@ def _format_value(value: Any, indent: int = 0) -> str:
         return _format_dict_value(value, indent=indent+1)
     if isinstance(value, list):
         return _format_list_value(value, indent=indent+1)
-    return str(value)
+    return f"{STYLE_GREEN}{str(value)}{RESET}"
 
 
 def _format_dict_value(dic: Dict, indent: int) -> str:
