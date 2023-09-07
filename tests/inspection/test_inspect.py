@@ -86,7 +86,6 @@ Public attributes:
 
 def test_inspect_clibuilder():
     cli = CliBuilder().has(argument('n', type=int))
-    ins(cli)
     inspect(cli)
     output = inspect_format(cli)
     assert_multiline_match(output, r'''
