@@ -6,12 +6,16 @@ that allows you to delve into and examine unknown objects at runtime.
 ## WAT inspector
 > "Wat" is a variant of the English word "what" that is often used to express confusion or disgust
 
-If you are deep down in the Python console, dazed and confused, and you're like "WAT? What's that thing?", that's where `wat` inspector comes in handy.
+If you find yourself deep within the Python console, feeling dazed and confused,
+wondering "WAT? What's that thing?",
+that's where the `wat` inspector comes in handy.
 
 Nuclear comes with the `wat` object that can quickly inspect things by using the division operator (to avoid typing parentheses). 
 
-Start the Python Interpreter (or attach to your program) and execute `wat / object` on any `object` to investigate
-its **type**, **formatted value**, **attributes**, **methods**, **parent types**, **signature**, **documentation**, and even **source code**.
+Start the Python Interpreter (or attach to your program) and execute `wat / object` on any `object`
+to investigate its
+**type**, **formatted value**, **variables**, **methods**, **parent types**, **signature**,
+**documentation**, and even its **source code**.
 
 <video width="100%" src="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect.mp4" controls="true" allowfullscreen="true" poster="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect-poster.png"></video>
 
@@ -21,7 +25,7 @@ Import inspection tools from **nuclear** package.
 pip install nuclear
 ```
 ```python
-from nuclear import inspect, wat, wats
+from nuclear import wat, wats, inspect
 ```
 
 Alternatively, use **Insta-Load** in the section below.
