@@ -53,11 +53,6 @@ def inspect(
     ))
 
 
-def ins(obj: Any, **kwargs):
-    """Inspect object's short, elementary data: value, type, signature"""
-    inspect(obj, short=True, **kwargs)
-
-
 def inspect_format(
     obj: Any,
     *,

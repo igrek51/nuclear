@@ -3,7 +3,7 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-from nuclear import CliBuilder, argument, inspect, ins, wat
+from nuclear import CliBuilder, argument, inspect, wat
 from nuclear.inspection.inspection import inspect_format
 from tests.asserts import assert_multiline_match, remove_ansi_sequences, StdoutCap
 

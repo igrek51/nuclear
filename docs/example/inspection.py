@@ -1,5 +1,5 @@
 #!/usr/bin/env python3
-from nuclear import inspect, ins, wat, wats
+from nuclear import inspect, wat, wats
 
 from pydantic import BaseModel
 
