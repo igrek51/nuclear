@@ -243,6 +243,24 @@ type: test_inspect\.Parent
 parents: str, enum\.Enum
 len: 5
 ''')
+    
+
+def test_list_deep_mro_classes():
+    class Grand(object):
+        pass
+
+    class Father(Grand):
+        pass
+
+    class Son(Father):
+        pass
+
+    output = inspect_format(Son(), short=True)
+    assert_multiline_match(output, r'''
+value: <test_inspect.test_list_deep_mro_classes.<locals>.Son object at .*>
+type: test_inspect.Son
+parents: test_inspect.Father, test_inspect.Grand
+''')
 
 
 def test_pydantic_class():

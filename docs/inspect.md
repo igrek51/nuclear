@@ -87,7 +87,7 @@ wat / 'stringy'
 
 ![](./img/wat-string.png)
 
-## Discover function's signature
+### Discover function's signature
 See the docstrings and the signature of a function or a method to see how to use it.
 
 ```python

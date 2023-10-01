@@ -266,8 +266,10 @@ def _format_type(type_: Type) -> str:
 
 
 def _get_parent_types(type_: Type) -> Iterable[str]:
-    if hasattr(type_, '__bases__'):
-        for base_type in type_.__bases__:
+    if hasattr(type_, '__mro__'):
+        for index, base_type in enumerate(type_.__mro__):
+            if index == 0:
+                continue
             if base_type == object:
                 continue
             yield _format_type(base_type)
