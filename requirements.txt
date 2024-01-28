@@ -1,2 +1,2 @@
 colorama
-dataclasses; python_version < '3.7'
+pydantic >= 2.0

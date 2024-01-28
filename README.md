@@ -383,7 +383,7 @@ Install package from [PyPI repository](https://pypi.org/project/nuclear) using p
 python3 -m pip install --upgrade nuclear
 ```
 
-You need Python 3.6 or newer.
+You need Python 3.7 or newer.
 
 ### Install package in develop mode
 You can install package in develop mode in order to make any changes for your own:
