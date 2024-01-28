@@ -3,9 +3,9 @@ from .builder.rule_factory import subcommand, flag, dictionary, parameter, prima
     default_action
 from .shell.shell_utils import shell, sh, CommandError
 from .shell.background_cmd import BackgroundCommand
-from .sublog.catch import exception_handler
+from .sublog.catch import error_handler
 from .sublog.sublog_logger import logger, log, log_exception, add_context
-from .sublog.exception import get_exception_details, unwrap
+from .sublog.exception import exception_details, unwrap
 from .sublog.context_error import ContextError
 from .inspection.inspection import inspect, wat, wats
 

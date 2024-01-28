@@ -1,2 +1,2 @@
-from .shell_utils import shell, shell_error_code, shell_output, CommandError
+from .shell_utils import shell, sh, CommandError
 from .background_cmd import BackgroundCommand

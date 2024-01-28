@@ -1,5 +1,4 @@
-from nuclear.sublog.sublog_logger import logger
-from nuclear.sublog import root_context_logger
+from nuclear.sublog import logger, error_handler
 from tests.asserts import MockIO
 
 
@@ -31,18 +30,18 @@ def test_root_context_logger():
     with MockIO() as mockio:
         logger.debug('outside context', a=4)
 
-        with root_context_logger(request_id=0xdeaddead):
-            logger.debug('got request')
+        with logger.contextualize(request_id=0xdeaddead) as context_logger:
+            context_logger.debug('got request')
 
-            with root_context_logger(user='igrek'):
-                logger.info('logged in', page='home')
-                with logerr():
-                    logger.warning('im a root')
+            with context_logger.contextualize(user='igrek') as logger3:
+                logger3.info('logged in', page='home')
+                with error_handler():
+                    logger3.warning('im a root')
                     raise RuntimeError("I'm a pickle")
 
-            log.debug('logged out')
+            context_logger.debug('logged out')
 
-        log.debug('exited')
+        logger.debug('exited')
 
         mockio.assert_match_uncolor(' outside context a=4$')
         mockio.assert_match_uncolor(' got request request_id=3735936685$')

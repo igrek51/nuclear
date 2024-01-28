@@ -8,7 +8,7 @@ from typing import Dict, Any
 from colorama import Fore, Style
 
 from nuclear.sublog.context_error import ContextError
-from nuclear.sublog.exception import get_exception_details
+from nuclear.sublog.exception import exception_details
 
 LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message)s'
 LOG_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
@@ -20,14 +20,14 @@ log_level = os.environ.get('LOG_LEVEL', 'debug')
 
 
 def _create_logging_logger() -> logging.Logger:
-    log_level = _get_logging_level(log_level)
     logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT, level=logging.INFO, datefmt=LOG_DATE_FORMAT, force=True)
 
     for handler in logging.getLogger().handlers:
         handler.setFormatter(ColoredFormatter(handler.formatter))
 
+    level = _get_logging_level(log_level)
     root_logger = logging.getLogger(LOGGING_LOGGER_NAME)
-    root_logger.setLevel(log_level)
+    root_logger.setLevel(level)
     return root_logger
 
 
@@ -106,7 +106,7 @@ class ContextLogger:
             return message
         
     def exception(self, e: BaseException):
-        error_msg: str = get_exception_details(e)
+        error_msg: str = exception_details(e)
         self.error(error_msg)
         
     def contextualize(self, **ctx) -> 'ContextLogger':
@@ -129,7 +129,7 @@ def log_exception(e: BaseException):
     """
     Log exception in concise one-line format containing message, exception type and short traceback
     """
-    error_msg: str = get_exception_details(e)
+    error_msg: str = exception_details(e)
     logger.error(error_msg)
 
 

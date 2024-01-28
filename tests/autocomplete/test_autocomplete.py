@@ -1,4 +1,4 @@
-from nuclear import *
+from nuclear import CliBuilder, subcommand, parameter, flag, argument, arguments
 from tests.asserts import MockIO
 
 

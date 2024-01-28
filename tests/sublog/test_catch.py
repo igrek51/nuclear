@@ -1,14 +1,14 @@
 from nuclear import CliBuilder
-from nuclear.sublog import wrap_context, logerr, log_exception
+from nuclear.sublog import add_context, error_handler, log_exception
 from tests.asserts import MockIO
 import importlib.util
 
 
 def test_sublog_traceback():
     with MockIO() as mockio:
-        with logerr():
-            with wrap_context('initializing', request_id=42):
-                with wrap_context('liftoff', speed='zero'):
+        with error_handler():
+            with add_context('initializing', request_id=42):
+                with add_context('liftoff', speed='zero'):
                     disaster()
 
         mockio.assert_match_uncolor('ERROR initializing: liftoff: disaster request_id=42 speed=zero '
@@ -29,7 +29,7 @@ def reason():
 def test_keyboard_interrupt():
     with MockIO() as mockio:
         try:
-            with logerr():
+            with error_handler():
                 raise KeyboardInterrupt()
             assert False, 'should exit'
         except SystemExit as e:
@@ -40,7 +40,7 @@ def test_keyboard_interrupt():
 
 def test_catch_with_context_name():
     with MockIO() as mockio:
-        with logerr('hacking time'):
+        with error_handler('hacking time'):
             raise RuntimeError('nope')
 
         mockio.assert_match_uncolor('ERROR hacking time: nope '
@@ -50,7 +50,7 @@ def test_catch_with_context_name():
 
 def test_catch_chained_exception_cause():
     with MockIO() as mockio:
-        with logerr('hacking time'):
+        with error_handler('hacking time'):
             try:
                 raise AttributeError('real cause')
             except AttributeError as e:
@@ -63,7 +63,7 @@ def test_catch_chained_exception_cause():
 
 def test_recover_from_dynamically_imported_module():
     with MockIO() as mockio:
-        with logerr('hacking time'):
+        with error_handler('hacking time'):
 
             spec = importlib.util.spec_from_file_location("dynamic", 'tests/sublog/res/dynamic.py')
             ext_module = importlib.util.module_from_spec(spec)

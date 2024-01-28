@@ -11,7 +11,7 @@ PRINT_TRACEBACK = is_env_flag_enabled('PRINT_TRACEBACK', 'true')
 
 
 @contextmanager
-def exception_handler(context_name: str = ''):
+def error_handler(context_name: str = ''):
     """
     Catch all exceptions and display traceback in pretty, concise format
     :param context_name: description of the operation to show in case of error

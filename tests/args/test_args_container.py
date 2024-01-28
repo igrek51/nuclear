@@ -1,5 +1,5 @@
-from nuclear import *
 from nuclear.args.container import ArgsContainer
+from nuclear import CliBuilder, parameter, flag
 from tests.asserts import MockIO, assert_error
 
 

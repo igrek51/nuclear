@@ -1,18 +1,18 @@
-from nuclear.sublog import wrap_context, ContextError, log, logerr, short_exception_details
+from nuclear.sublog import add_context, ContextError, log, error_handler, exception_details
 from tests.asserts import MockIO
 
 
 def test_sublog_wrapping():
     with MockIO() as mockio:
-        with logerr():
-            with wrap_context('initializing', request_id=42):
-                with wrap_context('liftoff', speed='zero'):
+        with error_handler():
+            with add_context('initializing', request_id=42):
+                with add_context('liftoff', speed='zero'):
                     raise RuntimeError('dupa')
 
-        with logerr():
+        with error_handler():
             raise ContextError('dupa2', a=5, z='fifteen')
 
-        with logerr():
+        with error_handler():
             raise RuntimeError('dupa3')
 
         log.info('success', param='with_param')
@@ -33,19 +33,19 @@ def test_sublog_wrapping():
 
 def test_sublog_wrapping_try_string():
     try:
-        with wrap_context('initializing', request_id=42):
-            with wrap_context('liftoff', speed='zero'):
+        with add_context('initializing', request_id=42):
+            with add_context('liftoff', speed='zero'):
                 try:
                     raise ValueError('dupa')
                 except ValueError as e:
                     raise RuntimeError('parent') from e
     except Exception as e:
         assert str(e) == 'initializing: liftoff: parent: dupa'
-        assert short_exception_details(e).startswith('initializing: liftoff: parent: dupa, cause=ValueError, traceback=')
+        assert exception_details(e).startswith('initializing: liftoff: parent: dupa, cause=ValueError, traceback=')
 
 
     try:
-        with wrap_context('initializing'):
+        with add_context('initializing'):
             try:
                 raise ValueError('nothing inside')
             except ValueError as e:

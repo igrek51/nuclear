@@ -7,8 +7,7 @@ from nuclear.builder.decorator_builder import create_decorated_subcommand
 from nuclear.help.help import print_version, print_help, print_usage
 from nuclear.parser.error import CliSyntaxError, CliDefinitionError
 from nuclear.parser.parser import Parser
-from nuclear.sublog import log
-from nuclear.sublog.catch import logerr
+from nuclear.sublog import logger, error_handler
 from .rule import DefaultActionRule, CliRule, SubcommandRule
 from .rule_factory import default_action, primary_option, arguments, argument, subcommand
 
@@ -82,7 +81,7 @@ class CliBuilder:
         If actions need some parameters, they will be injected based on the parsed arguments.
         """
         if self.__log_error:
-            with logerr():
+            with error_handler():
                 self.run_with_args(sys.argv[1:])
         else:
             self.run_with_args(sys.argv[1:])
@@ -92,10 +91,10 @@ class CliBuilder:
             parser = self.__create_parser(args)
             parser.parse_args(args)
         except CliDefinitionError as e:
-            log.error(f'CLI Definition error: {e}')
+            logger.error(f'CLI Definition error: {e}')
             raise e
         except CliSyntaxError as e:
-            log.error(f'Syntax error: {e}')
+            logger.error(f'Syntax error: {e}')
             if self.__usage_onerror:
                 self.print_usage()
             if self.__reraise_error:

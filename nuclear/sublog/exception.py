@@ -5,7 +5,7 @@ from typing import Collection, Iterable
 from nuclear.sublog.context_error import ContextError
 
 
-def get_exception_details(e: BaseException) -> str:
+def exception_details(e: BaseException) -> str:
     """
     Return concise one-line details of exception, containing message, exception type and short traceback
     """
