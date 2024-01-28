@@ -1,7 +1,7 @@
 from typing import List, Optional
 
 
-class ArgsQue(object):
+class ArgsQue:
     def __init__(self, args: List[str]):
         self.__args = args
         self.__current_index = 0

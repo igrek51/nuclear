@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from nuclear.sublog.context_logger import log
+from nuclear.sublog.sublog_logger import logger
 
 
 def shell(
@@ -47,9 +47,9 @@ def shell(
     process = subprocess.Popen(cmd, **popen_kwargs)
     if print_log:
         if independent:
-            log.debug('Starting process', cmd=cmd, pid=process.pid)
+            logger.debug('Starting process', cmd=cmd, pid=process.pid)
         else:
-            log.debug(f'Command: {cmd}')
+            logger.debug(f'Command: {cmd}')
 
     try:
         if raw_output:
@@ -76,8 +76,9 @@ def shell(
             raise CommandError(cmd, stdout, process.returncode)
         return captured_stream.getvalue()
     except KeyboardInterrupt:
-        log.warning('killing subprocess', pid=process.pid)
-        process.kill()
+        if not independent:
+            logger.warning('killing subprocess', pid=process.pid)
+            process.kill()
         raise
 
 
@@ -99,5 +100,6 @@ class ShellExecutor:
 
     def __add__(self, other: str) -> str:
         return shell(other)
+
 
 sh = ShellExecutor()

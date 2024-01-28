@@ -17,7 +17,7 @@ from .validate import validate_rules, check_strict_choices, check_required_argum
 from .value import parse_value_rule, parse_typed_value
 
 
-class Parser(object):
+class Parser:
     def __init__(self,
                  rules: List[CliRule],
                  run: Optional[Action] = None,

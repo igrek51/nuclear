@@ -7,7 +7,7 @@ from nuclear.builder.typedef import Action
 
 
 @dataclass
-class RunContext(object):
+class RunContext:
     args_container: ArgsContainer
     action: Optional[Action]
     active_subcommands: List[SubcommandRule]

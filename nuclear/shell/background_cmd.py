@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Callable, List, Optional
 
 from nuclear.shell.shell_utils import CommandError
-from nuclear.sublog.context_logger import log
+from nuclear.sublog.sublog_logger import logger
 
 
 class BackgroundCommand:
@@ -64,7 +64,7 @@ class BackgroundCommand:
                 on_error(CommandError(cmd, stdout, stream._process.returncode))
 
             if debug:
-                log.debug(f'Command finished: {cmd}')
+                logger.debug(f'Command finished: {cmd}')
 
         self._monitor_thread = threading.Thread(
             target=monitor_output,
@@ -73,7 +73,7 @@ class BackgroundCommand:
         )
 
         if debug:
-            log.debug(f'Command: {cmd}')
+            logger.debug(f'Command: {cmd}')
         if shell:
             process_args = cmd
         else:
@@ -97,19 +97,19 @@ class BackgroundCommand:
         children = _get_child_processes(self._process.pid)
         for child_pid in children:
             if self._debug:
-                log.debug(f'terminating child process', pid=child_pid)
+                logger.debug(f'terminating child process', pid=child_pid)
             try:
                 os.kill(child_pid, signal.SIGTERM)
             except ProcessLookupError as e:
                 if e.errno == 3:
-                    log.debug('child process has gone while terminating', error=e.strerror, pid=child_pid)
+                    logger.debug('child process has gone while terminating', error=e.strerror, pid=child_pid)
                 else:
                     raise e
 
         self._process.terminate()
         self._process.poll()  # wait for subprocess
         if self._debug:
-            log.debug(f'subprocess terminated', pid=self._process.pid)
+            logger.debug(f'subprocess terminated', pid=self._process.pid)
         self._monitor_thread.join()  # wait for thread is finished
 
     def wait(self):
@@ -132,7 +132,7 @@ def _get_child_processes(pid: int) -> List[int]:
     children_pids = []
     proc_task_path = Path(f'/proc/{pid}/task')
     if not proc_task_path.is_dir():
-        log.warn(f"Can't find process task directory: {proc_task_path}")
+        logger.warn(f"Can't find process task directory: {proc_task_path}")
         return []
     tasks = [t for t in proc_task_path.iterdir()]
     for task in tasks:

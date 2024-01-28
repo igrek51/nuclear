@@ -3,7 +3,7 @@ from typing import Dict, Any
 from nuclear.parser.keyword import format_var_name
 
 
-class ArgsContainer(object):
+class ArgsContainer:
     def __init__(self, _vars: Dict[str, Any]):
         self.__vars = _vars
 

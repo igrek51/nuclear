@@ -1,17 +1,18 @@
-from nuclear.sublog import log, context_logger, root_context_logger, logerr, get_logger
+from nuclear.sublog.sublog_logger import logger
+from nuclear.sublog import root_context_logger
 from tests.asserts import MockIO
 
 
 def test_context_logger():
     with MockIO() as mockio:
-        with context_logger(request_id=0xdeaddead) as logger:
-            logger.debug('got request')
-            with context_logger(logger, user='igrek') as logger2:
-                logger2.info('logged in', page='sweet home')
-                log.warn('im a root')
+        with logger.contextualize(request_id=0xdeaddead) as logger2:
+            logger2.debug('got request')
+            with logger2.contextualize(user='igrek') as logger3:
+                logger3.info('logged in', page='sweet home')
+                logger.warn('im a root')
 
-            logger.debug('logged out')
-        log.debug(42)
+            logger2.debug('logged out')
+        logger.debug(42)
 
         # datetime
         mockio.assert_match('^\x1b\\[2m\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\]\x1b\\[0m ')
@@ -28,15 +29,15 @@ def test_context_logger():
 
 def test_root_context_logger():
     with MockIO() as mockio:
-        log.debug('outside context', a=4)
+        logger.debug('outside context', a=4)
 
         with root_context_logger(request_id=0xdeaddead):
-            log.debug('got request')
+            logger.debug('got request')
 
             with root_context_logger(user='igrek'):
-                log.info('logged in', page='home')
+                logger.info('logged in', page='home')
                 with logerr():
-                    log.warning('im a root')
+                    logger.warning('im a root')
                     raise RuntimeError("I'm a pickle")
 
             log.debug('logged out')
@@ -55,11 +56,9 @@ def test_root_context_logger():
 
 def test_child_logger():
     with MockIO() as mockio:
-        logger = get_logger(__name__)
         logger.warning('beware of Python loggers')
         mockio.assert_match_uncolor('] WARN  beware of Python loggers$')
 
     with MockIO() as mockio:
-        logger = get_logger()
         logger.warning('beware of Python loggers')
         mockio.assert_match_uncolor('] WARN  beware of Python loggers$')

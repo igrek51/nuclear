@@ -3,7 +3,7 @@ from typing import Dict, Any
 from .keyword import format_var_name
 
 
-class InternalVars(object):
+class InternalVars:
     def __init__(self):
         self.vars: Dict[str, Any] = {}
 

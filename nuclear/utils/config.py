@@ -5,7 +5,7 @@ from typing import Type, TypeVar
 from pydantic import BaseModel
 import yaml
 
-from nuclear.sublog.context_logger import log
+from nuclear import logger
 
 T = TypeVar("T", bound=BaseModel)
 
@@ -18,7 +18,7 @@ def load_config(clazz: Type[T]) -> T:
     """
     config_file_path = os.environ.get('CONFIG_FILE')
     if not config_file_path:
-        log.warning('CONFIG_FILE unspecified, loading default config')
+        logger.warning('CONFIG_FILE unspecified, loading default config')
         return clazz()
 
     path = Path(config_file_path)
@@ -30,7 +30,7 @@ def load_config(clazz: Type[T]) -> T:
             config_dict = yaml.load(file, Loader=yaml.FullLoader)
             config = clazz.model_validate(config_dict)
 
-            log.info(f'config loaded from {config_file_path}: {config}')
+            logger.info(f'config loaded from {config_file_path}: {config}')
             return config
     except Exception as e:
         raise RuntimeError('loading config failed') from e

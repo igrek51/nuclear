@@ -14,7 +14,7 @@ from nuclear.version import __version__
 
 
 @dataclass
-class _OptionHelp(object):
+class _OptionHelp:
     cmd: str
     help: str
     parent: '_OptionHelp' = None
