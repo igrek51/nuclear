@@ -90,3 +90,14 @@ class CommandError(RuntimeError):
 
     def __str__(self):
         return f'command failed: {self.cmd}: {self.stdout}'
+
+
+class ShellExecutor:
+    """An instance for running shell commands with short syntax: sh+'command'"""
+    def __call__(self, cmd: str) -> str:
+        return shell(cmd)
+
+    def __add__(self, other: str) -> str:
+        return shell(other)
+
+sh = ShellExecutor()
