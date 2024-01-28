@@ -23,7 +23,6 @@ test:
 
 readme:
 	cat docs/about.md > $(OUTPUT_README)
-
 	cat docs/demo.md >> $(OUTPUT_README)
 	cat docs/toc.md >> $(OUTPUT_README)
 	cat docs/how-it-works.md >> $(OUTPUT_README)
