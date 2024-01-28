@@ -7,6 +7,7 @@ import logging
 import mock
 
 from nuclear.parser.error import CliError
+from nuclear.sublog.sublog_logger import get_logger
 
 
 def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str = None):
@@ -42,7 +43,7 @@ class MockIO:
         self.old_out, self.old_err = sys.stdout, sys.stderr
 
         # capture output from loggers
-        self.logger = logging.getLogger('nuclear.sublog')
+        self.logger = get_logger('nuclear.sublog')
         self.old_handler, self.new_handler = None, None
         if self.logger.hasHandlers():
             self.old_handler = self.logger.handlers[0]

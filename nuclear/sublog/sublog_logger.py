@@ -28,7 +28,9 @@ def _create_logging_logger() -> logging.Logger:
     level = _get_logging_level(log_level)
     root_logger = logging.getLogger(LOGGING_LOGGER_NAME)
     root_logger.setLevel(level)
-    return root_logger
+    root_logger.propagate = False
+
+    return root_logger.getChild(__name__)
 
 
 class ColoredFormatter(logging.Formatter):

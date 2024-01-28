@@ -1,4 +1,4 @@
-from nuclear.sublog import add_context, ContextError, log, error_handler, exception_details
+from nuclear.sublog import add_context, ContextError, logger, error_handler, exception_details
 from tests.asserts import MockIO
 
 
@@ -15,9 +15,9 @@ def test_sublog_wrapping():
         with error_handler():
             raise RuntimeError('dupa3')
 
-        log.info('success', param='with_param')
-        log.warn('attention')
-        log.debug('trace')
+        logger.info('success', param='with_param')
+        logger.warn('attention')
+        logger.debug('trace')
 
         mockio.assert_match_uncolor('ERROR initializing: liftoff: dupa '
                                     'request_id=42 speed=zero '

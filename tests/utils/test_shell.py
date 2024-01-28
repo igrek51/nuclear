@@ -22,7 +22,7 @@ def test_shell_error_code():
     except CommandError as e:
         assert e.cmd == 'shiiiiit'
         assert e.return_code != 0
-        assert 'command error: shiiiiit: ' in str(e)
+        assert 'command failed: shiiiiit: ' in str(e)
 
 
 def test_write_stdout_to_file():
@@ -95,4 +95,4 @@ def test_background_command_failed():
     cmd = BackgroundCommand('shiiiiit', on_error=on_error)
     cmd.wait()
     assert not cmd.is_running
-    assert 'command error: shiiiiit' in str(error)
+    assert 'command failed: shiiiiit' in str(error)
