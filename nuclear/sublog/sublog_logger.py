@@ -3,12 +3,13 @@ import logging
 import os
 import sys
 import threading
+import traceback
 from typing import Dict, Any
 
 from colorama import Fore, Style
 
 from nuclear.sublog.context_error import ContextError
-from nuclear.sublog.exception import exception_details
+from nuclear.sublog.exception import _error_message, _get_traceback_lines, _root_cause_type, exception_details
 
 LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message)s'
 LOG_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
@@ -72,8 +73,7 @@ class ContextLogger:
             return message
         
     def exception(self, e: BaseException):
-        error_msg: str = exception_details(e)
-        self.error(error_msg)
+        log_exception(e)
         
     def contextualize(self, **ctx) -> 'ContextLogger':
         merged_context = {**self.ctx, **ctx}
@@ -95,8 +95,22 @@ def log_exception(e: BaseException):
     """
     Log exception in concise one-line format containing message, exception type and short traceback
     """
-    error_msg: str = exception_details(e)
-    logger.error(error_msg)
+    ex_type = type(e)
+    tb = e.__traceback__
+
+    if isinstance(e, ContextError):
+        ctx = e.ctx
+    else:
+        ctx = {}
+
+    traceback_ex = traceback.TracebackException(ex_type, e, tb, limit=None)
+    traceback_lines = list(_get_traceback_lines(traceback_ex))
+    traceback_str = ', '.join(traceback_lines)
+    ctx['cause'] = _root_cause_type(e)
+    ctx['traceback'] = traceback_str
+
+    error_msg = _error_message(e)
+    logger.error(error_msg, **ctx)
 
 
 @contextmanager

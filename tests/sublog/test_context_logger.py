@@ -48,7 +48,7 @@ def test_root_context_logger():
         mockio.assert_match_uncolor(' logged in request_id=3735936685 user=igrek page=home$')
         mockio.assert_match_uncolor(' im a root request_id=3735936685 user=igrek$')
         mockio.assert_match_uncolor(
-            ' I\'m a pickle request_id=3735936685 user=igrek cause=RuntimeError traceback=.+:40$')
+            ' I\'m a pickle cause=RuntimeError traceback=.+:40$')
         mockio.assert_match_uncolor(' logged out request_id=3735936685$')
         mockio.assert_match_uncolor(' exited$')
 
