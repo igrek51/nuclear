@@ -40,32 +40,26 @@ code = 'eJzNGu1u20byf55i4f4QlTCq3dwHoEa5cxs3DZAmh8S9ILANlpJWNhuKFLhUEkcnoA9xz3AP
 exec(zlib.decompress(base64.b64decode(code.encode())).decode(), globals())
 ```
 
-Now you can use `wat`, `wats` or `inspect`.
+Now you can use `wat`.
 
-## Options & aliases
-Instead of `wat(object)` syntax, you can use shorter `wat / object` which has the same result.
+## Usage & modifiers
+A short, no-parentheses syntax `wat / object` is equivalent to `wat(object)`.
 
-You can call `wat(**options) / object` with the following `options`:
+You can call `wat.modifiers / object` (or `wat.modifiers(object)`)
+with the following **modifiers**:
 
-- `short=True` to hide attributes (variables and methods)
-- `dunder=True` to display dunder attributes
-- `docs=False` to hide documentation for functions and classes
-- `long=True` to show non-abbreviated values and documentation
-- `code=True` to reveal the source code of a function, method, or class
-- `all=True` to include all available information
+- `.short` to hide attributes (variables and methods)
+- `.long` to show non-abbreviated values and documentation
+- `.dunder` to display dunder attributes
+- `.code` to reveal the source code of a function, method, or class
+- `.nodocs` to hide documentation for functions and classes
+- `.all` to include all available information
+
+You can chain modifiers, e.g. `wat.long.dunder / object`.
+
+Call `wat()` to inspect `locals()` variables.
 
 Type `wat` in the interpreter to learn more about this object itself.
-
-You can also use `wats` alias or `inspect` function:
-```python
-from nuclear import wat, wats, inspect
-obj = {None}
-wat / obj  # Default ouput: value + type + public attributes
-wats / obj  # Short output: value + type. Equivalent to: wat(short=True) / obj
-inspect(obj)  # Same, but functional. Equivalent to: wat / obj
-inspect(obj, **options)  # Equivalent to: wat(**options) / obj
-wat(all=True) / obj  # Display all information, including dunder attributes, docs, code
-```
 
 ## Use cases
 
@@ -73,7 +67,7 @@ wat(all=True) / obj  # Display all information, including dunder attributes, doc
 In a dynamic typing language like Python, it's often hard to determine the type of an object. WAT Inspector can help you with that by showing the name of the type with the module it comes from.
 
 ```python
->>> wats / {None}
+>>> wat.short({None})
 value: {None}
 type: set
 len: 1
@@ -84,7 +78,7 @@ Listing methods, functions and looking up their signature is extremely beneficia
 Plus, you can read their docstrings.
 
 ```python
-wat / 'stringy'
+wat('stringy')
 ```
 
 ![](./img/wat-string.png)
@@ -93,7 +87,7 @@ wat / 'stringy'
 See the docstrings and the signature of a function or a method to see how to use it.
 
 ```python
-wat / str.split
+wat(str.split)
 ```
 
 ![](./img/wat-str-split.png)
@@ -121,7 +115,7 @@ Then, you can navigate further, e.g. `wat / pathlib.fnmatch`.
 
 ### Explore dunder attributes
 ```python
-wat(dunder=True) / {}
+wat.dunder / {}
 ```
 
 ![](./img/wat-dict-dunder.png)
@@ -131,7 +125,7 @@ Look up the source code of a function to see how it really works.
 
 ```python
 import re
-wat(code=True) / re.match
+wat.code / re.match
 ```
 
 ![](./img/wat-code-rematch.png)
@@ -151,4 +145,9 @@ logger.debug('done')
 (Pdb) wat / x  # inspect local variable
 ...
 (Pdb) c  # continue execution
+```
+
+### Explore built-ints
+```python
+wat / __builtins__
 ```

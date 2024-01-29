@@ -344,13 +344,14 @@ class Wat:
     
     def _print_help(self):
         text = f"""
-Try `{STYLE_YELLOW}wat(object){RESET}`, `{STYLE_YELLOW}wat / object{RESET}` or `{STYLE_YELLOW}wat.modifiers / object{RESET}` to inspect an {STYLE_YELLOW}object{RESET}. Modifiers are:
+Try {STYLE_YELLOW}wat(object){RESET}, {STYLE_YELLOW}wat / object{RESET} or {STYLE_YELLOW}wat.modifiers / object{RESET} to inspect an {STYLE_YELLOW}object{RESET}. {STYLE_BRIGHT}Modifiers{RESET} are:
   {STYLE_GREEN}.short{RESET} to hide attributes (variables and methods)
   {STYLE_GREEN}.long{RESET} to print non-abbreviated values and documentation
   {STYLE_GREEN}.dunder{RESET} to print dunder attributes
   {STYLE_GREEN}.code{RESET} to print source code of a function, method or class
   {STYLE_GREEN}.nodocs{RESET} to hide documentation for functions and classes
   {STYLE_GREEN}.all{RESET} to include all information
+Call {STYLE_YELLOW}wat(){RESET} to inspect {STYLE_YELLOW}locals(){RESET} variables.
 """.strip()
         if not sys.stdout.isatty():
             text = _strip_color(text)
@@ -366,7 +367,7 @@ Try `{STYLE_YELLOW}wat(object){RESET}`, `{STYLE_YELLOW}wat / object{RESET}` or `
         elif kwargs:
             return Wat(**kwargs)
         else:
-            inspect(globals())
+            inspect(_build_locals_object())
 
     def __truediv__(self, other: Any): return self._react_with(other) # /
     def __add__(self, other: Any): return self._react_with(other) # +
@@ -377,6 +378,8 @@ Try `{STYLE_YELLOW}wat(object){RESET}`, `{STYLE_YELLOW}wat / object{RESET}` or `
 
     def __getattr__(self, name) -> 'Wat':
         if name == 'short':
+            self._params['short'] = True
+        elif name == 's':
             self._params['short'] = True
         elif name == 'long':
             self._params['long'] = True
@@ -398,6 +401,18 @@ wats = Wat(short=True)
 
 def _strip_color(text: str) -> str:
     return re.sub(r'\x1b\[\d+(;\d+)?m', '', text)
+
+
+def _build_locals_object():
+    o = type('locals', (object,), {})()
+    frame = std_inspect.currentframe()
+    try:
+        locals = frame.f_back.f_back.f_locals  # back to caller frame
+        for key, value in locals.items():
+            setattr(o, key, value)
+    finally:
+        del frame
+    return o
 
 
 RESET ='\033[0m'
