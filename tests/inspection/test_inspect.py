@@ -89,12 +89,12 @@ def test_inspect_clibuilder():
     inspect(cli)
     output = inspect_format(cli)
     assert_multiline_match(output, r'''
-value: <nuclear\.builder\.builder\.CliBuilder object at .*>
-type: nuclear.builder.builder.CliBuilder
+value: <nuclear\.cli\.builder\.builder\.CliBuilder object at .*>
+type: nuclear.cli.builder.builder.CliBuilder
 
 Public attributes:
   def add_command\(\*subcommands: str\) \# Decorator for binding function with a CLI command…
-  def has\(\*subrules: nuclear.builder.rule.CliRule\) -> 'CliBuilder' \# Add more CLI rules for the particular level…
+  def has\(\*subrules: nuclear.cli.builder.rule.CliRule\) -> 'CliBuilder' \# Add more CLI rules for the particular level…
   def print_help\(subcommands: List\[str\]\)
   def print_usage\(\)
   def run\(\) \# Parse all the CLI arguments passed to application.…
@@ -115,8 +115,8 @@ Private attributes:
   def _CliBuilder__add_default_rules\(\)
   def _CliBuilder__bash_autocomplete\(cmdline: str, word_idx: Optional\[int\]\)
   def _CliBuilder__bind_decorated_command\(function: Callable\[\.\.\., NoneType\], names: List\[str\]\)
-  def _CliBuilder__create_parser\(args: List\[str\]\) -> nuclear.parser.parser.Parser
-  def _CliBuilder__find_subcommand_rule\(name: str\) -> Optional\[nuclear.builder.rule.SubcommandRule\]
+  def _CliBuilder__create_parser\(args: List\[str\]\) -> nuclear.cli.parser.parser.Parser
+  def _CliBuilder__find_subcommand_rule\(name: str\) -> Optional\[nuclear.cli.builder.rule.SubcommandRule\]
   def _CliBuilder__has_default_action\(\) -> bool
 ''')
 

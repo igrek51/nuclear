@@ -1,5 +1,5 @@
-from .builder.builder import CliBuilder
-from .builder.rule_factory import subcommand, flag, dictionary, parameter, primary_option, argument, arguments, \
+from .cli.builder.builder import CliBuilder
+from .cli.builder.rule_factory import subcommand, flag, dictionary, parameter, primary_option, argument, arguments, \
     default_action
 from .shell.shell_utils import shell, sh, CommandError
 from .shell.background_cmd import BackgroundCommand
