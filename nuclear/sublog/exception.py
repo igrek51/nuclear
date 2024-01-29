@@ -1,6 +1,6 @@
 import os
 import traceback
-from typing import Collection, Iterable, Dict
+from typing import Collection, Iterable, Dict, Tuple
 
 from nuclear.sublog.context_error import ContextError
 
@@ -20,7 +20,7 @@ def exception_details(e: BaseException) -> str:
     return f'{error_msg}, cause={cause}, traceback={traceback_str}'
 
 
-def extended_exception_details(e: BaseException) -> tuple[str, Dict]:
+def extended_exception_details(e: BaseException) -> Tuple[str, Dict]:
     if isinstance(e, ContextError):
         ctx = e.ctx
     else:
