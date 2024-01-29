@@ -5,9 +5,6 @@ from typing import Dict, Any
 from nuclear.sublog.exception import _error_message, _get_traceback_lines, _root_cause_type
 from nuclear.sublog.sublog_logger import logger
 from nuclear.sublog.context_error import ContextError
-from nuclear.utils.env import is_env_flag_enabled
-
-PRINT_TRACEBACK = is_env_flag_enabled('PRINT_TRACEBACK', 'true')
 
 
 @contextmanager
@@ -29,13 +26,12 @@ def error_handler(context_name: str = ''):
 
 
 def _print_error_context(e: Exception, ctx: Dict[str, Any], context_name: str):
-    if PRINT_TRACEBACK:
-        ex_type = type(e)
-        tb = e.__traceback__
-        traceback_ex = traceback.TracebackException(ex_type, e, tb, limit=None)
-        traceback_lines = list(_get_traceback_lines(traceback_ex))
-        traceback_str = ', '.join(traceback_lines)
-        ctx['cause'] = _root_cause_type(e)
-        ctx['traceback'] = traceback_str
+    ex_type = type(e)
+    tb = e.__traceback__
+    traceback_ex = traceback.TracebackException(ex_type, e, tb, limit=None)
+    traceback_lines = list(_get_traceback_lines(traceback_ex))
+    traceback_str = ', '.join(traceback_lines)
+    ctx['cause'] = _root_cause_type(e)
+    ctx['traceback'] = traceback_str
     error_msg = _error_message(e, context_name)
     logger.error(error_msg, **ctx)

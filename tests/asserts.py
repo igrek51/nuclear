@@ -9,6 +9,7 @@ import mock
 from nuclear.parser.error import CliError
 from nuclear.sublog import get_logger, init_logs
 from nuclear.sublog.sublog_logger import LOG_FORMAT, LOG_DATE_FORMAT, ColoredFormatter
+from nuclear.utils.strings import strip_ansi_colors
 
 
 def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str = None):
@@ -163,7 +164,7 @@ class StdoutCap:
 
 def assert_multiline_match(text: str, regex_pattern: str):
     regex_lines = regex_pattern.strip().splitlines()
-    text_lines = remove_ansi_sequences(text).strip().splitlines()
+    text_lines = strip_ansi_colors(text).strip().splitlines()
 
     if len(text_lines) < len(regex_lines):
         missing_lines = "\n".join(regex_lines[len(text_lines):])
@@ -176,10 +177,6 @@ def assert_multiline_match(text: str, regex_pattern: str):
     for index, (regex_line, text_line) in enumerate(zip(regex_lines, text_lines)):
         match = re.fullmatch(regex_line, text_line)
         assert match, f'Actual Line #{index+1}:\n{text_line}\n does not match the Regex pattern:\n{regex_line}'
-
-
-def remove_ansi_sequences(text: str) -> str:
-    return re.sub(r'\x1b\[\d+(;\d+)?m', '', text)
 
 
 def get_logger_handler(logger: logging.Logger) -> Optional[logging.Handler]:

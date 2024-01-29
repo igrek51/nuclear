@@ -1,18 +1,24 @@
 from contextlib import contextmanager
+from datetime import datetime, timezone
 import logging
 import os
 import sys
 import threading
-from typing import Dict, Any
+from typing import Dict, Any, Callable
+import json
 
 from colorama import Fore, Style
 
 from nuclear.sublog.context_error import ContextError
 from nuclear.sublog.exception import extended_exception_details
+from nuclear.utils.env import is_env_flag_enabled
+from nuclear.utils.strings import strip_ansi_colors
 
 LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message)s'
 LOG_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
+ISO_DATE_FORMAT = r'%Y-%m-%dT%H:%M:%S.%fZ'
 LOGGING_LOGGER_NAME = 'nuclear.sublog'
+STRUCTURED_LOGGING = is_env_flag_enabled('STRUCTURED_LOGGING', 'false')
 
 log_level = os.environ.get('LOG_LEVEL', 'debug')
 simultaneous_print_lock = threading.Lock()
@@ -21,10 +27,14 @@ _logging_logger = logging.getLogger(LOGGING_LOGGER_NAME)
 
 def init_logs():
     """Configure loggers: formatters, handlers and log levels"""
-    logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT, level=logging.INFO, datefmt=LOG_DATE_FORMAT, force=True)
-
-    for handler in logging.getLogger().handlers:
-        handler.setFormatter(ColoredFormatter(handler.formatter))
+    if not STRUCTURED_LOGGING:
+        logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT, level=logging.INFO, datefmt=LOG_DATE_FORMAT, force=True)
+        for handler in logging.getLogger().handlers:
+            handler.setFormatter(ColoredFormatter(handler.formatter))
+    else:
+        logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT, level=logging.INFO, datefmt=ISO_DATE_FORMAT, force=True)
+        for handler in logging.getLogger().handlers:
+            handler.setFormatter(StructuredFormatter(handler.formatter))
 
     level = _get_logging_level(log_level)
     root_logger = logging.getLogger(LOGGING_LOGGER_NAME)
@@ -46,30 +56,33 @@ class ContextLogger:
 
     def error(self, message: str, **ctx):
         with simultaneous_print_lock:
-            _logging_logger.error(self._print_log(message, ctx))
-
-    def warn(self, message: str, **ctx):
-        with simultaneous_print_lock:
-            _logging_logger.warning(self._print_log(message, ctx))
+            self._print_log(message, ctx, _logging_logger.error)
 
     def warning(self, message: str, **ctx):
-        self.warn(message, **ctx)
+        with simultaneous_print_lock:
+            self._print_log(message, ctx, _logging_logger.warning)
+
+    def warn(self, message: str, **ctx):
+        self.warning(message, **ctx)
 
     def info(self, message: str, **ctx):
         with simultaneous_print_lock:
-            _logging_logger.info(self._print_log(message, ctx))
+            self._print_log(message, ctx, _logging_logger.info)
 
     def debug(self, message: str, **ctx):
         with simultaneous_print_lock:
-            _logging_logger.debug(self._print_log(message, ctx))
+            self._print_log(message, ctx, _logging_logger.debug)
 
-    def _print_log(self, message: str, ctx: Dict[str, Any]) -> str:
+    def _print_log(self, message: str, ctx: Dict[str, Any], logger_func: Callable):
         merged_context = {**self.ctx, **ctx}
-        display_context = _display_context(merged_context)
-        if display_context:
-            return f'{message} {display_context}'
+        if not STRUCTURED_LOGGING:
+            display_context = _display_context(merged_context)
+            if display_context:
+                logger_func(f'{message} {display_context}')
+            else:
+                logger_func(message)
         else:
-            return message
+            logger_func(message, extra={'extra': merged_context})
         
     def exception(self, e: BaseException):
         log_exception(e)
@@ -125,10 +138,30 @@ class ColoredFormatter(logging.Formatter):
         'DEBUG': f'{Fore.GREEN}DEBUG{Style.RESET_ALL}',
     }
 
-    def format(self, record: logging.LogRecord):
+    def format(self, record: logging.LogRecord) -> str:
         if record.levelname in self.log_level_templates:
             record.levelname = self.log_level_templates[record.levelname].format(record.levelname)
         return self.plain_formatter.format(record)
+
+
+class StructuredFormatter(logging.Formatter):
+    def __init__(self, plain_formatter):
+        logging.Formatter.__init__(self)
+        self.plain_formatter = plain_formatter
+
+    def format(self, record: logging.LogRecord) -> str:
+        timestamp: float = record.created
+        time: str = datetime.fromtimestamp(timestamp, tz=timezone.utc).strftime(ISO_DATE_FORMAT)
+        level: str = record.levelname
+        message: str = strip_ansi_colors(record.msg)
+        extra = record.__dict__.get('extra', {})
+        log_rec = {
+            "time": time,
+            "level": level,
+            "message": message,
+            **extra,
+        }
+        return json.dumps(log_rec)
 
 
 def _get_logging_level(str_level: str) -> int:

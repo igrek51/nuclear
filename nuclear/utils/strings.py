@@ -1,3 +1,4 @@
+import re
 from typing import List, Union, Optional
 
 
@@ -31,3 +32,8 @@ def format_bytes(count: int):
         return f'{count/1024/1024:.2f} MiB'
     else:
         return f'{count/1024/1024/1024:.2f} GiB'
+
+
+def strip_ansi_colors(content: str) -> str:
+    """Remove ANSI escape codes controlling font colors"""
+    return re.sub(r'\x1b\[\d+(;\d+)?m', '', content)

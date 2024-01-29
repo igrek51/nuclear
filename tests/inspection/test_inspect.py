@@ -5,18 +5,18 @@ from pydantic import BaseModel
 
 from nuclear import CliBuilder, argument, inspect, wat
 from nuclear.inspection.inspection import inspect_format
-from tests.asserts import assert_multiline_match, remove_ansi_sequences, StdoutCap
+from tests.asserts import assert_multiline_match, strip_ansi_colors, StdoutCap
 
 
 def test_inspect_primitive_var():
     output = inspect_format(None)
-    assert remove_ansi_sequences(output) == """
+    assert strip_ansi_colors(output) == """
 value: None
 type: NoneType
 """.strip()
 
     output = inspect_format([5])
-    assert remove_ansi_sequences(output) == """
+    assert strip_ansi_colors(output) == """
 value: [
     5,
 ]
@@ -38,7 +38,7 @@ Public attributes:
 """.strip()
     
     output = inspect_format([5], dunder=True)
-    assert "def __eq__(value, /) # Return self==value." in remove_ansi_sequences(output)
+    assert "def __eq__(value, /) # Return self==value." in strip_ansi_colors(output)
 
     output = inspect_format('poo', short=True)
     assert_multiline_match(output, r'''
