@@ -27,7 +27,7 @@ _logging_logger = logging.getLogger(LOGGING_LOGGER_NAME)
 
 def init_logs():
     """Configure loggers: formatters, handlers and log levels"""
-    if not STRUCTURED_LOGGING:
+    if not is_env_flag_enabled('STRUCTURED_LOGGING', 'false'):
         logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT, level=logging.INFO, datefmt=LOG_DATE_FORMAT, force=True)
         for handler in logging.getLogger().handlers:
             handler.setFormatter(ColoredFormatter(handler.formatter))
@@ -53,6 +53,7 @@ def get_logger(logger_name: str) -> logging.Logger:
 class ContextLogger:
     def __init__(self, ctx: Dict[str, Any]):
         self.ctx: Dict[str, Any] = ctx
+        self.structured_logging = STRUCTURED_LOGGING
 
     def error(self, message: str, **ctx):
         with simultaneous_print_lock:
@@ -75,7 +76,7 @@ class ContextLogger:
 
     def _print_log(self, message: str, ctx: Dict[str, Any], logger_func: Callable):
         merged_context = {**self.ctx, **ctx}
-        if not STRUCTURED_LOGGING:
+        if not self.structured_logging:
             display_context = _display_context(merged_context)
             if display_context:
                 logger_func(f'{message} {display_context}')

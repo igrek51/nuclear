@@ -7,8 +7,7 @@ import logging
 import mock
 
 from nuclear.parser.error import CliError
-from nuclear.sublog import get_logger, init_logs
-from nuclear.sublog.sublog_logger import LOG_FORMAT, LOG_DATE_FORMAT, ColoredFormatter
+from nuclear.sublog import init_logs
 from nuclear.utils.strings import strip_ansi_colors
 
 
@@ -41,11 +40,11 @@ class MockIO:
         logger = logging.getLogger('nuclear.sublog')
         logger.setLevel(logging.DEBUG)
         logger.propagate = False
-        handler = logging.StreamHandler(stream=sys.stdout)
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
-        handler.setFormatter(ColoredFormatter(formatter))
-        logger.addHandler(handler)
+        self.extra_handler = logging.getLogger().handlers[0]
+        self.extra_handler.setLevel(logging.DEBUG)
+        formatter = logging.getLogger().handlers[0].formatter
+        self.extra_handler.setFormatter(formatter)
+        logger.addHandler(self.extra_handler)
 
         # mock cli input
         self._mock_args = mock.patch.object(sys, 'argv', ['glue'] + list(in_args))
@@ -79,6 +78,7 @@ class MockIO:
         if self.old_handler is not None:
             self.logger.removeHandler(self.new_handler)
             self.logger.addHandler(self.old_handler)
+        self.logger.removeHandler(self.extra_handler)
 
     def output(self) -> str:
         return self.new_out.getvalue() + self.new_err.getvalue()
@@ -117,11 +117,11 @@ class StdoutCap:
         logger = logging.getLogger('nuclear.sublog')
         logger.setLevel(logging.DEBUG)
         logger.propagate = False
-        handler = logging.StreamHandler(stream=sys.stdout)
-        handler.setLevel(logging.DEBUG)
-        formatter = logging.Formatter(fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
-        handler.setFormatter(ColoredFormatter(formatter))
-        logger.addHandler(handler)
+        self.extra_handler = logging.getLogger().handlers[0]
+        self.extra_handler.setLevel(logging.DEBUG)
+        formatter = logging.getLogger().handlers[0].formatter
+        self.extra_handler.setFormatter(formatter)
+        logger.addHandler(self.extra_handler)
 
         # mock output
         self.new_out, self.new_err = StringIO(), StringIO()
@@ -150,6 +150,7 @@ class StdoutCap:
         if self.old_handler is not None:
             self.logger.removeHandler(self.new_handler)
             self.logger.addHandler(self.old_handler)
+        self.logger.removeHandler(self.extra_handler)
 
     def output(self) -> str:
         return self.new_out.getvalue() + self.new_err.getvalue()
