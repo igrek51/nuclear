@@ -21,8 +21,13 @@ class ContextError(RuntimeError):
         if cause is not None:
             self.__cause__ = cause
 
-    def __str__(self):
-        if self.__cause__ is None:
-            return self.context_message
-        else:
-            return f'{self.context_message}: {self.__cause__}'
+    def __str__(self) -> str:
+        e: Exception = self
+        layers = []
+        while e is not None:
+            if isinstance(e, ContextError):
+                layers.append(e.context_message)
+            else:
+                layers.append(str(e))
+            e = e.__cause__
+        return ': '.join(layers)

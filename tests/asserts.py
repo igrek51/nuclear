@@ -1,13 +1,14 @@
 import re
 import sys
 from io import StringIO
-from typing import Type
+from typing import Type, Optional
 import logging
 
 import mock
 
 from nuclear.parser.error import CliError
-from nuclear.sublog.sublog_logger import get_logger
+from nuclear.sublog import get_logger, init_logs
+from nuclear.sublog.sublog_logger import LOG_FORMAT, LOG_DATE_FORMAT, ColoredFormatter
 
 
 def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str = None):
@@ -35,6 +36,17 @@ def assert_system_exit(action):
 
 class MockIO:
     def __init__(self, *in_args: str):
+        init_logs()
+
+        logger = logging.getLogger('nuclear.sublog')
+        logger.setLevel(logging.DEBUG)
+        logger.propagate = False
+        handler = logging.StreamHandler(stream=sys.stdout)
+        handler.setLevel(logging.DEBUG)
+        formatter = logging.Formatter(fmt=LOG_FORMAT, datefmt=LOG_DATE_FORMAT)
+        handler.setFormatter(ColoredFormatter(formatter))
+        logger.addHandler(handler)
+
         # mock cli input
         self._mock_args = mock.patch.object(sys, 'argv', ['glue'] + list(in_args))
 
@@ -43,10 +55,11 @@ class MockIO:
         self.old_out, self.old_err = sys.stdout, sys.stderr
 
         # capture output from loggers
-        self.logger = get_logger('nuclear.sublog')
         self.old_handler, self.new_handler = None, None
-        if self.logger.hasHandlers():
-            self.old_handler = self.logger.handlers[0]
+        self.logger = logger
+        handler = get_logger_handler(self.logger)
+        if handler is not None:
+            self.old_handler = handler
             self.new_handler = logging.StreamHandler(self.new_out)
             self.new_handler.setLevel(self.old_handler.level)
             self.new_handler.setFormatter(self.old_handler.formatter)
@@ -100,15 +113,17 @@ class MockIO:
 
 class StdoutCap:
     def __init__(self):
+        init_logs()
         # mock output
         self.new_out, self.new_err = StringIO(), StringIO()
         self.old_out, self.old_err = sys.stdout, sys.stderr
 
         # capture output from loggers
-        self.logger = logging.getLogger('nuclear.sublog')
         self.old_handler, self.new_handler = None, None
-        if self.logger.hasHandlers():
-            self.old_handler = self.logger.handlers[0]
+        self.logger = get_logger('nuclear.sublog')
+        handler = get_logger_handler(self.logger)
+        if handler is not None:
+            self.old_handler = handler
             self.new_handler = logging.StreamHandler(self.new_out)
             self.new_handler.setLevel(self.old_handler.level)
             self.new_handler.setFormatter(self.old_handler.formatter)
@@ -157,3 +172,15 @@ def assert_multiline_match(text: str, regex_pattern: str):
 
 def remove_ansi_sequences(text: str) -> str:
     return re.sub(r'\x1b\[\d+(;\d+)?m', '', text)
+
+
+def get_logger_handler(logger: logging.Logger) -> Optional[logging.Handler]:
+    c = logger
+    while c:
+        if c.handlers:
+            return c.handlers[0]
+        if not c.propagate:
+            return None
+        else:
+            c = c.parent
+    return None

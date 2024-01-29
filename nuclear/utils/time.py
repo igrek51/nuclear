@@ -3,6 +3,7 @@ from datetime import datetime, timezone
 PARSE_DATE_FORMATS = [
     '%Y-%m-%dT%H:%M:%S.%fZ',
     '%Y-%m-%dT%H:%M:%SZ',
+    '%Y-%m-%dT%H:%M:%S%z',
     '%Y-%m-%d %H:%M:%S',
     '%Y-%m-%d',
 ]

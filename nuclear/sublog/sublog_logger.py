@@ -14,12 +14,13 @@ LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message
 LOG_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
 LOGGING_LOGGER_NAME = 'nuclear.sublog'
 
-simultaneous_print_lock = threading.Lock()
-
 log_level = os.environ.get('LOG_LEVEL', 'debug')
+simultaneous_print_lock = threading.Lock()
+_logging_logger = logging.getLogger(LOGGING_LOGGER_NAME)
 
 
-def _create_logging_logger() -> logging.Logger:
+def init_logs():
+    """Configure loggers: formatters, handlers and log levels"""
     logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT, level=logging.INFO, datefmt=LOG_DATE_FORMAT, force=True)
 
     for handler in logging.getLogger().handlers:
@@ -28,43 +29,6 @@ def _create_logging_logger() -> logging.Logger:
     level = _get_logging_level(log_level)
     root_logger = logging.getLogger(LOGGING_LOGGER_NAME)
     root_logger.setLevel(level)
-    root_logger.propagate = False
-
-    return root_logger.getChild(__name__)
-
-
-class ColoredFormatter(logging.Formatter):
-    def __init__(self, plain_formatter):
-        logging.Formatter.__init__(self)
-        self.plain_formatter = plain_formatter
-
-    log_level_templates = {
-        'CRITICAL': f'{Style.BRIGHT + Fore.RED}CRIT {Style.RESET_ALL}',
-        'ERROR': f'{Style.BRIGHT + Fore.RED}ERROR{Style.RESET_ALL}',
-        'WARNING': f'{Fore.YELLOW}WARN {Style.RESET_ALL}',
-        'INFO': f'{Fore.BLUE}INFO {Style.RESET_ALL}',
-        'DEBUG': f'{Fore.GREEN}DEBUG{Style.RESET_ALL}',
-    }
-
-    def format(self, record: logging.LogRecord):
-        if record.levelname in self.log_level_templates:
-            record.levelname = self.log_level_templates[record.levelname].format(record.levelname)
-        return self.plain_formatter.format(record)
-
-
-def _get_logging_level(str_level: str) -> int:
-    return {
-        'debug': logging.DEBUG,
-        'info': logging.INFO,
-        'warn': logging.WARNING,
-        'warning': logging.WARNING,
-        'error': logging.ERROR,
-        'crit': logging.CRITICAL,
-        'off': logging.NOTSET,
-    }[str_level.lower()]
-
-
-_logging_logger = _create_logging_logger()
 
 
 def get_logger(logger_name: str) -> logging.Logger:
@@ -147,6 +111,37 @@ def add_context(context_name: str, log: bool = False, **ctx):
         raise ContextError(context_name, **merged_context) from e
     except BaseException as e:
         raise ContextError(context_name, **ctx) from e
+
+
+class ColoredFormatter(logging.Formatter):
+    def __init__(self, plain_formatter):
+        logging.Formatter.__init__(self)
+        self.plain_formatter = plain_formatter
+
+    log_level_templates = {
+        'CRITICAL': f'{Style.BRIGHT + Fore.RED}CRIT {Style.RESET_ALL}',
+        'ERROR': f'{Style.BRIGHT + Fore.RED}ERROR{Style.RESET_ALL}',
+        'WARNING': f'{Fore.YELLOW}WARN {Style.RESET_ALL}',
+        'INFO': f'{Fore.BLUE}INFO {Style.RESET_ALL}',
+        'DEBUG': f'{Fore.GREEN}DEBUG{Style.RESET_ALL}',
+    }
+
+    def format(self, record: logging.LogRecord):
+        if record.levelname in self.log_level_templates:
+            record.levelname = self.log_level_templates[record.levelname].format(record.levelname)
+        return self.plain_formatter.format(record)
+
+
+def _get_logging_level(str_level: str) -> int:
+    return {
+        'debug': logging.DEBUG,
+        'info': logging.INFO,
+        'warn': logging.WARNING,
+        'warning': logging.WARNING,
+        'error': logging.ERROR,
+        'crit': logging.CRITICAL,
+        'off': logging.NOTSET,
+    }[str_level.lower()]
 
 
 def _display_context(ctx: Dict[str, Any]) -> str:

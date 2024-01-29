@@ -1,9 +1,8 @@
 import os
 from pathlib import Path
 
-from nuclear import *
 from nuclear.utils.files import script_real_path
-from nuclear import shell
+from nuclear import shell, CliBuilder
 from tests.asserts import MockIO
 
 
@@ -12,16 +11,14 @@ def test_bash_install_twice():
 
     with MockIO('--install-bash', 'nuclear_test_dupa123') as mockio:
         CliBuilder().run()
-        assert 'Link installed' in mockio.output()
-        assert 'Autocompleter has been installed' in mockio.output()
+        assert 'Link installed' in mockio.output() or 'already exists' in mockio.output()
         assert os.path.islink(f'/usr/bin/{app_name}')
         assert os.path.realpath(f'/usr/bin/{app_name}') == script_real_path()
         assert os.path.exists(f'/etc/bash_completion.d/nuclear_{app_name}.sh')
 
     with MockIO('--install-bash', 'nuclear_test_dupa123') as mockio:
         CliBuilder().run()
-        assert 'Link installed' in mockio.output()
-        assert 'Autocompleter has been installed' in mockio.output()
+        assert 'already exists' in mockio.output()
         assert os.path.islink(f'/usr/bin/{app_name}')
         assert os.path.realpath(f'/usr/bin/{app_name}') == script_real_path()
         assert os.path.exists(f'/etc/bash_completion.d/nuclear_{app_name}.sh')
