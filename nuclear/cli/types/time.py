@@ -1,7 +1,7 @@
 from datetime import datetime, date, time
 from typing import Callable
 
-from nuclear.parser.error import CliSyntaxError
+from nuclear.cli.parser.error import CliSyntaxError
 
 
 def datetime_format(*formats: str) -> Callable[[str], datetime]:

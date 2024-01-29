@@ -3,13 +3,13 @@ import sys
 from dataclasses import dataclass, field
 from typing import List, Set, Optional
 
-from nuclear.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
+from nuclear.cli.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, SubcommandRule, \
     PositionalArgumentRule, ManyArgumentsRule, DictionaryRule, ValueRule
-from nuclear.parser.context import RunContext
-from nuclear.parser.keyword import format_var_names, format_var_name
-from nuclear.parser.parser import Parser
-from nuclear.parser.transform import filter_rules
-from nuclear.parser.value import generate_value_choices
+from nuclear.cli.parser.context import RunContext
+from nuclear.cli.parser.keyword import format_var_names, format_var_name
+from nuclear.cli.parser.parser import Parser
+from nuclear.cli.parser.transform import filter_rules
+from nuclear.cli.parser.value import generate_value_choices
 from nuclear.version import __version__
 
 

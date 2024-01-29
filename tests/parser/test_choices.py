@@ -1,5 +1,5 @@
 from nuclear import parameter
-from nuclear.parser.value import generate_value_choices
+from nuclear.cli.parser.value import generate_value_choices
 
 
 def test_generate_choices_from_list():

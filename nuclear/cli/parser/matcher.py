@@ -1,8 +1,8 @@
 from typing import Optional, Tuple
 
-from nuclear.args.args_que import ArgsQue
-from nuclear.builder.rule import DictionaryRule
-from nuclear.builder.rule import ParameterRule
+from nuclear.cli.args.args_que import ArgsQue
+from nuclear.cli.builder.rule import DictionaryRule
+from nuclear.cli.builder.rule import ParameterRule
 from .error import CliSyntaxError
 
 

@@ -2,7 +2,7 @@ from typing import List, Any, Set, Optional, TypeVar, Iterable, Union
 
 from dataclasses import dataclass, field
 
-from nuclear.parser.keyword import format_var_names
+from nuclear.cli.parser.keyword import format_var_names
 from .typedef import Action, ChoiceProvider, TypeOrParser
 
 

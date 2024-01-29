@@ -1,6 +1,6 @@
 from pathlib import Path
 from nuclear import *
-from nuclear.types.filesystem import existing_file, existing_directory
+from nuclear.cli.types.filesystem import existing_file, existing_directory
 from tests.asserts import MockIO, assert_cli_error
 
 

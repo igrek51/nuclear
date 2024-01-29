@@ -1,9 +1,9 @@
 from dataclasses import dataclass
 from typing import Optional, List, Any, Dict
 
-from nuclear.args.container import ArgsContainer
-from nuclear.builder.rule import SubcommandRule, CliRule
-from nuclear.builder.typedef import Action
+from nuclear.cli.args.container import ArgsContainer
+from nuclear.cli.builder.rule import SubcommandRule, CliRule
+from nuclear.cli.builder.typedef import Action
 
 
 @dataclass

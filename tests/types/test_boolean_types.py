@@ -1,5 +1,5 @@
 from nuclear import *
-from nuclear.types.boolean import boolean
+from nuclear.cli.types.boolean import boolean
 from tests.asserts import MockIO
 
 

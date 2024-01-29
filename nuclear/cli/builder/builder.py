@@ -1,12 +1,12 @@
 import sys
 from typing import Callable, List, Optional
 
-from nuclear.autocomplete.autocomplete import bash_autocomplete
-from nuclear.autocomplete.install import install_bash, install_autocomplete
-from nuclear.builder.decorator_builder import create_decorated_subcommand
-from nuclear.help.help import print_version, print_help, print_usage
-from nuclear.parser.error import CliSyntaxError, CliDefinitionError
-from nuclear.parser.parser import Parser
+from nuclear.cli.autocomplete.autocomplete import bash_autocomplete
+from nuclear.cli.autocomplete.install import install_bash, install_autocomplete
+from nuclear.cli.builder.decorator_builder import create_decorated_subcommand
+from nuclear.cli.help import print_version, print_help, print_usage
+from nuclear.cli.parser.error import CliSyntaxError, CliDefinitionError
+from nuclear.cli.parser.parser import Parser
 from nuclear.sublog import logger, error_handler
 from .rule import DefaultActionRule, CliRule, SubcommandRule
 from .rule_factory import default_action, primary_option, arguments, argument, subcommand

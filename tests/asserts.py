@@ -6,7 +6,7 @@ import logging
 
 import mock
 
-from nuclear.parser.error import CliError
+from nuclear.cli.parser.error import CliError
 from nuclear.sublog import init_logs
 from nuclear.utils.strings import strip_ansi_colors
 

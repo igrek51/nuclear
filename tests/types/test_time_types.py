@@ -1,7 +1,7 @@
 import datetime
 
 from nuclear import *
-from nuclear.types.time import datetime_format, today_format
+from nuclear.cli.types.time import datetime_format, today_format
 from tests.asserts import MockIO, assert_cli_error
 
 

@@ -1,7 +1,7 @@
 from pathlib import Path
 
 from nuclear import *
-from nuclear.completers import file_completer
+from nuclear.cli.completers.file import file_completer
 from tests.asserts import MockIO
 
 

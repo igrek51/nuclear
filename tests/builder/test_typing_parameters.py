@@ -3,7 +3,7 @@ from datetime import datetime
 
 import pytest
 from nuclear import CliBuilder
-from nuclear.parser.error import CliSyntaxError
+from nuclear.cli.parser.error import CliSyntaxError
 from tests.asserts import MockIO
 
 

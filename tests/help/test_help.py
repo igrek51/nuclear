@@ -1,5 +1,5 @@
 from nuclear import *
-from nuclear.parser.error import CliSyntaxError
+from nuclear.cli.parser.error import CliSyntaxError
 from tests.asserts import MockIO, assert_error
 
 

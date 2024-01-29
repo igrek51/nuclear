@@ -2,8 +2,8 @@ from inspect import getfullargspec, ismethod
 from typing import Any, List
 from typing import Dict, Mapping
 
-from nuclear.args.container import ArgsContainer
-from nuclear.builder.typedef import Action
+from nuclear.cli.args.container import ArgsContainer
+from nuclear.cli.builder.typedef import Action
 from nuclear.sublog import log
 
 

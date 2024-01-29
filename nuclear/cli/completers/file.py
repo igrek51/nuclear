@@ -1,8 +1,8 @@
 import os
-from typing import Optional, Tuple
+from typing import Optional, Tuple, List
 
 
-def file_completer(current: Optional[str]):
+def file_completer(current: Optional[str]) -> List[str]:
     listdir, prefixdir = _current_listing_dir(current)
     names = []
     for file in os.listdir(listdir):

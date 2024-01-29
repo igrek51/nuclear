@@ -1,5 +1,5 @@
 from nuclear import *
-from nuclear.parser.error import CliDefinitionError
+from nuclear.cli.parser.error import CliDefinitionError
 from tests.asserts import assert_error
 
 

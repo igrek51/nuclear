@@ -48,7 +48,7 @@ Options:
 #### boolean type
 `boolean` converts string value (eg. `true`, `True`, `1`, `yes`) to Pythonic `bool` type.
 ```python
-from nuclear.types.boolean import boolean
+from nuclear.cli.types.boolean import boolean
 
 parameter('enabled', type=boolean)
 ```
@@ -57,7 +57,7 @@ parameter('enabled', type=boolean)
 - `nuclear.types.filesystem.existing_file` validates if given string is an existing regular file (not a directory).
 After validation, the value is internally stored as `str`.
 ```python
-from nuclear.types.filesystem import existing_file
+from nuclear.cli.types.filesystem import existing_file
 
 argument('file', type=existing_file)
 ```
@@ -65,7 +65,7 @@ argument('file', type=existing_file)
 - `nuclear.types.filesystem.existing_directory` validates if given string is an existing directory.
 After validation, the value is internally stored as `str`.
 ```python
-from nuclear.types.filesystem import existing_directory
+from nuclear.cli.types.filesystem import existing_directory
 
 argument('file', type=existing_directory)
 ```
@@ -74,7 +74,7 @@ argument('file', type=existing_directory)
 - `nuclear.types.time.iso_date` parses / validates given string as a date in ISO format: `%Y-%m-%d`.
 After validation, the value is internally stored as `datetime.datetime`.
 ```python
-from nuclear.types.time import iso_date
+from nuclear.cli.types.time import iso_date
 
 argument('date', type=iso_date)
 ```
@@ -82,7 +82,7 @@ argument('date', type=iso_date)
 - `nuclear.types.time.iso_time` parses / validates given string as a time in ISO format: `%H:%M:%S`.
 After validation, the value is internally stored as `datetime.datetime`.
 ```python
-from nuclear.types.time import iso_time
+from nuclear.cli.types.time import iso_time
 
 argument('time', type=iso_time)
 ```
@@ -90,7 +90,7 @@ argument('time', type=iso_time)
 - `nuclear.types.time.iso_time` parses / validates given string as a datetime in ISO format: `%Y-%m-%d %H:%M:%S`.
 After validation, the value is internally stored as `datetime.datetime`.
 ```python
-from nuclear.types.time import iso_datetime
+from nuclear.cli.types.time import iso_datetime
 
 argument('datetime', type=iso_datetime)
 ```
@@ -98,7 +98,7 @@ Example:
 ```python
 #!/usr/bin/env python3
 from nuclear import CliBuilder, argument
-from nuclear.types.time import iso_datetime
+from nuclear.cli.types.time import iso_datetime
 from datetime import datetime
 
 def print_it(to: datetime):
@@ -129,7 +129,7 @@ After that, the value is internally stored as `datetime.datetime`.
 ```python
 #!/usr/bin/env python3
 from nuclear import CliBuilder, argument
-from nuclear.types.time import datetime_format
+from nuclear.cli.types.time import datetime_format
 from datetime import datetime
 
 def print_it(to: datetime):
@@ -155,7 +155,7 @@ After that, the value is internally stored as `datetime.datetime`.
 ```python
 #!/usr/bin/env python3
 from nuclear import CliBuilder, argument
-from nuclear.types.time import today_format
+from nuclear.cli.types.time import today_format
 from datetime import datetime
 
 def print_it(to: datetime):

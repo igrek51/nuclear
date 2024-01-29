@@ -33,8 +33,8 @@ Here's an example of more complex CLI definition tree:
 ```python
 #!/usr/bin/env python3
 from nuclear import CliBuilder, argument, parameter, flag, subcommand, arguments, default_action
-from nuclear.types.filesystem import existing_directory
-from nuclear.types.time import iso_datetime
+from nuclear.cli.types.filesystem import existing_directory
+from nuclear.cli.types.time import iso_datetime
 
 
 def main():

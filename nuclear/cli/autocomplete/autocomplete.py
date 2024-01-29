@@ -2,12 +2,12 @@ import re
 import shlex
 from typing import List, Optional
 
-from nuclear.builder.rule import CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
+from nuclear.cli.builder.rule import CliRule, ParameterRule, FlagRule, SubcommandRule, PrimaryOptionRule, \
     PositionalArgumentRule, ManyArgumentsRule
-from nuclear.parser.context import RunContext
-from nuclear.parser.parser import Parser
-from nuclear.parser.transform import filter_rules
-from nuclear.parser.value import generate_value_choices
+from nuclear.cli.parser.context import RunContext
+from nuclear.cli.parser.parser import Parser
+from nuclear.cli.parser.transform import filter_rules
+from nuclear.cli.parser.value import generate_value_choices
 
 
 def bash_autocomplete(rules: List[CliRule], cmdline: str, word_idx: Optional[int]):

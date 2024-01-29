@@ -1,6 +1,6 @@
 #!/usr/bin/env python3
 from nuclear import CliBuilder, argument, parameter, flag, subcommand, arguments, dictionary
-from nuclear.types.filesystem import existing_directory, existing_file
+from nuclear.cli.types.filesystem import existing_directory, existing_file
 
 
 def main():

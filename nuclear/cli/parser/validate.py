@@ -1,8 +1,8 @@
 from typing import List, Optional
 
-from nuclear.builder.rule import CliRule, PositionalArgumentRule, ManyArgumentsRule, \
+from nuclear.cli.builder.rule import CliRule, PositionalArgumentRule, ManyArgumentsRule, \
     OptionalValueRule, ValueRule, ParameterRule
-from nuclear.parser.internal_vars import InternalVars
+from nuclear.cli.parser.internal_vars import InternalVars
 from .error import CliDefinitionError, CliSyntaxError
 from .transform import filter_rules
 from .value import generate_value_choices

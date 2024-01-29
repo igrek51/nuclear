@@ -1,11 +1,11 @@
 from typing import Dict
 from typing import Type, Any, List, TypeVar, Optional
 
-from nuclear.args.args_que import ArgsQue
-from nuclear.args.container import ArgsContainer
-from nuclear.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, KeywordRule, \
+from nuclear.cli.args.args_que import ArgsQue
+from nuclear.cli.args.container import ArgsContainer
+from nuclear.cli.builder.rule import PrimaryOptionRule, ParameterRule, FlagRule, CliRule, KeywordRule, \
     DefaultActionRule, PositionalArgumentRule, ManyArgumentsRule, SubcommandRule, DictionaryRule, ValueRule
-from nuclear.builder.typedef import Action
+from nuclear.cli.builder.typedef import Action
 from nuclear.sublog import log
 from .context import RunContext
 from .error import CliSyntaxError

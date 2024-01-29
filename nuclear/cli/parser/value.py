@@ -2,10 +2,10 @@ import inspect
 from collections.abc import Iterable
 from typing import List, Any, Optional
 
-from nuclear.builder.rule import ValueRule
-from nuclear.builder.typedef import TypeOrParser
-from nuclear.parser.error import CliSyntaxError
-from nuclear.types.boolean import boolean
+from nuclear.cli.builder.rule import ValueRule
+from nuclear.cli.builder.typedef import TypeOrParser
+from nuclear.cli.parser.error import CliSyntaxError
+from nuclear.cli.types.boolean import boolean
 
 
 def parse_value_rule(rule: ValueRule, arg: str) -> Any:

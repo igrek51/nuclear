@@ -1,4 +1,4 @@
-from nuclear.args.args_que import ArgsQue
+from nuclear.cli.args.args_que import ArgsQue
 
 
 def test_iterating_all():

@@ -2,7 +2,7 @@ from typing import Optional, Union
 
 import pytest
 from nuclear import *
-from nuclear.parser.error import CliDefinitionError, CliSyntaxError
+from nuclear.cli.parser.error import CliDefinitionError, CliSyntaxError
 from tests.asserts import MockIO, assert_error
 from functools import reduce
 import base64
