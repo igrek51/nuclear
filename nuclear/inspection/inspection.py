@@ -377,9 +377,7 @@ Call {STYLE_YELLOW}wat(){RESET} to inspect {STYLE_YELLOW}locals(){RESET} variabl
     def __lt__(self, other: Any): return self._react_with(other)  # <
 
     def __getattr__(self, name) -> 'Wat':
-        if name == 'short':
-            self._params['short'] = True
-        elif name == 's':
+        if name in {'short', 's'}:
             self._params['short'] = True
         elif name == 'long':
             self._params['long'] = True
