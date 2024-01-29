@@ -113,10 +113,10 @@ Private attributes:
   _CliBuilder__version: NoneType = None
 
   def _CliBuilder__add_default_rules\(\)
-  def _CliBuilder__bash_autocomplete\(cmdline: str, word_idx: Optional\[int\]\)
+  def _CliBuilder__bash_autocomplete\(cmdline: str, word_idx: (Optional\[int\]|Union\[int, NoneType\])\)
   def _CliBuilder__bind_decorated_command\(function: Callable\[\.\.\., NoneType\], names: List\[str\]\)
   def _CliBuilder__create_parser\(args: List\[str\]\) -> nuclear.cli.parser.parser.Parser
-  def _CliBuilder__find_subcommand_rule\(name: str\) -> Optional\[nuclear.cli.builder.rule.SubcommandRule\]
+  def _CliBuilder__find_subcommand_rule\(name: str\) -> (Optional\[nuclear.cli.builder.rule.SubcommandRule\]|Union\[nuclear.cli.builder.rule.SubcommandRule, NoneType\])
   def _CliBuilder__has_default_action\(\) -> bool
 ''')
 
@@ -237,7 +237,7 @@ def test_list_parent_classes():
 
     output = inspect_format(Parent.FIRST, short=True)
     assert_multiline_match(output, r'''
-str: 'Parent.FIRST'
+str: '(Parent\.FIRST|first)'
 repr: <Parent\.FIRST: 'first'>
 type: test_inspect\.Parent
 parents: str, enum\.Enum
