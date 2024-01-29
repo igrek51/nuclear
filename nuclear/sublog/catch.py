@@ -3,7 +3,7 @@ import traceback
 from typing import Dict, Any
 
 from nuclear.sublog.exception import _error_message, _get_traceback_lines, _root_cause_type
-from nuclear.sublog.sublog_logger import logger
+from nuclear.sublog.logging import logger
 from nuclear.sublog.context_error import ContextError
 
 

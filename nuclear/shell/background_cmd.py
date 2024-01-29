@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Callable, List, Optional
 
 from nuclear.shell.shell_utils import CommandError
-from nuclear.sublog.sublog_logger import logger
+from nuclear.sublog.logging import logger
 
 
 class BackgroundCommand:

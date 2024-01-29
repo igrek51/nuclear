@@ -4,7 +4,7 @@ import sys
 from pathlib import Path
 from typing import Optional
 
-from nuclear.sublog.sublog_logger import logger
+from nuclear.sublog.logging import logger
 
 
 def shell(
