@@ -2,7 +2,7 @@ import re
 from typing import List, Union, Optional
 
 
-def nonempty_lines(str_in: str) -> list[str]:
+def nonempty_lines(str_in: str) -> List[str]:
     all_lines = str_in.splitlines()
     return list(filter(lambda l: len(l) > 0, all_lines))
 
