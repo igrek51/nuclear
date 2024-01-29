@@ -1,4 +1,4 @@
-from typing import Dict, Any
+from typing import Dict, Any, Optional
 
 
 class ContextError(RuntimeError):
@@ -14,7 +14,7 @@ class ContextError(RuntimeError):
             raise ContextError('loading config') from e
     """
 
-    def __init__(self, context_message: str, cause: BaseException | None = None, **ctx):
+    def __init__(self, context_message: str, cause: Optional[BaseException] = None, **ctx):
         super().__init__()
         self.context_message: str = context_message
         self.ctx: Dict[str, Any] = ctx
