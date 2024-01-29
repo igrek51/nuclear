@@ -1,6 +1,6 @@
 import os
 import traceback
-from typing import Collection, Iterable
+from typing import Collection, Iterable, Dict
 
 from nuclear.sublog.context_error import ContextError
 
@@ -18,6 +18,22 @@ def exception_details(e: BaseException) -> str:
     cause = _root_cause_type(e)
     error_msg = _error_message(e)
     return f'{error_msg}, cause={cause}, traceback={traceback_str}'
+
+
+def extended_exception_details(e: BaseException) -> tuple[str, Dict]:
+    if isinstance(e, ContextError):
+        ctx = e.ctx
+    else:
+        ctx = {}
+
+    ex_type = type(e)
+    traceback_ex = traceback.TracebackException(ex_type, e, e.__traceback__, limit=None)
+    traceback_lines = list(_get_traceback_lines(traceback_ex))
+    traceback_str = ', '.join(traceback_lines)
+    ctx['cause'] = _root_cause_type(e)
+    ctx['traceback'] = traceback_str
+    error_msg = _error_message(e)
+    return error_msg, ctx
 
 
 def unwrap(e: BaseException) -> BaseException:
