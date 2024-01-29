@@ -103,3 +103,5 @@ class ShellExecutor:
 
 
 sh = ShellExecutor()
+
+shell_output = shell  # Deprecated alias

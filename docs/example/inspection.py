@@ -1,6 +1,5 @@
 #!/usr/bin/env python3
-from nuclear import inspect, wat, wats
-
+from nuclear import wat
 from pydantic import BaseModel
 
 
@@ -9,4 +8,4 @@ class Person(BaseModel):
 
 
 if __name__ == '__main__':
-    wats / Person(name='george')
+    wat.short / Person(name='george')

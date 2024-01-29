@@ -50,6 +50,6 @@ nav:
     - Shell Auto-completion: autocompletion.md
     - Parsing data types: data-types.md
     - Errors handling: errors.md
-  - Nuclear Inspect: inspect.md
+  - WAT Inspect: inspect.md
   - Sublog: sublog.md
   - Installation: installation.md

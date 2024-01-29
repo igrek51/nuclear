@@ -10,7 +10,7 @@ from typing import Any, Dict, List, Optional, Type, Iterable, Union
 class InspectConfig:
     short: bool
     dunder: bool
-    docs: bool
+    nodocs: bool
     long: bool
     code: bool
 
@@ -32,7 +32,7 @@ def inspect(
     *,
     short: bool = False,
     dunder: bool = False,
-    docs: bool = True,
+    nodocs: bool = False,
     long: bool = False,
     code: bool = False,
     all: bool = False,
@@ -42,14 +42,14 @@ def inspect(
     documentation or source code.
     :param obj: object to inspect
     :param short: whether to print short output without attributes (neither variables nor methods)
-    :param dunder: whether to print dunder attributes
-    :param docs: whether to print documentation for functions and classes
     :param long: whether to print non-abbreviated values and documentation
+    :param dunder: whether to print dunder attributes
     :param code: whether to print source code of a function, method or class
+    :param nodocs: whether to hide documentation for functions and classes
     :param all: whether to include all information
     """
     print(inspect_format(
-        obj, short=short, dunder=dunder or all, long=long or all, docs=docs or all, code=code or all
+        obj, short=short, dunder=dunder or all, long=long or all, nodocs=nodocs, code=code or all
     ))
 
 
@@ -58,11 +58,11 @@ def inspect_format(
     *,
     short: bool = False,
     dunder: bool = False,
-    docs: bool = True,
+    nodocs: bool = False,
     long: bool = False,
     code: bool = False,
 ) -> str:
-    config = InspectConfig(short=short, dunder=dunder, docs=docs, long=long, code=code)
+    config = InspectConfig(short=short, dunder=dunder, nodocs=nodocs, long=long, code=code)
     output: List[str] = []
 
     str_value = _format_value(obj)
@@ -89,7 +89,7 @@ def inspect_format(
         output.append(f'{STYLE_BRIGHT_BLUE}signature:{RESET} {signature}')
 
     doc = _get_doc(obj, long=True)
-    if doc and config.docs and callable(obj):
+    if doc and not config.nodocs and callable(obj):
         if doc.count('\n') == 0:
             output.append(f'{STYLE_GRAY}"""{doc}"""{RESET}')
         else:
@@ -165,7 +165,6 @@ def _get_callable_signature(name: str, obj: Any) -> Optional[str]:
         prefix = "def "
     else:
         prefix = ""
-
     return f'{STYLE_BLUE}{prefix}{STYLE_BRIGHT_GREEN}{name}{STYLE_GREEN}{_signature}{RESET}'
 
 
@@ -332,7 +331,7 @@ def _render_attrs_section(attributes: List[InspectAttribute], config: InspectCon
 
 
 class Wat:
-    """Inspector instance to examine unknown objects with division operator"""
+    """Inspector instance to examine unknown objects with short operators"""
     def __init__(self, **kwargs):
         self._params = kwargs
 
@@ -345,13 +344,13 @@ class Wat:
     
     def _print_help(self):
         text = f"""
-Try `{STYLE_YELLOW}wat / object{RESET}`, `{STYLE_YELLOW}wat(**options) / object{RESET}` or `{STYLE_YELLOW}wat(object, **options){RESET}` to inspect an {STYLE_YELLOW}object{RESET}. Options are:
-  {STYLE_GREEN}short={STYLE_BRIGHT_GREEN}True{RESET} to hide attributes (variables and methods)
-  {STYLE_GREEN}dunder={STYLE_BRIGHT_GREEN}True{RESET} to print dunder attributes
-  {STYLE_GREEN}docs={STYLE_BRIGHT_RED}False{RESET} to hide documentation for functions and classes
-  {STYLE_GREEN}long={STYLE_BRIGHT_GREEN}True{RESET} to print non-abbreviated values and documentation
-  {STYLE_GREEN}code={STYLE_BRIGHT_GREEN}True{RESET} to print source code of a function, method or class
-  {STYLE_GREEN}all={STYLE_BRIGHT_GREEN}True{RESET} to include all information
+Try `{STYLE_YELLOW}wat(object){RESET}`, `{STYLE_YELLOW}wat / object{RESET}` or `{STYLE_YELLOW}wat.modifiers / object{RESET}` to inspect an {STYLE_YELLOW}object{RESET}. Modifiers are:
+  {STYLE_GREEN}.short{RESET} to hide attributes (variables and methods)
+  {STYLE_GREEN}.long{RESET} to print non-abbreviated values and documentation
+  {STYLE_GREEN}.dunder{RESET} to print dunder attributes
+  {STYLE_GREEN}.code{RESET} to print source code of a function, method or class
+  {STYLE_GREEN}.nodocs{RESET} to hide documentation for functions and classes
+  {STYLE_GREEN}.all{RESET} to include all information
 """.strip()
         if not sys.stdout.isatty():
             text = _strip_color(text)
@@ -362,15 +361,36 @@ Try `{STYLE_YELLOW}wat / object{RESET}`, `{STYLE_YELLOW}wat(**options) / object{
     
     def __call__(self, *args: Any, **kwargs: Any) -> Union['Wat', None]:
         if args:
-            inspect(*args, **kwargs)
-        else:
+            self._params.update(kwargs)
+            inspect(*args, **self._params)
+        elif kwargs:
             return Wat(**kwargs)
+        else:
+            inspect(globals())
 
     def __truediv__(self, other: Any): return self._react_with(other) # /
+    def __add__(self, other: Any): return self._react_with(other) # +
     def __lshift__(self, other: Any): return self._react_with(other)  # <<
     def __rshift__(self, other: Any): return self._react_with(other)  # >>
     def __or__(self, other: Any): return self._react_with(other)  # |
     def __lt__(self, other: Any): return self._react_with(other)  # <
+
+    def __getattr__(self, name) -> 'Wat':
+        if name == 'short':
+            self._params['short'] = True
+        elif name == 'long':
+            self._params['long'] = True
+        elif name == 'dunder':
+            self._params['dunder'] = True
+        elif name == 'code':
+            self._params['code'] = True
+        elif name == 'nodocs':
+            self._params['nodocs'] = True
+        elif name == 'all':
+            self._params['all'] = True
+        else:
+            raise AttributeError
+        return self
 
 wat = Wat()
 wats = Wat(short=True)

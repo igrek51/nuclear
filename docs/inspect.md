@@ -12,7 +12,7 @@ that's where the `wat` inspector comes in handy.
 
 Nuclear comes with the `wat` object that can quickly inspect things by using the division operator (to avoid typing parentheses). 
 
-Start the Python Interpreter (or attach to your program) and execute `wat / object` on any `object`
+Start the Python Interpreter (or attach to your program) and execute `wat(object)` on any `object`
 to investigate its
 **type**, **formatted value**, **variables**, **methods**, **parent types**, **signature**,
 **documentation**, and even its **source code**.
@@ -25,7 +25,7 @@ Import inspection tools from **nuclear** package.
 pip install nuclear
 ```
 ```python
-from nuclear import wat, wats, inspect
+from nuclear import wat
 ```
 
 Alternatively, use **Insta-Load** in the section below.
@@ -43,6 +43,8 @@ exec(zlib.decompress(base64.b64decode(code.encode())).decode(), globals())
 Now you can use `wat`, `wats` or `inspect`.
 
 ## Options & aliases
+Instead of `wat(object)` syntax, you can use shorter `wat / object` which has the same result.
+
 You can call `wat(**options) / object` with the following `options`:
 
 - `short=True` to hide attributes (variables and methods)
