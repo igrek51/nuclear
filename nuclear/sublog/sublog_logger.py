@@ -27,12 +27,21 @@ _logging_logger = logging.getLogger(LOGGING_LOGGER_NAME)
 
 def init_logs():
     """Configure loggers: formatters, handlers and log levels"""
+    logging_kwargs = {
+        'stream': sys.stdout,
+        'format': LOG_FORMAT,
+        'level': logging.INFO,
+        'datefmt': LOG_DATE_FORMAT,
+    }
+    if sys.version_info[1] >= 8:
+        logging_kwargs['force'] = True
     if not is_env_flag_enabled('STRUCTURED_LOGGING', 'false'):
-        logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT, level=logging.INFO, datefmt=LOG_DATE_FORMAT, force=True)
+        logging.basicConfig(**logging_kwargs)
         for handler in logging.getLogger().handlers:
             handler.setFormatter(ColoredFormatter(handler.formatter))
     else:
-        logging.basicConfig(stream=sys.stdout, format=LOG_FORMAT, level=logging.INFO, datefmt=ISO_DATE_FORMAT, force=True)
+        logging_kwargs['datefmt'] = ISO_DATE_FORMAT
+        logging.basicConfig(**logging_kwargs)
         for handler in logging.getLogger().handlers:
             handler.setFormatter(StructuredFormatter(handler.formatter))
 
