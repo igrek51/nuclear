@@ -15,11 +15,13 @@ def calculate_primes(n: int):
 ```
 and we need a "glue" which binds them with a CLI (Command-Line Interface).
 We want it to be run with different keywords and parameters provided by user to the terminal shell in a following manner:
+
 - `./quickstart.py hello NAME --decode --repeat=3` mapped to `say_hello` function,
 - `./quickstart.py calculate factorial N` mapped to `calculate_factorial` function,
 - `./quickstart.py calculate primes N` mapped to `calculate_primes` function,
 
 We've just identified 2 main commands in a program: `hello` and `calculate` (which in turn contains 2 subcommands: `factorial` & `primes`). That forms a tree:
+
 - `hello` command has one positional argument `NAME`, one boolean flag `decode` and one numerical parameter `repeat`.
 - `calculate` command has 2 another subcommands:
     * `factorial` subcommand has one positional argument `N`,
@@ -94,6 +96,7 @@ Let's trace what is happening here:
 - `flag('decode')` binds `--decode` keyword to a flag named `decode`. So as it may be used later on. Providing `help` adds description to help screen.
 - `parameter('repeat', type=int, default=1)` binds `--repeat` keyword to a parameter named `repeat`, which type is `int` and its default value is `1`.
 - Finally, invoking `.run()` does all the magic.
+
 It gets system arguments list, starts to process them and invokes most relevant action.
 
 ### Decorator builder

@@ -1,18 +1,24 @@
-# Nuclear - binding glue for CLI
-[![GitHub version](https://badge.fury.io/gh/igrek51%2Fnuclear.svg)](https://github.com/igrek51/nuclear)
-[![PyPI version](https://badge.fury.io/py/nuclear.svg)](https://pypi.org/project/nuclear)
+# Nuclear
+[![GitHub version (latest SemVer)](https://img.shields.io/github/v/tag/igrek51/nuclear?label=github&sort=semver)](https://github.com/igrek51/nuclear)
+[![PyPI](https://img.shields.io/pypi/v/nuclear)](https://pypi.org/project/nuclear)
 [![Github Pages](https://img.shields.io/badge/docs-github.io-blue)](https://igrek51.github.io/nuclear)
 [![Documentation Status](https://readthedocs.org/projects/nuclear-py/badge/?version=latest)](https://nuclear-py.readthedocs.io/en/latest/?badge=latest)
-[![Build Status](https://app.travis-ci.com/igrek51/nuclear.svg?branch=master)](https://app.travis-ci.com/igrek51/nuclear)
 [![codecov](https://codecov.io/gh/igrek51/nuclear/branch/master/graph/badge.svg)](https://codecov.io/gh/igrek51/nuclear)
+[![GitHub Workflow Status](https://img.shields.io/github/actions/workflow/status/igrek51/nuclear/test.yml?branch=master&label=tests)](https://github.com/igrek51/nuclear/actions?query=workflow%3Atest)
 
+<div align="center">
+    <a href="https://github.com/igrek51/nuclear">GitHub</a>
+    -
+    <a href="https://pypi.org/project/nuclear">PyPI</a>
+    -
+    <a href="https://igrek51.github.io/nuclear">Documentation</a>
+</div>
 
-`nuclear` is a declarative parser for command line interfaces in Python.
-It's a binding glue between CLI shell arguments and functions being invoked.
-It mostly focuses on building multi level command trees.
+*Nuclear* is a binding glue for CLI applications.
+It includes a set of tools for building CLI applications in Python:
 
-`nuclear` parses and validates the command line arguments provided by the user when starting a console application.
-It then automatically invokes the appropriate action, based on the declared Command-Line Interface rules, injecting all the necessary  parameters.
-You don't need to write the "glue" code to bind & parse the parameters each time.
-This makes writing console aplications simpler and clearer.
+- [CLI parser](https://igrek51.github.io/nuclear/quick-start/) for building nested CLI commands
+- [WAT](https://igrek51.github.io/nuclear/inspect/) - inspection tool for exploring Python objects
+- [Sublog](https://igrek51.github.io/nuclear/sublog/) - contextual logging system
+- [Shell utilities](https://igrek51.github.io/nuclear/shell/)
 

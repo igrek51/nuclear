@@ -24,13 +24,15 @@ test:
 readme:
 	cat docs/about.md > $(OUTPUT_README)
 	cat docs/demo.md >> $(OUTPUT_README)
-	cat docs/toc.md >> $(OUTPUT_README)
-	cat docs/how-it-works.md >> $(OUTPUT_README)
-	cat docs/quick-start.md >> $(OUTPUT_README)
-	cat docs/vs-argparse-short.md >> $(OUTPUT_README)
-	cat docs/installation.md >> $(OUTPUT_README)
+	# cat docs/toc.md >> $(OUTPUT_README)
+	# cat docs/how-it-works.md >> $(OUTPUT_README)
+	# cat docs/quick-start.md >> $(OUTPUT_README)
+	# cat docs/vs-argparse-short.md >> $(OUTPUT_README)
+	# cat docs/installation.md >> $(OUTPUT_README)
+	# cat docs/cheatsheet-short.md >> $(OUTPUT_README)
+	cat docs/inspect.md >> $(OUTPUT_README)
 	cat docs/sublog.md >> $(OUTPUT_README)
-	cat docs/cheatsheet-short.md >> $(OUTPUT_README)
+	cat docs/shell.md >> $(OUTPUT_README)
 
 clean:
 	rm -rf build/

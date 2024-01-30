@@ -1,4 +1,4 @@
-## Demo
+# Demo
 ```python
 from nuclear import CliBuilder
 
@@ -30,37 +30,10 @@ cli.run()
 
 See [demo.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-decorator.py) for a complete example.
 
-## Get it now
+# Installation
 ```bash
 python3 -m pip install --upgrade nuclear
 ```
 
-## CLI Tree builder
-Apart from decorator syntax style, you can also do the same using tree-builder syntax,
-which is useful in more complex cases:
-
-```python
-from nuclear import CliBuilder, argument, flag, parameter, subcommand
-
-CliBuilder().has(
-    subcommand('hello', run=say_hello).has(
-        argument('name'),
-        parameter('repeat', type=int, default=1),
-        flag('decode', help='Decode name as base64'),
-    ),
-    subcommand('calculate').has(
-        subcommand('factorial', run=calculate_factorial,
-                   help='Calculate factorial').has(
-            argument('n', type=int),
-        ),
-        subcommand('primes', run=calculate_primes,
-                   help='List prime numbers using Sieve of Eratosthenes').has(
-            argument('n', type=int, required=False, default=100,
-                     help='maximum number to check'),
-        ),
-    ),
-).run()
-```
-
-See [demo-tree.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-tree.py) for a complete example.
+You need Python 3.8 or newer.
 

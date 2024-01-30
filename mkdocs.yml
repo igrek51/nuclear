@@ -32,8 +32,8 @@ markdown_extensions:
 
 nav:
   - Home: README.md
+  - Demo: demo.md
   - CLI:
-    - Demo: demo.md
     - Quick start: quick-start.md
     - How does it work?: how-it-works.md
     - Nuclear vs argparse: vs-argparse.md
@@ -50,6 +50,7 @@ nav:
     - Shell Auto-completion: autocompletion.md
     - Parsing data types: data-types.md
     - Errors handling: errors.md
-  - WAT Inspect: inspect.md
+  - WAT Inspector: inspect.md
   - Sublog: sublog.md
+  - Shell: shell.md
   - Installation: installation.md

@@ -1,16 +1,13 @@
-# Nuclear Inspect
+# WAT Inspector
 
 **Nuclear** comes with a powerful inspection tool
 that allows you to delve into and examine unknown objects at runtime.
 
-## WAT inspector
 > "Wat" is a variant of the English word "what" that is often used to express confusion or disgust
 
 If you find yourself deep within the Python console, feeling dazed and confused,
 wondering "WAT? What's that thing?",
 that's where the `wat` inspector comes in handy.
-
-Nuclear comes with the `wat` object that can quickly inspect things by using the division operator (to avoid typing parentheses). 
 
 Start the Python Interpreter (or attach to your program) and execute `wat(object)` on any `object`
 to investigate its
@@ -31,7 +28,8 @@ from nuclear import wat
 Alternatively, use **Insta-Load** in the section below.
 
 ### Insta-Load
-If you want to debug something quickly, you don't even need to install **nuclear** package to use `wat` inspector.
+If you want to debug something quickly,
+you don't even need to install **nuclear** package to use `wat` inspector.
 
 Load it on the fly by pasting this snippet to your Python interpreter:
 ```python
@@ -43,6 +41,8 @@ exec(zlib.decompress(base64.b64decode(code.encode())).decode(), globals())
 Now you can use `wat`.
 
 ## Usage & modifiers
+Nuclear comes with the `wat` object that can quickly inspect things
+by using the division operator (to avoid typing parentheses). 
 A short, no-parentheses syntax `wat / object` is equivalent to `wat(object)`.
 
 You can call `wat.modifiers / object` (or `wat.modifiers(object)`)

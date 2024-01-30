@@ -125,7 +125,7 @@ def log_exception(e: BaseException):
 def add_context(context_name: str, log: bool = False, **ctx):
     """Apply context to occurred errors and propagate them further"""
     if log:
-        logger.debug(context_name)
+        logger.debug(context_name, **ctx)
     try:
         yield
     except ContextError as e:
