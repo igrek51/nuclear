@@ -62,4 +62,3 @@ reloading plugins: loading config: file is missing
 Note that each individual message part doesn't describe the error well,
 but combined, the whole message is very informative.
 That's the main idea behind wrapping errors with context.
-

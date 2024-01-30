@@ -26,7 +26,7 @@ def calculate_primes(n: int):
 cli.run()
 ```
 
-![sublog demo](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-live.gif?raw=true)
+![](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-live.gif?raw=true)
 
 See [demo.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-decorator.py) for a complete example.
 
@@ -36,4 +36,3 @@ python3 -m pip install --upgrade nuclear
 ```
 
 You need Python 3.8 or newer.
-

@@ -22,6 +22,7 @@ It includes a set of tools for building CLI applications in Python:
 - [Sublog](https://igrek51.github.io/nuclear/sublog/) - contextual logging system
 - [Shell utilities](https://igrek51.github.io/nuclear/shell/)
 
+
 # Demo
 ```python
 from nuclear import CliBuilder
@@ -60,6 +61,7 @@ python3 -m pip install --upgrade nuclear
 ```
 
 You need Python 3.8 or newer.
+
 
 # WAT Inspector
 
@@ -219,6 +221,8 @@ wat / __builtins__
 ```python
 wat()
 ```
+
+
 # Logging with Sublog
 **Sublog** is a *nuclear*'s contextual logging system that allows you to:
   
@@ -283,6 +287,7 @@ reloading plugins: loading config: file is missing
 Note that each individual message part doesn't describe the error well,
 but combined, the whole message is very informative.
 That's the main idea behind wrapping errors with context.
+
 
 # Shell Utilities
 

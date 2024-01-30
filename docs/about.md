@@ -21,4 +21,3 @@ It includes a set of tools for building CLI applications in Python:
 - [WAT](https://igrek51.github.io/nuclear/inspect/) - inspection tool for exploring Python objects
 - [Sublog](https://igrek51.github.io/nuclear/sublog/) - contextual logging system
 - [Shell utilities](https://igrek51.github.io/nuclear/shell/)
-
