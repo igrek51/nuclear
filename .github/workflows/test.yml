@@ -17,7 +17,6 @@ jobs:
         run: make setup-test-unit
       - run: . venv/bin/activate && make test
       
-      - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v4
-        env:
-          token: ${{ secrets.CODECOV_TOKEN }}
+      - name: Upload Coverage
+        uses: codecov/codecov-action@v3
+        token: ${{ secrets.CODECOV_TOKEN }}

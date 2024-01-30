@@ -54,11 +54,11 @@ with add_context('reloading plugins'):
     with add_context('loading config'):
         raise RuntimeError('file is missing')
 ```
-This will produce an error message:
+This will produce an error with the following message:
 ```
 reloading plugins: loading config: file is missing
 ```
 
-Note that each individual message part doesn't describe the error well,
-but combined, the whole message is very informative.
-That's the main idea behind wrapping errors with context.
+Note that while each individual part of the message may not provide a comprehensive explanation of the error,
+when combined, the whole message becomes highly informative.
+This is the core principle behind enriching errors with context.
