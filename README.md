@@ -79,7 +79,8 @@ to investigate its
 **type**, **formatted value**, **variables**, **methods**, **parent types**, **signature**,
 **documentation**, and even its **source code**.
 
-<video width="100%" src="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect.mp4" controls="true" allowfullscreen="true" poster="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect-poster.png"></video>
+<video width="100%" controls="true" allowfullscreen="true" src="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect.mp4" poster="https://raw.githubusercontent.com/igrek51/nuclear/master/docs/demo/demo-inspect-poster.png">
+</video>
 
 ## Import
 Import inspection tools from **nuclear** package.
@@ -146,7 +147,7 @@ Plus, you can read their docstrings.
 wat('stringy')
 ```
 
-![](./img/wat-string.png)
+![](https://github.com/igrek51/nuclear/blob/master/docs/img/wat-string.png?raw=true)
 
 ### Discover function's signature
 See the docstrings and the signature of a function or a method to see how to use it.
@@ -155,7 +156,7 @@ See the docstrings and the signature of a function or a method to see how to use
 wat(str.split)
 ```
 
-![](./img/wat-str-split.png)
+![](https://github.com/igrek51/nuclear/blob/master/docs/img/wat-str-split.png?raw=true)
 
 ### Look up variables
 Check what's inside, list the value of variables and their types to see what's really inside the inspected object.
@@ -163,7 +164,7 @@ Check what's inside, list the value of variables and their types to see what's r
 wat / re.match('(\d)_(.*)', '1_title')
 ```
 
-![](./img/wat-re-match.png)
+![](https://github.com/igrek51/nuclear/blob/master/docs/img/wat-re-match.png?raw=true)
 
 ### Explore modules
 One of the use cases is to explore modules.
@@ -174,7 +175,7 @@ import pathlib
 wat / pathlib
 ```
 
-![](./img/wat-pathlib.png)
+![](https://github.com/igrek51/nuclear/blob/master/docs/img/wat-pathlib.png?raw=true)
 
 Then, you can navigate further, e.g. `wat / pathlib.fnmatch`.
 
@@ -183,7 +184,7 @@ Then, you can navigate further, e.g. `wat / pathlib.fnmatch`.
 wat.dunder / {}
 ```
 
-![](./img/wat-dict-dunder.png)
+![](https://github.com/igrek51/nuclear/blob/master/docs/img/wat-dict-dunder.png?raw=true)
 
 ### Review the code
 Look up the source code of a function to see how it really works.
@@ -193,7 +194,7 @@ import re
 wat.code / re.match
 ```
 
-![](./img/wat-code-rematch.png)
+![](https://github.com/igrek51/nuclear/blob/master/docs/img/wat-code-rematch.png?raw=true)
 
 ### Debug with breakpoint
 You can use Python's `breakpoint()` keyword to launch an interactive debugger in your program:
@@ -223,7 +224,7 @@ wat()
 ```
 
 
-# 📜 Logging with Sublog
+# 📜 Sublog
 **Sublog** is a *nuclear*'s contextual logging system that allows you to:
   
 - display variables besides log messages: `logger.debug('message', airspeed=20)`,
@@ -289,7 +290,7 @@ when combined, the whole message becomes highly informative.
 This is the core principle behind enriching errors with context.
 
 
-# 🐌 Shell Utilities
+# 🐌 Shell utilities
 
 *Nuclear* provides utilities for running system shell commands.
 

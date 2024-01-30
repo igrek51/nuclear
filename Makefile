@@ -51,8 +51,8 @@ clean:
 	rm -rf ./*.egg-info
 
 release-pypi: clean readme
-	python3 setup.py sdist bdist_wheel
-	python3 -m twine upload dist/*
+	python setup.py sdist bdist_wheel
+	python -m twine upload -u __token__ dist/*
 
 mkdocs-local:
 	mkdocs serve

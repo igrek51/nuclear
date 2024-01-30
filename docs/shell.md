@@ -1,4 +1,4 @@
-# 🐌 Shell Utilities
+# 🐌 Shell utilities
 
 *Nuclear* provides utilities for running system shell commands.
 
