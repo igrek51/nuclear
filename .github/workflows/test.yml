@@ -18,4 +18,6 @@ jobs:
       - run: . venv/bin/activate && make test
       
       - name: Upload Coverage to Codecov
-        uses: codecov/codecov-action@v2
+        uses: codecov/codecov-action@v4
+        env:
+          token: ${{ secrets.CODECOV_TOKEN }}
