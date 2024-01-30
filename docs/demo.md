@@ -1,4 +1,4 @@
-# Demo
+# CLI Demo
 ```python
 from nuclear import CliBuilder
 

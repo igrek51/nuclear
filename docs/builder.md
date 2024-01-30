@@ -1,4 +1,4 @@
-## CLI Builder
+# CLI Builder
 `CliBuilder` is a main class of `nuclear` package which allows to build CLI definition.
 It's a builder for Command Line Interface specification.
 After that, you can invoke `.run()` method in order to parse provided arguments and invoke particular actions.
@@ -8,7 +8,7 @@ Empty CliBuilder has standard options enabled by default:
 - `--help` - displaying usage and help
 - `--version` - displaying application version number (if it has been defined)
 
-### Step 1. Creating CliBuilder
+## Step 1. Creating CliBuilder
 In this step you can create new `CliBuilder` and set a custom configuration for it.
  The constructor is as follows:
 ```python
@@ -48,7 +48,7 @@ Enabling this causes stack trace to be flooded to the user.
 
 `hide_internal` - wheter internal options (`--install-bash`, `--autocomplete`) should be hidden on help output.
 
-### Step 2. Declaring CLI rules
+## Step 2. Declaring CLI rules
 The next step is to declare CLI rules for `CliBuilder` using `.has()` method
 
 `has(*subrules: CliRule) -> 'CliBuilder'` method receives a CLI rules in its parameters and returns the `CliBuilder` itself for further building.
@@ -79,7 +79,7 @@ CliBuilder('multiapp', version='1.0.0', help='many apps launcher',
 )
 ```
 
-### Step 3. Running CLI arguments through parser
+## Step 3. Running CLI arguments through parser
 The final step is calling `.run()` on `CliBuilder`.
 It parses all the CLI arguments passed to application.
 Then it invokes triggered action which were defined before.
@@ -93,3 +93,36 @@ CliBuilder().run()
 ```
 just prints the standard help output, because it's the default action for an empty builder if no arguments are provided.
 
+## CLI Tree builder
+
+*Nuclear* is a declarative parser for command line interfaces in Python.
+It's a binding glue between CLI shell arguments and functions being invoked.
+It mostly focuses on building multi level command trees.
+
+Apart from decorator syntax style, you can also do the same using tree-builder syntax,
+which is useful in more complex cases:
+
+```python
+from nuclear import CliBuilder, argument, flag, parameter, subcommand
+
+CliBuilder().has(
+    subcommand('hello', run=say_hello).has(
+        argument('name'),
+        parameter('repeat', type=int, default=1),
+        flag('decode', help='Decode name as base64'),
+    ),
+    subcommand('calculate').has(
+        subcommand('factorial', run=calculate_factorial,
+                   help='Calculate factorial').has(
+            argument('n', type=int),
+        ),
+        subcommand('primes', run=calculate_primes,
+                   help='List prime numbers using Sieve of Eratosthenes').has(
+            argument('n', type=int, required=False, default=100,
+                     help='maximum number to check'),
+        ),
+    ),
+).run()
+```
+
+See [demo-tree.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-tree.py) for a complete example.

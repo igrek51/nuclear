@@ -1,4 +1,4 @@
-# Nuclear
+# ☢️ Nuclear
 [![GitHub version (latest SemVer)](https://img.shields.io/github/v/tag/igrek51/nuclear?label=github&sort=semver)](https://github.com/igrek51/nuclear)
 [![PyPI](https://img.shields.io/pypi/v/nuclear)](https://pypi.org/project/nuclear)
 [![Github Pages](https://img.shields.io/badge/docs-github.io-blue)](https://igrek51.github.io/nuclear)
@@ -23,7 +23,7 @@ It includes a set of tools for building CLI applications in Python:
 - [Shell utilities](https://igrek51.github.io/nuclear/shell/)
 
 
-# Demo
+# CLI Demo
 ```python
 from nuclear import CliBuilder
 
@@ -63,7 +63,7 @@ python3 -m pip install --upgrade nuclear
 You need Python 3.8 or newer.
 
 
-# WAT Inspector
+# 🙀 WAT Inspector
 
 **Nuclear** comes with a powerful inspection tool
 that allows you to delve into and examine unknown objects at runtime.
@@ -223,7 +223,7 @@ wat()
 ```
 
 
-# Logging with Sublog
+# 📜 Logging with Sublog
 **Sublog** is a *nuclear*'s contextual logging system that allows you to:
   
 - display variables besides log messages: `logger.debug('message', airspeed=20)`,
@@ -289,7 +289,7 @@ when combined, the whole message becomes highly informative.
 This is the core principle behind enriching errors with context.
 
 
-# Shell Utilities
+# 🐌 Shell Utilities
 
 *Nuclear* provides utilities for running system shell commands.
 

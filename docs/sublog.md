@@ -1,4 +1,4 @@
-# Logging with Sublog
+# 📜 Logging with Sublog
 **Sublog** is a *nuclear*'s contextual logging system that allows you to:
   
 - display variables besides log messages: `logger.debug('message', airspeed=20)`,

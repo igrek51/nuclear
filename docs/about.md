@@ -1,4 +1,4 @@
-# Nuclear
+# ☢️ Nuclear
 [![GitHub version (latest SemVer)](https://img.shields.io/github/v/tag/igrek51/nuclear?label=github&sort=semver)](https://github.com/igrek51/nuclear)
 [![PyPI](https://img.shields.io/pypi/v/nuclear)](https://pypi.org/project/nuclear)
 [![Github Pages](https://img.shields.io/badge/docs-github.io-blue)](https://igrek51.github.io/nuclear)

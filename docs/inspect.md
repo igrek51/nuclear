@@ -1,4 +1,4 @@
-# WAT Inspector
+# 🙀 WAT Inspector
 
 **Nuclear** comes with a powerful inspection tool
 that allows you to delve into and examine unknown objects at runtime.
