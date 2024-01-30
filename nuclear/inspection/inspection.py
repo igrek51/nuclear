@@ -394,7 +394,6 @@ Call {STYLE_YELLOW}wat(){RESET} to inspect {STYLE_YELLOW}locals(){RESET} variabl
         return self
 
 wat = Wat()
-wats = Wat(short=True)
 
 
 def _strip_color(text: str) -> str:

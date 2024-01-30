@@ -3,7 +3,7 @@ from enum import Enum
 
 from pydantic import BaseModel
 
-from nuclear import CliBuilder, argument, inspect, wat
+from nuclear import CliBuilder, argument, wat
 from nuclear.inspection.inspection import inspect_format
 from tests.asserts import assert_multiline_match, strip_ansi_colors, StdoutCap
 
@@ -86,7 +86,7 @@ Public attributes:
 
 def test_inspect_clibuilder():
     cli = CliBuilder().has(argument('n', type=int))
-    inspect(cli)
+    wat(cli)
     output = inspect_format(cli)
     assert_multiline_match(output, r'''
 value: <nuclear\.cli\.builder\.builder\.CliBuilder object at .*>
@@ -210,7 +210,7 @@ def test_wat_with_nothing():
     assert str(wat) == '<nuclear Wat Inspector object>'
     with StdoutCap() as capture:
         assert repr(wat) == ''
-    assert 'Try `wat / object`, `wat(**options) / object` or `wat(object, **options)` to inspect an object. Options are:' in capture.uncolor().splitlines()
+    assert 'Try wat(object), wat / object or wat.modifiers / object to inspect an object. Modifiers are:' in capture.uncolor().splitlines()
 
 
 def test_wat_with_object():
