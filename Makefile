@@ -1,4 +1,4 @@
-.PHONY: setup test clean
+.PHONY: setup test clean build dist
 
 PYTHON_INTERPRETER ?= python3
 OUTPUT_README = README.md
@@ -50,8 +50,10 @@ clean:
 	rm -rf dist/
 	rm -rf ./*.egg-info
 
-release-pypi: clean readme
+build:
 	python setup.py sdist bdist_wheel
+
+release-pypi: clean readme build
 	python -m twine upload -u __token__ dist/*
 
 mkdocs-local:
