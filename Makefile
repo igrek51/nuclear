@@ -9,13 +9,13 @@ setup:
 	. venv/bin/activate &&\
 	pip install --upgrade pip setuptools &&\
 	pip install -r requirements.txt -r requirements-dev.txt &&\
-	python setup.py develop
+	python -m pip install -e .
 
 setup-test-unit:
 	python3 -m venv venv &&\
 	. venv/bin/activate &&\
 	pip install -r requirements.txt -r requirements-dev.txt &&\
-	python setup.py develop
+	python -m pip install -e .
 
 test:
 	$(PYTHON_INTERPRETER) -m coverage run --source nuclear -m pytest -vv --tb=short -ra --color=yes $(test)

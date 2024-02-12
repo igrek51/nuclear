@@ -7,7 +7,7 @@ import threading
 from typing import Dict, Any, Callable
 import json
 
-from colorama import Fore, Style
+from colorama import init, Fore, Style
 
 from nuclear.sublog.context_error import ContextError
 from nuclear.sublog.exception import extended_exception_details
@@ -62,7 +62,8 @@ def get_logger(logger_name: str) -> logging.Logger:
 class ContextLogger:
     def __init__(self, ctx: Dict[str, Any]):
         self.ctx: Dict[str, Any] = ctx
-        self.structured_logging = STRUCTURED_LOGGING
+        self.structured_logging: bool = STRUCTURED_LOGGING
+        self.first_use = True
 
     def error(self, message: str, **ctx):
         with simultaneous_print_lock:
@@ -84,6 +85,11 @@ class ContextLogger:
             self._print_log(message, ctx, _logging_logger.debug)
 
     def _print_log(self, message: str, ctx: Dict[str, Any], logger_func: Callable):
+        if self.first_use:
+            init()
+            init_logs()
+            self.first_use = False
+
         merged_context = {**self.ctx, **ctx}
         if not self.structured_logging:
             display_context = _display_context(merged_context)

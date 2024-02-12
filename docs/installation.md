@@ -10,8 +10,8 @@ You need Python 3.8 or newer.
 ## Install package in develop mode
 You can install package in develop mode in order to make any changes for your own:
 ```bash
-pip3 install -r requirements.txt
-python3 setup.py develop
+python -m pip install -r requirements.txt
+python -m pip install -e .
 ```
 
 ## Testing
