@@ -17,6 +17,7 @@ setuptools.setup(
     long_description_content_type="text/markdown",
     url="https://github.com/igrek51/nuclear",
     packages=setuptools.find_packages(exclude=["tests.*", "tests"]),
+    package_data={"nuclear": ["py.typed"]},
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: MIT License",
