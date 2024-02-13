@@ -15,11 +15,11 @@
 </div>
 
 *Nuclear* is a binding glue for CLI applications.
-It includes a set of tools for building CLI applications in Python:
+It consists of tools for building CLI applications in Python, including:
 
 - [CLI parser](https://igrek51.github.io/nuclear/quick-start/) for building nested CLI commands
-- [WAT](https://igrek51.github.io/nuclear/inspect/) - inspection tool for exploring Python objects
-- [Sublog](https://igrek51.github.io/nuclear/sublog/) - contextual logging system
+- [Sublog](https://igrek51.github.io/nuclear/sublog/) - contextual logger
+- [WAT](https://igrek51.github.io/nuclear/inspect/) - inspection tool
 - [Shell utilities](https://igrek51.github.io/nuclear/shell/)
 
 
@@ -229,7 +229,7 @@ wat()
   
 - display variables besides log messages: `logger.debug('message', airspeed=20)`,
 - wrap errors with context: `with add_context('ignition')`,
-- catch errors and show traceback in a concise, pretty format: `with  logerr()`.
+- catch errors and show traceback in a concise, pretty format: `with error_handler()`.
 
 ```python
 from nuclear.sublog import logger, error_handler, add_context
