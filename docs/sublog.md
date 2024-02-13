@@ -3,7 +3,7 @@
   
 - display variables besides log messages: `logger.debug('message', airspeed=20)`,
 - wrap errors with context: `with add_context('ignition')`,
-- catch errors and show traceback in a concise, pretty format: `with  logerr()`.
+- catch errors and show traceback in a concise, pretty format: `with error_handler()`.
 
 ```python
 from nuclear.sublog import logger, error_handler, add_context
