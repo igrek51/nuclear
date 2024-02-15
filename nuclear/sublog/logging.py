@@ -20,14 +20,16 @@ ISO_DATE_FORMAT = r'%Y-%m-%dT%H:%M:%S.%fZ'
 LOGGING_LOGGER_NAME = 'nuclear.sublog'
 STRUCTURED_LOGGING = is_env_flag_enabled('STRUCTURED_LOGGING', 'false')
 
-log_level = os.environ.get('LOG_LEVEL', 'debug')
+log_level: str = os.environ.get('LOG_LEVEL', 'debug')
 simultaneous_print_lock = threading.Lock()
-_logging_logger = logging.getLogger(LOGGING_LOGGER_NAME)
-
+_logging_logger: logging.Logger = logging.getLogger(LOGGING_LOGGER_NAME)
+_log_state = {
+    'init': False,
+}
 
 def init_logs():
     """Configure loggers: formatters, handlers and log levels"""
-    logging_kwargs = {
+    logging_kwargs: Dict[str, Any] = {
         'stream': sys.stdout,
         'format': LOG_FORMAT,
         'level': logging.INFO,
@@ -48,6 +50,7 @@ def init_logs():
     level = _get_logging_level(log_level)
     root_logger = logging.getLogger(LOGGING_LOGGER_NAME)
     root_logger.setLevel(level)
+    _log_state['init'] = True
 
 
 def get_logger(logger_name: str) -> logging.Logger:
@@ -85,7 +88,7 @@ class ContextLogger:
             self._print_log(message, ctx, _logging_logger.debug)
 
     def _print_log(self, message: str, ctx: Dict[str, Any], logger_func: Callable):
-        if self.first_use:
+        if self.first_use and not _log_state['init']:
             init()
             init_logs()
             self.first_use = False
@@ -157,7 +160,10 @@ class ColoredFormatter(logging.Formatter):
     def format(self, record: logging.LogRecord) -> str:
         if record.levelname in self.log_level_templates:
             record.levelname = self.log_level_templates[record.levelname].format(record.levelname)
-        return self.plain_formatter.format(record)
+        line: str = self.plain_formatter.format(record)
+        if not sys.stdout.isatty():
+            line = strip_ansi_colors(line)
+        return line
 
 
 class StructuredFormatter(logging.Formatter):
