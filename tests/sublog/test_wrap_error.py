@@ -19,14 +19,14 @@ def test_sublog_wrapping():
         logger.warn('attention')
         logger.debug('trace')
 
-        mockio.assert_match_uncolor('ERROR initializing: liftoff: dupa '
+        mockio.assert_match_uncolor('ERROR initializing: liftoff: dupa: '
                                     'request_id=42 speed=zero '
                                     'cause=RuntimeError traceback=(.*)/test_wrap_error.py:10$')
-        mockio.assert_match_uncolor('ERROR dupa2 a=5 z=fifteen '
+        mockio.assert_match_uncolor('ERROR dupa2: a=5 z=fifteen '
                                     'cause=ContextError traceback=(.*)/test_wrap_error.py:13$')
-        mockio.assert_match_uncolor('ERROR dupa3 '
+        mockio.assert_match_uncolor('ERROR dupa3: '
                                     'cause=RuntimeError traceback=(.*)/test_wrap_error.py:16$')
-        mockio.assert_match_uncolor('INFO  success param=with_param$')
+        mockio.assert_match_uncolor('INFO  success: param=with_param$')
         mockio.assert_match_uncolor('WARN  attention$')
         mockio.assert_match_uncolor('DEBUG trace$')
 
@@ -41,7 +41,7 @@ def test_sublog_wrapping_try_string():
                     raise RuntimeError('parent') from e
     except Exception as e:
         assert str(e) == 'initializing: liftoff: parent: dupa'
-        assert exception_details(e).startswith('initializing: liftoff: parent: dupa, cause=ValueError, traceback=')
+        assert exception_details(e).startswith('initializing: liftoff: parent: dupa: cause=ValueError, traceback='), exception_details(e)
 
 
     try:

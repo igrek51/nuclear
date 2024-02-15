@@ -1,6 +1,6 @@
 import os
 import traceback
-from typing import Collection, Iterable, Dict, Tuple
+from typing import Collection, Iterable, Dict, Optional, Tuple
 
 from nuclear.sublog.context_error import ContextError
 
@@ -17,7 +17,7 @@ def exception_details(e: BaseException) -> str:
     traceback_str = ', '.join(traceback_lines)
     cause = _root_cause_type(e)
     error_msg = _error_message(e)
-    return f'{error_msg}, cause={cause}, traceback={traceback_str}'
+    return f'{error_msg}: cause={cause}, traceback={traceback_str}'
 
 
 def extended_exception_details(e: BaseException) -> Tuple[str, Dict]:
@@ -71,20 +71,21 @@ def _include_traceback_frame(frame: traceback.FrameSummary) -> bool:
     return True
 
 
-def _root_cause_type(e: Exception) -> str:
+def _root_cause_type(e: BaseException) -> str:
     while e.__cause__ is not None:
         e = e.__cause__
     return type(e).__name__
 
 
-def _error_message(e: Exception, context_name: str = ''):
+def _error_message(e: BaseException, context_name: str = ''):
     layers = []
     if context_name:
         layers.append(context_name)
-    while e is not None:
-        if isinstance(e, ContextError):
-            layers.append(e.context_message.strip())
+    e_step: Optional[BaseException] = e
+    while e_step is not None:
+        if isinstance(e_step, ContextError):
+            layers.append(e_step.context_message.strip())
         else:
-            layers.append(str(e).strip())
-        e = e.__cause__
+            layers.append(str(e_step).strip())
+        e_step = e_step.__cause__
     return ': '.join(layers)

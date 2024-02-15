@@ -94,14 +94,16 @@ class ContextLogger:
             self.first_use = False
 
         merged_context = {**self.ctx, **ctx}
-        if not self.structured_logging:
+        if self.structured_logging:
+            logger_func(message, extra={'extra': merged_context})
+        else:
             display_context = _display_context(merged_context)
             if display_context:
-                logger_func(f'{message} {display_context}')
+                if message.endswith(':'):
+                    message = message[:-1]
+                logger_func(f'{message}: {display_context}')
             else:
                 logger_func(message)
-        else:
-            logger_func(message, extra={'extra': merged_context})
         
     def exception(self, e: BaseException):
         log_exception(e)
