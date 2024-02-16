@@ -53,7 +53,7 @@ clean:
 build:
 	python setup.py sdist bdist_wheel
 
-release-pypi: clean readme build
+release: clean readme build
 	python -m twine upload -u __token__ dist/*
 
 mkdocs-local:
