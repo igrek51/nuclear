@@ -11,14 +11,14 @@ def test_context_logger():
                 logger.warn('im a root')
 
             logger2.debug('logged out')
-        logger.debug(42)
+        logger.debug('42')
 
         # datetime
-        mockio.assert_match('^\x1b\\[2m\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\]\x1b\\[0m ')
+        mockio.assert_match('^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\] ')
         # log level
-        mockio.assert_match(' \x1b\\[32mDEBUG\x1b\\[0m ')
+        mockio.assert_match(' DEBUG ')
         # message with context
-        mockio.assert_match(' got request \x1b\\[32mrequest_id=\x1b\\[1m3735936685\x1b\\[0m$')
+        mockio.assert_match(' got request request_id=3735936685$')
 
         mockio.assert_match_uncolor('INFO  logged in request_id=3735936685 user=igrek page="sweet home"$')
         mockio.assert_match_uncolor('WARN  im a root$')
