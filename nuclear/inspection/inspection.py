@@ -376,7 +376,7 @@ Call {STYLE_YELLOW}wat(){RESET} to inspect {STYLE_YELLOW}locals(){RESET} variabl
     def __or__(self, other: Any): return self._react_with(other)  # |
     def __lt__(self, other: Any): return self._react_with(other)  # <
 
-    def __getattr__(self, name) -> 'Wat':
+    def __getattr__(self, name) -> Union['Wat', None]:
         new_wat = Wat(**self._params)
         if name in {'short', 's'}:
             new_wat._params['short'] = True
@@ -390,6 +390,10 @@ Call {STYLE_YELLOW}wat(){RESET} to inspect {STYLE_YELLOW}locals(){RESET} variabl
             new_wat._params['nodocs'] = True
         elif name == 'all':
             new_wat._params['all'] = True
+        elif name == 'locals':
+            return inspect(_build_locals_object())
+        elif name == 'globals':
+            return inspect(_build_globals_object())
         else:
             raise AttributeError
         return new_wat
@@ -410,6 +414,21 @@ def _build_locals_object():
                 frame = frame.f_back
         if frame is not None:
             for key, value in frame.f_locals.items():
+                setattr(o, key, value)
+    finally:
+        del frame
+    return o
+
+
+def _build_globals_object():
+    o = type('globals', (object,), {})()
+    frame = std_inspect.currentframe()
+    try:
+        for _ in range(2):
+            if frame is not None:
+                frame = frame.f_back
+        if frame is not None:
+            for key, value in frame.f_globals.items():
                 setattr(o, key, value)
     finally:
         del frame
