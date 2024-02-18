@@ -363,11 +363,11 @@ Call {STYLE_YELLOW}wat(){RESET} to inspect {STYLE_YELLOW}locals(){RESET} variabl
     def __call__(self, *args: Any, **kwargs: Any) -> Union['Wat', None]:
         if args:
             self._params.update(kwargs)
-            inspect(*args, **self._params)
+            return inspect(*args, **self._params)
         elif kwargs:
             return Wat(**kwargs)
         else:
-            inspect(_build_locals_object())
+            return inspect(_build_locals_object())
 
     def __truediv__(self, other: Any): return self._react_with(other) # /
     def __add__(self, other: Any): return self._react_with(other) # +
@@ -377,21 +377,22 @@ Call {STYLE_YELLOW}wat(){RESET} to inspect {STYLE_YELLOW}locals(){RESET} variabl
     def __lt__(self, other: Any): return self._react_with(other)  # <
 
     def __getattr__(self, name) -> 'Wat':
+        new_wat = Wat(**self._params)
         if name in {'short', 's'}:
-            self._params['short'] = True
+            new_wat._params['short'] = True
         elif name == 'long':
-            self._params['long'] = True
+            new_wat._params['long'] = True
         elif name == 'dunder':
-            self._params['dunder'] = True
+            new_wat._params['dunder'] = True
         elif name == 'code':
-            self._params['code'] = True
+            new_wat._params['code'] = True
         elif name == 'nodocs':
-            self._params['nodocs'] = True
+            new_wat._params['nodocs'] = True
         elif name == 'all':
-            self._params['all'] = True
+            new_wat._params['all'] = True
         else:
             raise AttributeError
-        return self
+        return new_wat
 
 wat = Wat()
 
@@ -404,9 +405,12 @@ def _build_locals_object():
     o = type('locals', (object,), {})()
     frame = std_inspect.currentframe()
     try:
-        locals = frame.f_back.f_back.f_locals  # back to caller frame
-        for key, value in locals.items():
-            setattr(o, key, value)
+        for _ in range(2):  # back to caller frame
+            if frame is not None:
+                frame = frame.f_back
+        if frame is not None:
+            for key, value in frame.f_locals.items():
+                setattr(o, key, value)
     finally:
         del frame
     return o
