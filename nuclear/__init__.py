@@ -12,3 +12,15 @@ from .inspection.inspection import wat
 from .version import __version__
 
 name = "nuclear"
+
+__all__ = [
+    'CliBuilder',
+    'subcommand', 'flag', 'dictionary', 'parameter', 'primary_option', 'argument', 'arguments', 'default_action',
+    'shell', 'shell_output', 'sh', 'CommandError',
+    'BackgroundCommand',
+    'error_handler',
+    'logger', 'log', 'log_exception', 'add_context', 'get_logger', 'init_logs',
+    'exception_details', 'unwrap',
+    'ContextError',
+    'wat',
+]
