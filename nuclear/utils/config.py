@@ -1,25 +1,21 @@
 import os
 from pathlib import Path
-from typing import Type, TypeVar
+from typing import Dict
 
-from pydantic import BaseModel
 import yaml
 
 from nuclear import logger
 
-T = TypeVar("T", bound=BaseModel)
 
-
-def load_config(clazz: Type[T]) -> T:
+def load_config() -> Dict:
     """
     Load general configuration from YAML file given in CONFIG_FILE environment var or load default config.
-    :param clazz: pydantic.BaseModel type that should be loaded
-    :return: configuration object of given "clazz" type
+    :return: loaded configuration dictionary object
     """
     config_file_path = os.environ.get('CONFIG_FILE')
     if not config_file_path:
         logger.warning('CONFIG_FILE unspecified, loading default config')
-        return clazz()
+        return {}
 
     path = Path(config_file_path)
     if not path.is_file():
@@ -28,9 +24,8 @@ def load_config(clazz: Type[T]) -> T:
     try:
         with path.open() as file:
             config_dict = yaml.load(file, Loader=yaml.FullLoader)
-            config = clazz.model_validate(config_dict)
 
-            logger.info(f'config loaded from {config_file_path}: {config}')
-            return config
+            logger.info(f'config loaded from {config_file_path}: {config_dict}')
+            return config_dict
     except Exception as e:
         raise RuntimeError('loading config failed') from e
