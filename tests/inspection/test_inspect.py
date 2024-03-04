@@ -1,10 +1,11 @@
 from datetime import datetime
 from enum import Enum
+import re
 
 from pydantic import BaseModel
 
 from nuclear import CliBuilder, argument, wat
-from nuclear.inspection.inspection import inspect_format
+from nuclear.inspection.inspection import Wat, inspect_format
 from tests.asserts import assert_multiline_match, strip_ansi_colors, StdoutCap
 
 
@@ -213,6 +214,28 @@ def test_wat_with_nothing():
     assert 'Try wat(object), wat / object or wat.modifiers / object to inspect an object. Modifiers are:' in capture.uncolor().splitlines()
 
 
+def test_wat_locals():
+    _local_var = 23
+    with StdoutCap() as capture:
+        wat()
+    assert 'value: <nuclear.inspection.inspection.locals object' in capture.uncolor()
+    assert '_local_var: int = 23' in capture.uncolor()
+
+    with StdoutCap() as capture:
+        wat.locals
+    assert 'value: <nuclear.inspection.inspection.locals object' in capture.uncolor()
+    assert '_local_var: int = 23' in capture.uncolor()
+
+
+global_var = 23
+
+def test_wat_globals():
+    with StdoutCap() as capture:
+        wat.globals
+    assert 'value: <nuclear.inspection.inspection.globals object' in capture.uncolor()
+    assert 'global_var: int = 23' in capture.uncolor()
+
+
 def test_wat_with_object():
     with StdoutCap() as capture:
         wat(short=True) / 'moo'
@@ -228,6 +251,53 @@ len: 3
 value: 'moo'
 type: str
 len: 3
+''')
+
+
+def test_wat_with_short_long_modifiers():
+    with StdoutCap() as capture:
+        wat.short('moo')
+    assert_multiline_match(capture.output(), r'''
+value: 'moo'
+type: str
+len: 3
+''')
+
+    with StdoutCap() as capture:
+        wat.long / 'moo2'
+    assert r'''
+  def capitalize():
+"""
+''' in capture.output()
+
+
+def test_wat_with_multiple_modifiers():
+    with StdoutCap() as capture:
+        wat.dunder.code / re.match
+
+    assert '''
+Dunder attributes:
+''' in capture.output()
+    assert '''  def __eq__(value, /)''' in capture.output()
+    
+    assert '''
+source code:
+def match(pattern, string, flags=0):
+''' in capture.output()
+    
+
+def test_wat_modifiers_all_but_nodocs():
+    with StdoutCap() as capture:
+        wat.all.short.nodocs / re.match
+    assert_multiline_match(capture.output(), r'''
+value: <function match at .*>
+type: function
+signature: def match\(pattern, string, flags=0\)
+source code:
+def match\(pattern, string, flags=0\):
+    """.*
+    .*"""
+    .*
 ''')
 
 

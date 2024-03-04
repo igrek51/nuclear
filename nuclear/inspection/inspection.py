@@ -362,8 +362,9 @@ Call {STYLE_YELLOW}wat(){RESET} to inspect {STYLE_YELLOW}locals(){RESET} variabl
     
     def __call__(self, *args: Any, **kwargs: Any) -> Union['Wat', None]:
         if args:
-            self._params.update(kwargs)
-            return inspect(*args, **self._params)
+            new_params = self._params.copy()
+            new_params.update(kwargs)
+            return inspect(*args, **new_params)
         elif kwargs:
             return Wat(**kwargs)
         else:
