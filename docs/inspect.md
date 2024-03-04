@@ -56,13 +56,13 @@ with the following **modifiers**:
 - `.nodocs` to hide documentation for functions and classes
 - `.all` to include all available information
 
-You can chain modifiers, e.g. `wat.long.dunder / object`.
+You can chain modifiers, e.g. `wat.long.dunder.nodocs / object`.
 
 Call `wat()` to inspect `locals()` variables.
 
 Type `wat` in the interpreter to learn more about this object itself.
 
-## Use cases
+## Use Cases Examples
 
 ### Determine type
 In a dynamic typing language like Python, it's often hard to determine the type of an object. WAT Inspector can help you with that by showing the name of the type with the module it comes from.
@@ -82,12 +82,14 @@ type: django.contrib.auth.models.User
 parents: django.contrib.auth.models.AbstractUser, django.contrib.auth.base_user.AbstractBaseUser, django.contrib.auth.models.PermissionsMixin, django.db.models.base.Model, django.db.models.utils.AltersData
 ```
 
+Now that you've identified the actual type, you can put the type annotations in your code to reduce the confusion.
+
 ### Look up methods
 Listing methods, functions and looking up their signature is extremely beneficial to see how to use them.
 Plus, you can read their docstrings.
 
 ```python
-wat('stringy')
+wat / 'stringy'
 ```
 
 ![](https://github.com/igrek51/nuclear/blob/master/docs/img/wat-string.png?raw=true)
@@ -96,13 +98,13 @@ wat('stringy')
 See the docstrings and the signature of a function or a method to see how to use it.
 
 ```python
-wat(str.split)
+wat / str.split
 ```
 
 ![](https://github.com/igrek51/nuclear/blob/master/docs/img/wat-str-split.png?raw=true)
 
-### Look up variables
-Check what's inside, list the value of variables and their types to see what's really inside the inspected object.
+### Look up attributes
+List the attribues and their types to see what's really inside the inspected object.
 ```python
 wat / re.match('(\d)_(.*)', '1_title')
 ```
@@ -164,4 +166,11 @@ wat / __builtins__
 ### Look up local variables
 ```python
 wat()
+# or
+wat.locals
+```
+
+### Look up global variables
+```python
+wat.globals
 ```
