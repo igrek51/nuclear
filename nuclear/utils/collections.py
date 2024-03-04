@@ -9,7 +9,7 @@ def chunks(lst: List[T], n: int) -> Iterable[List[T]]:
         yield lst[i:i + n]
 
 
-def deduplicate_latest(items: list[T], key: Callable[[T], Any]) -> list[T]:
+def deduplicate_latest(items: List[T], key: Callable[[T], Any]) -> List[T]:
     """Deduplicate items in the list by key. Keep the earliest items first, remove the latest duplicates"""
     ids = set()
     dedup_items: List[T] = []
@@ -21,7 +21,7 @@ def deduplicate_latest(items: list[T], key: Callable[[T], Any]) -> list[T]:
     return dedup_items
 
 
-def deduplicate_earliest(items: list[T], key: Callable[[T], Any]) -> list[T]:
+def deduplicate_earliest(items: List[T], key: Callable[[T], Any]) -> List[T]:
     """Deduplicate items in the list by key. Keep the latest items, remove the earliest duplicates"""
     ids = set()
     dedup_items: List[T] = []

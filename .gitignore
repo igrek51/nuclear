@@ -9,6 +9,7 @@ dist/
 .coverage
 coverage.xml
 /venv
+/venv*
 
 .idea
 *.iml
