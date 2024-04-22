@@ -141,7 +141,7 @@ def _iter_attributes(obj: Any, config: InspectConfig) -> Iterable[InspectAttribu
 def _get_attribute_value(obj: Any, key: str) -> Any:
     try:
         return getattr(obj, key)
-    except AttributeError as e:
+    except BaseException as e:
         return e
 
 
