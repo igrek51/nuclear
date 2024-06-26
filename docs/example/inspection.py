@@ -8,4 +8,4 @@ class Person(BaseModel):
 
 
 if __name__ == '__main__':
-    wat.short / Person(name='george')
+    wat.code / Person

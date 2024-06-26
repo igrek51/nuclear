@@ -17,7 +17,7 @@ def exception_details(e: BaseException) -> str:
     traceback_str = ', '.join(traceback_lines)
     cause = _root_cause_type(e)
     error_msg = _error_message(e)
-    return f'{error_msg}: cause={cause}, traceback={traceback_str}'
+    return f'{error_msg}, cause={cause}, traceback={traceback_str}'
 
 
 def extended_exception_details(e: BaseException) -> Tuple[str, Dict]:

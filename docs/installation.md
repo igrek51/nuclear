@@ -17,7 +17,7 @@ python -m pip install -e .
 ## Testing
 Running tests:
 ```bash
-make setup
+make venv
 . venv/bin/activate
 make test
 ```

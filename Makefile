@@ -1,10 +1,10 @@
-.PHONY: setup test clean build dist
+.PHONY: venv test clean build dist
 
 PYTHON_INTERPRETER ?= python3
 OUTPUT_README = README.md
 SHELL := /bin/bash
 
-setup:
+venv:
 	python3 -m venv venv &&\
 	. venv/bin/activate &&\
 	pip install --upgrade pip setuptools &&\

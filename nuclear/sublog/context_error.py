@@ -22,7 +22,7 @@ class ContextError(RuntimeError):
             self.__cause__ = cause
 
     def __str__(self) -> str:
-        e: Exception = self
+        e: Optional[BaseException] = self
         layers = []
         while e is not None:
             if isinstance(e, ContextError):

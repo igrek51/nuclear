@@ -171,8 +171,8 @@ def _get_callable_signature(name: str, obj: Any) -> Optional[str]:
 def _get_source_code(obj: Any) -> Optional[str]:
     try:
         return std_inspect.getsource(obj)
-    except (OSError, TypeError, IndentationError):
-        return None
+    except (OSError, TypeError, IndentationError) as e:
+        return f'failed to get source code: {type(e)}: {e}'
 
 
 def _get_doc(obj: Any, long: bool) -> Optional[str]:
@@ -244,9 +244,9 @@ def _format_dict_value(dic: Dict, indent: int) -> str:
         return f'{STYLE_YELLOW}{{}}{RESET}'
 
 
-def _format_list_value(l: List, indent: int) -> str:
+def _format_list_value(lst: List, indent: int) -> str:
     lines: List[str] = []
-    for value in l:
+    for value in lst:
         value_str = _format_value(value, indent)
         lines.append('    ' * indent + f'{value_str},')
     if lines:

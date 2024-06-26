@@ -11,7 +11,7 @@ def test_sublog_traceback():
                 with add_context('liftoff', speed='zero'):
                     disaster()
 
-        mockio.assert_match_uncolor('ERROR initializing: liftoff: disaster: request_id=42 speed=zero '
+        mockio.assert_match_uncolor('ERROR initializing: liftoff: disaster, request_id=42 speed=zero '
                                     'cause=RuntimeError '
                                     'traceback="(.+)/test_catch.py:12, '
                                     '(.+)/test_catch.py:22, '
@@ -43,7 +43,7 @@ def test_catch_with_context_name():
         with error_handler('hacking time'):
             raise RuntimeError('nope')
 
-        mockio.assert_match_uncolor('ERROR hacking time: nope: '
+        mockio.assert_match_uncolor('ERROR hacking time: nope, '
                                     'cause=RuntimeError '
                                     'traceback=(.+)/test_catch.py:44"?$')
 
@@ -56,7 +56,7 @@ def test_catch_chained_exception_cause():
             except AttributeError as e:
                 raise RuntimeError('wrapper') from e
 
-        mockio.assert_match_uncolor('ERROR hacking time: wrapper: real cause: '
+        mockio.assert_match_uncolor('ERROR hacking time: wrapper: real cause, '
                                     'cause=AttributeError '
                                     'traceback=(.+)/test_catch.py:55"?$')
 
@@ -71,7 +71,7 @@ def test_recover_from_dynamically_imported_module():
             assert loader is not None, 'no module loader'
             loader.exec_module(ext_module)
 
-        mockio.assert_match_uncolor(r'ERROR hacking time: Fire!: '
+        mockio.assert_match_uncolor(r'ERROR hacking time: Fire!, '
                                     r'cause=RuntimeError '
                                     r'traceback="(.+)/test_catch.py:72, '
                                     r'<frozen importlib._bootstrap_external>:\d+, '
@@ -87,7 +87,7 @@ def test_catch_and_log_exception_from_builder():
         cli = CliBuilder(log_error=True, run=doit)
         cli.run()
 
-        mockio.assert_match_uncolor('ERROR fail: '
+        mockio.assert_match_uncolor('ERROR fail, '
                                     'cause=RuntimeError '
                                     'traceback=(.+)/test_catch.py:85"?$')
 
@@ -99,6 +99,6 @@ def test_log_exception():
         except Exception as e:
             log_exception(e)
 
-        mockio.assert_match_uncolor('ERROR fail: '
+        mockio.assert_match_uncolor('ERROR fail, '
                                     'cause=RuntimeError '
                                     'traceback=(.+)/test_catch.py:98"?$')

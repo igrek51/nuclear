@@ -101,7 +101,7 @@ class ContextLogger:
             if display_context:
                 if message.endswith(':'):
                     message = message[:-1]
-                logger_func(f'{message}: {display_context}')
+                logger_func(f'{message}, {display_context}')
             else:
                 logger_func(message)
         
