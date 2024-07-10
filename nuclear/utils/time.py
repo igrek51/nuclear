@@ -14,6 +14,11 @@ def now() -> datetime:
     return datetime.now(timezone.utc)
 
 
+def now_tz() -> datetime:
+    """Return current datetime with local timezone set"""
+    return datetime.now().astimezone()
+
+
 def now_timestamp() -> int:
     return datetime_to_timestamp(now())
 

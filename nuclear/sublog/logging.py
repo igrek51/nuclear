@@ -1,31 +1,34 @@
 from contextlib import contextmanager
 from datetime import datetime, timezone
 import logging
+import json
 import os
 import sys
 import threading
-from typing import Dict, Any, Callable
-import json
+import time
+from typing import Dict, Any, Callable, List, Optional
 
 from colorama import init, Fore, Style
 
 from nuclear.sublog.context_error import ContextError
 from nuclear.sublog.exception import extended_exception_details
+from nuclear.utils.collections import filter_not_none
 from nuclear.utils.env import is_env_flag_enabled
 from nuclear.utils.strings import strip_ansi_colors
 
 LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message)s'
 LOG_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
+LOG_DATE_FORMAT_UTC = r'%Y-%m-%d %H:%M:%SZ'
 ISO_DATE_FORMAT = r'%Y-%m-%dT%H:%M:%S.%fZ'
 LOGGING_LOGGER_NAME = 'nuclear.sublog'
-STRUCTURED_LOGGING = is_env_flag_enabled('STRUCTURED_LOGGING', 'false')
 
-log_level: str = os.environ.get('LOG_LEVEL', 'debug')
+log_level: str = os.environ.get('NUCLEAR_LOG_LEVEL', 'debug')
+log_level_show: bool = is_env_flag_enabled('NUCLEAR_LOG_LEVEL_SHOW', 'true')
+log_time_show: bool = is_env_flag_enabled('NUCLEAR_LOG_TIME', 'true')
 simultaneous_print_lock = threading.Lock()
 _logging_logger: logging.Logger = logging.getLogger(LOGGING_LOGGER_NAME)
-_log_state = {
-    'init': False,
-}
+_log_state = {'init': False}
+
 
 def init_logs():
     """Configure loggers: formatters, handlers and log levels"""
@@ -37,15 +40,15 @@ def init_logs():
     }
     if sys.version_info[1] >= 8:
         logging_kwargs['force'] = True
-    if not is_env_flag_enabled('STRUCTURED_LOGGING', 'false'):
-        logging.basicConfig(**logging_kwargs)
-        for handler in logging.getLogger().handlers:
-            handler.setFormatter(ColoredFormatter(handler.formatter))
-    else:
+    if is_env_flag_enabled('NUCLEAR_STRUCTURED_LOGGING', 'false'):
         logging_kwargs['datefmt'] = ISO_DATE_FORMAT
         logging.basicConfig(**logging_kwargs)
         for handler in logging.getLogger().handlers:
-            handler.setFormatter(StructuredFormatter(handler.formatter))
+            handler.setFormatter(StructuredFormatter())
+    else:
+        logging.basicConfig(**logging_kwargs)
+        for handler in logging.getLogger().handlers:
+            handler.setFormatter(ColoredFormatter())
 
     level = _get_logging_level(log_level)
     root_logger = logging.getLogger(LOGGING_LOGGER_NAME)
@@ -65,7 +68,7 @@ def get_logger(logger_name: str) -> logging.Logger:
 class ContextLogger:
     def __init__(self, ctx: Dict[str, Any]):
         self.ctx: Dict[str, Any] = ctx
-        self.structured_logging: bool = STRUCTURED_LOGGING
+        self.structured_logging: bool = is_env_flag_enabled('NUCLEAR_STRUCTURED_LOGGING', 'false')
         self.first_use = True
 
     def error(self, message: str, **ctx):
@@ -147,9 +150,8 @@ def add_context(context_name: str, log: bool = False, **ctx):
 
 
 class ColoredFormatter(logging.Formatter):
-    def __init__(self, plain_formatter):
+    def __init__(self):
         logging.Formatter.__init__(self)
-        self.plain_formatter = plain_formatter
 
     log_level_templates = {
         'CRITICAL': f'{Style.BRIGHT + Fore.RED}CRIT {Style.RESET_ALL}',
@@ -160,18 +162,30 @@ class ColoredFormatter(logging.Formatter):
     }
 
     def format(self, record: logging.LogRecord) -> str:
-        if record.levelname in self.log_level_templates:
-            record.levelname = self.log_level_templates[record.levelname].format(record.levelname)
-        line: str = self.plain_formatter.format(record)
+        part_levelname = self.log_level_templates.get(record.levelname, record.levelname) if log_level_show else None
+        part_message = record.msg
+        part_time = self.format_time()
+        parts: List[str] = filter_not_none([part_time, part_levelname, part_message])
+        line = ' '.join(parts)
         if not sys.stdout.isatty():
             line = strip_ansi_colors(line)
         return line
+    
+    @staticmethod
+    def format_time() -> Optional[str]:
+        if not log_time_show:
+            return None
+        now_tz = datetime.now().astimezone()
+        if time.timezone == 0:
+            time_formatted = now_tz.strftime(LOG_DATE_FORMAT_UTC)
+        else:
+            time_formatted = now_tz.strftime(LOG_DATE_FORMAT)
+        return f'{Style.DIM}[{time_formatted}]{Style.RESET_ALL}'
 
 
 class StructuredFormatter(logging.Formatter):
-    def __init__(self, plain_formatter):
+    def __init__(self):
         logging.Formatter.__init__(self)
-        self.plain_formatter = plain_formatter
 
     def format(self, record: logging.LogRecord) -> str:
         timestamp: float = record.created

@@ -1,4 +1,4 @@
-from typing import Any, Callable, Iterable, TypeVar, List, Union
+from typing import Any, Callable, Iterable, TypeVar, List, Union, Optional
 
 T = TypeVar('T')
 
@@ -42,3 +42,7 @@ def flatten(collection: Iterable[Union[T, List[T]]]) -> List[T]:
         else:
             flat.append(item)
     return flat
+
+
+def filter_not_none(items: List[Optional[T]]) -> List[T]:
+    return [item for item in items if item is not None]
