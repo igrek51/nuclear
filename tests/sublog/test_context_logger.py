@@ -1,8 +1,11 @@
+import os
+
 from nuclear.sublog import logger, error_handler
 from tests.asserts import MockIO
 
 
 def test_context_logger():
+    os.environ['TZ'] = 'Europe/Warsaw'
     with MockIO() as mockio:
         with logger.contextualize(request_id=0xdeaddead) as logger2:
             logger2.debug('got request')
