@@ -48,12 +48,8 @@ def filter_not_none(items: List[Optional[T]]) -> List[T]:
     return [item for item in items if item is not None]
 
 
-def coalesce(*items: Optional[T]) -> Optional[T]:
+def coalesce(*items: Optional[T]) -> T:
     for item in items:
         if item is not None:
             return item
-    return None
-
-
-def coalesce2(item: Optional[T], default: T) -> T:
-    return item if item is not None else default
+    raise ValueError('all items are None')
