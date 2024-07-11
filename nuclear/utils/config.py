@@ -1,10 +1,12 @@
 import os
 from pathlib import Path
-from typing import Dict
+from typing import Dict, Type, TypeVar
 
 import yaml
 
 from nuclear import logger
+
+T = TypeVar('T')
 
 
 def load_config() -> Dict:
@@ -29,3 +31,22 @@ def load_config() -> Dict:
             return config_dict
     except Exception as e:
         raise RuntimeError('loading config failed') from e
+
+
+def load_local_config(dataclazz: Type[T]) -> T:
+    """
+    Load local configuration from YAML file and return it as a dataclass.
+    """
+    path = Path('.config.yaml')
+    if not path.is_file():
+        logger.warning(f'Local config not found at {path}, using defaults')
+        return dataclazz()
+
+    try:
+        with path.open() as file:
+            config_dict = yaml.load(file, Loader=yaml.FullLoader)
+            config = dataclazz(**config_dict)
+            logger.debug(f'local config loaded from {path}: {config_dict}')
+            return config
+    except Exception as e:
+        raise RuntimeError('loading local config failed') from e
