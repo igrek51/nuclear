@@ -11,7 +11,7 @@ from nuclear.sublog.logging import init_logs_once
 from nuclear.utils.strings import strip_ansi_colors
 
 
-def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str | None = None):
+def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: Optional[str] = None):
     try:
         action()
         assert False, 'should raise error'
@@ -21,7 +21,7 @@ def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_ms
             assert expected_msg in str(e), 'unexpected error message'
 
 
-def assert_cli_error(action, expected_error: str | None = None):
+def assert_cli_error(action, expected_error: Optional[str] = None):
     assert_error(action, CliError, expected_error)
 
 
