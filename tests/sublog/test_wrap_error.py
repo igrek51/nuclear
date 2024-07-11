@@ -1,8 +1,9 @@
-from nuclear.sublog import add_context, ContextError, logger, error_handler, exception_details
+from nuclear.sublog import add_context, ContextError, logger, error_handler, exception_details, init_logs
 from tests.asserts import MockIO
 
 
 def test_sublog_wrapping():
+    init_logs()
     with MockIO() as mockio:
         with error_handler():
             with add_context('initializing', request_id=42):
@@ -21,11 +22,11 @@ def test_sublog_wrapping():
 
         mockio.assert_match_uncolor('ERROR initializing: liftoff: dupa, '
                                     'request_id=42 speed=zero '
-                                    'cause=RuntimeError traceback=(.*)/test_wrap_error.py:10$')
+                                    'cause=RuntimeError traceback=(.*)/test_wrap_error.py:11$')
         mockio.assert_match_uncolor('ERROR dupa2, a=5 z=fifteen '
-                                    'cause=ContextError traceback=(.*)/test_wrap_error.py:13$')
+                                    'cause=ContextError traceback=(.*)/test_wrap_error.py:14$')
         mockio.assert_match_uncolor('ERROR dupa3, '
-                                    'cause=RuntimeError traceback=(.*)/test_wrap_error.py:16$')
+                                    'cause=RuntimeError traceback=(.*)/test_wrap_error.py:17$')
         mockio.assert_match_uncolor('INFO  success, param=with_param$')
         mockio.assert_match_uncolor('WARN  attention$')
         mockio.assert_match_uncolor('DEBUG trace$')

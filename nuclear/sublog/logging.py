@@ -12,7 +12,7 @@ from colorama import init, Fore, Style
 
 from nuclear.sublog.context_error import ContextError
 from nuclear.sublog.exception import extended_exception_details
-from nuclear.utils.collections import filter_not_none
+from nuclear.utils.collections import coalesce2, filter_not_none
 from nuclear.utils.env import is_env_flag_enabled
 from nuclear.utils.strings import strip_ansi_colors
 
@@ -22,16 +22,19 @@ LOG_DATE_FORMAT_UTC = r'%Y-%m-%d %H:%M:%SZ'
 ISO_DATE_FORMAT = r'%Y-%m-%dT%H:%M:%S.%fZ'
 LOGGING_LOGGER_NAME = 'nuclear.sublog'
 
-log_level: str = os.environ.get('NUCLEAR_LOG_LEVEL', 'debug')
-log_level_show: bool = is_env_flag_enabled('NUCLEAR_LOG_LEVEL_SHOW', 'true')
-log_time_show: bool = is_env_flag_enabled('NUCLEAR_LOG_TIME', 'true')
 simultaneous_print_lock = threading.Lock()
 _logging_logger: logging.Logger = logging.getLogger(LOGGING_LOGGER_NAME)
 _log_state = {'init': False}
 
 
-def init_logs():
-    """Configure loggers: formatters, handlers and log levels"""
+def init_logs(
+    show_time: Optional[bool] = None,
+):
+    """
+    Configure loggers: formatters, handlers and log levels
+    :param show_time: if True, formatted time will be displayed in each log message,
+    None will use default value
+    """
     logging_kwargs: Dict[str, Any] = {
         'stream': sys.stdout,
         'format': LOG_FORMAT,
@@ -46,14 +49,22 @@ def init_logs():
         for handler in logging.getLogger().handlers:
             handler.setFormatter(StructuredFormatter())
     else:
+        log_time_show: bool = coalesce2(show_time, is_env_flag_enabled('NUCLEAR_LOG_TIME', 'true'))
         logging.basicConfig(**logging_kwargs)
         for handler in logging.getLogger().handlers:
-            handler.setFormatter(ColoredFormatter())
+            handler.setFormatter(ColoredFormatter(log_time_show))
 
+    log_level: str = os.environ.get('NUCLEAR_LOG_LEVEL', 'debug')
     level = _get_logging_level(log_level)
     root_logger = logging.getLogger(LOGGING_LOGGER_NAME)
     root_logger.setLevel(level)
     _log_state['init'] = True
+    print('twice')
+
+
+def init_logs_once():
+    if not _log_state['init']:
+        init_logs()
 
 
 def get_logger(logger_name: str) -> logging.Logger:
@@ -150,8 +161,10 @@ def add_context(context_name: str, log: bool = False, **ctx):
 
 
 class ColoredFormatter(logging.Formatter):
-    def __init__(self):
+    def __init__(self, log_time_show: bool):
         logging.Formatter.__init__(self)
+        self.log_level_show: bool = is_env_flag_enabled('NUCLEAR_LOG_LEVEL_SHOW', 'true')
+        self.log_time_show: bool = log_time_show
 
     log_level_templates = {
         'CRITICAL': f'{Style.BRIGHT + Fore.RED}CRIT {Style.RESET_ALL}',
@@ -162,7 +175,7 @@ class ColoredFormatter(logging.Formatter):
     }
 
     def format(self, record: logging.LogRecord) -> str:
-        part_levelname = self.log_level_templates.get(record.levelname, record.levelname) if log_level_show else None
+        part_levelname = self.log_level_templates.get(record.levelname, record.levelname) if self.log_level_show else None
         part_message = record.msg
         part_time = self.format_time()
         parts: List[str] = filter_not_none([part_time, part_levelname, part_message])
@@ -171,9 +184,8 @@ class ColoredFormatter(logging.Formatter):
             line = strip_ansi_colors(line)
         return line
     
-    @staticmethod
-    def format_time() -> Optional[str]:
-        if not log_time_show:
+    def format_time(self) -> Optional[str]:
+        if not self.log_time_show:
             return None
         now_tz = datetime.now().astimezone()
         if time.timezone == 0:

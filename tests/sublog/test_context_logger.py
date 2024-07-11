@@ -1,11 +1,15 @@
 import os
+from time import tzset
 
-from nuclear.sublog import logger, error_handler
+from nuclear.sublog import logger, error_handler, init_logs
 from tests.asserts import MockIO
 
 
 def test_context_logger():
     os.environ['TZ'] = 'Europe/Warsaw'
+    tzset()
+    init_logs()
+    logger.debug('42')
     with MockIO() as mockio:
         with logger.contextualize(request_id=0xdeaddead) as logger2:
             logger2.debug('got request')
@@ -51,7 +55,7 @@ def test_root_context_logger():
         mockio.assert_match_uncolor(' logged in, request_id=3735936685 user=igrek page=home$')
         mockio.assert_match_uncolor(' im a root, request_id=3735936685 user=igrek$')
         mockio.assert_match_uncolor(
-            ' I\'m a pickle, cause=RuntimeError traceback=.+:40$')
+            ' I\'m a pickle, cause=RuntimeError traceback=.+:47$')
         mockio.assert_match_uncolor(' logged out, request_id=3735936685$')
         mockio.assert_match_uncolor(' exited$')
 
@@ -64,3 +68,13 @@ def test_child_logger():
     with MockIO() as mockio:
         logger.warning('beware of Python loggers')
         mockio.assert_match_uncolor('] WARN  beware of Python loggers$')
+
+
+def test_hidden_log_time():
+    try:
+        init_logs(show_time=False)
+        with MockIO() as mockio:
+            logger.debug('logged in')
+        mockio.assert_match('^DEBUG logged in$')
+    finally:
+        init_logs()

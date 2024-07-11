@@ -46,3 +46,14 @@ def flatten(collection: Iterable[Union[T, List[T]]]) -> List[T]:
 
 def filter_not_none(items: List[Optional[T]]) -> List[T]:
     return [item for item in items if item is not None]
+
+
+def coalesce(*items: Optional[T]) -> Optional[T]:
+    for item in items:
+        if item is not None:
+            return item
+    return None
+
+
+def coalesce2(item: Optional[T], default: T) -> T:
+    return item if item is not None else default

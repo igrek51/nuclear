@@ -7,11 +7,11 @@ import logging
 import mock
 
 from nuclear.cli.parser.error import CliError
-from nuclear.sublog import init_logs
+from nuclear.sublog.logging import init_logs_once
 from nuclear.utils.strings import strip_ansi_colors
 
 
-def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str = None):
+def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_msg: str | None = None):
     try:
         action()
         assert False, 'should raise error'
@@ -21,7 +21,7 @@ def assert_error(action, error_type: Type[Exception] = RuntimeError, expected_ms
             assert expected_msg in str(e), 'unexpected error message'
 
 
-def assert_cli_error(action, expected_error: str = None):
+def assert_cli_error(action, expected_error: str | None = None):
     assert_error(action, CliError, expected_error)
 
 
@@ -36,7 +36,7 @@ def assert_system_exit(action):
 
 class MockIO:
     def __init__(self, *in_args: str):
-        init_logs()
+        init_logs_once()
         logger = logging.getLogger('nuclear.sublog')
         logger.setLevel(logging.DEBUG)
         logger.propagate = False
@@ -113,7 +113,7 @@ class MockIO:
 
 class StdoutCap:
     def __init__(self):
-        init_logs()
+        init_logs_once()
         logger = logging.getLogger('nuclear.sublog')
         logger.setLevel(logging.DEBUG)
         logger.propagate = False
