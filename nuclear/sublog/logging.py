@@ -185,7 +185,8 @@ class ColoredFormatter(logging.Formatter):
         if self.log_level_show:
             part_levelname = self.log_level_templates.get(record.levelname, record.levelname)
             parts.append(part_levelname)
-        parts.append(record.msg)
+        log_message: str = record.getMessage()
+        parts.append(log_message)
         line = ' '.join(parts)
         if not sys.stdout.isatty():
             line = strip_ansi_colors(line)
