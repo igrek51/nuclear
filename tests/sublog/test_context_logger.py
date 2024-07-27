@@ -7,9 +7,14 @@ from tests.asserts import MockIO
 
 
 def test_context_logger():
-    os.environ['TZ'] = 'Europe/Warsaw'
+    for timezone in ['Europe/Warsaw', 'UTC']:
+        _test_context_logger_tz(timezone)
+
+
+def _test_context_logger_tz(timezone: str)
+    os.environ['TZ'] = timezone
     tzset()
-    tz_utc = time.timezone == 0  # in case timezone chanve didn't take effect
+    tz_utc = time.timezone == 0  # in case timezone change didn't take effect
     init_logs()
     logger.debug('42')
     with MockIO() as mockio:
