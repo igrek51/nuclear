@@ -2,7 +2,6 @@
 
 PYTHON_INTERPRETER ?= python3
 OUTPUT_README = README.md
-SHELL := /bin/bash
 
 venv:
 	python3 -m venv venv &&\
