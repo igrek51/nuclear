@@ -7,9 +7,14 @@ from tests.asserts import MockIO
 
 
 def test_context_logger():
-    os.environ['TZ'] = 'Europe/Warsaw'
+    for timezone in ['Europe/Warsaw', 'UTC']:
+        _test_context_logger_tz(timezone)
+
+
+def _test_context_logger_tz(timezone: str):
+    os.environ['TZ'] = timezone
     tzset()
-    tz_utc = time.timezone == 0  # in case timezone chanve didn't take effect
+    tz_utc = time.timezone == 0  # in case timezone change didn't take effect
     init_logs()
     logger.debug('42')
     with MockIO() as mockio:
@@ -24,7 +29,7 @@ def test_context_logger():
 
         # datetime
         if tz_utc:
-            mockio.assert_match('^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\Z] ')
+            mockio.assert_match('^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}Z\\] ')
         else:
             mockio.assert_match('^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\] ')
         # log level
@@ -60,7 +65,7 @@ def test_root_context_logger():
         mockio.assert_match_uncolor(' logged in, request_id=3735936685 user=igrek page=home$')
         mockio.assert_match_uncolor(' im a root, request_id=3735936685 user=igrek$')
         mockio.assert_match_uncolor(
-            ' I\'m a pickle, cause=RuntimeError traceback=.+:52$')
+            ' I\'m a pickle, cause=RuntimeError traceback=.+:57$')
         mockio.assert_match_uncolor(' logged out, request_id=3735936685$')
         mockio.assert_match_uncolor(' exited$')
 
