@@ -11,7 +11,7 @@ def test_context_logger():
         _test_context_logger_tz(timezone)
 
 
-def _test_context_logger_tz(timezone: str)
+def _test_context_logger_tz(timezone: str):
     os.environ['TZ'] = timezone
     tzset()
     tz_utc = time.timezone == 0  # in case timezone change didn't take effect
