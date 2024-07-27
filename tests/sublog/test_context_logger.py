@@ -1,5 +1,6 @@
 import os
 from time import tzset
+import time
 
 from nuclear.sublog import logger, error_handler, init_logs
 from tests.asserts import MockIO
@@ -8,6 +9,7 @@ from tests.asserts import MockIO
 def test_context_logger():
     os.environ['TZ'] = 'Europe/Warsaw'
     tzset()
+    tz_utc = time.timezone == 0  # in case timezone chanve didn't take effect
     init_logs()
     logger.debug('42')
     with MockIO() as mockio:
@@ -21,7 +23,10 @@ def test_context_logger():
         logger.debug('42')
 
         # datetime
-        mockio.assert_match('^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\] ')
+        if tz_utc:
+            mockio.assert_match('^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\Z] ')
+        else:
+            mockio.assert_match('^\\[\\d{4}-\\d{2}-\\d{2} \\d{2}:\\d{2}:\\d{2}\\] ')
         # log level
         mockio.assert_match(' DEBUG ')
         # message with context
