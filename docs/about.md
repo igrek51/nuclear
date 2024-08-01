@@ -19,5 +19,4 @@ It consists of tools for building CLI applications in Python, including:
 
 - [CLI parser](https://igrek51.github.io/nuclear/quick-start/) for building nested CLI commands
 - [Sublog](https://igrek51.github.io/nuclear/sublog/) - contextual logger
-- [WAT](https://igrek51.github.io/nuclear/inspect/) - inspection tool
 - [Shell utilities](https://igrek51.github.io/nuclear/shell/)

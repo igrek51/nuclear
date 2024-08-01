@@ -39,8 +39,6 @@ readme:
 	# echo -en '\n\n' >> $(OUTPUT_README)
 	# cat docs/cheatsheet-short.md >> $(OUTPUT_README)
 	# echo -en '\n\n' >> $(OUTPUT_README)
-	cat docs/inspect.md >> $(OUTPUT_README)
-	echo -en '\n\n' >> $(OUTPUT_README)
 	cat docs/sublog.md >> $(OUTPUT_README)
 	echo -en '\n\n' >> $(OUTPUT_README)
 	cat docs/shell.md >> $(OUTPUT_README)
@@ -61,14 +59,3 @@ mkdocs-local:
 
 mkdocs-push:
 	mkdocs gh-deploy --force
-
-
-dump-inspect:
-	python3 nuclear/inspection/insta/dump.py nuclear/inspection/inspection.py
-	@echo
-	@echo "paste it to: docs/inspect.md"
-	@echo "-paste it to: nuclear/inspection/insta/instaload.py"
-
-
-example-inspect:
-	python docs/example/inspection.py
