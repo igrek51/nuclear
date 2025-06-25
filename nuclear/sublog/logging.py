@@ -30,6 +30,7 @@ _log_state = {'init': False}
 def init_logs(
     show_time: Optional[bool] = None,
     show_log_level: Optional[bool] = None,
+    color_enabled: Optional[bool] = None,
 ):
     """
     Configure loggers: formatters, handlers and log levels
@@ -37,6 +38,8 @@ def init_logs(
     False to turn it off, None to use the default
     :param show_log_level: True to display log level in each log message,
     False to turn it off, None to use the default
+    :param color_enabled: True to enforce colorful outputs even in non-tty environment,
+    False to disable colorful output in the console, None to determine on its own.
     """
     logging_kwargs: Dict[str, Any] = {
         'stream': sys.stdout,
@@ -54,9 +57,10 @@ def init_logs(
     else:
         _show_log_time: bool = coalesce(show_time, is_env_flag_enabled('NUCLEAR_LOG_TIME', 'true'))
         _show_log_level: bool = coalesce(show_log_level, is_env_flag_enabled('NUCLEAR_LOG_LEVEL_SHOW', 'true'))
+        _color_enabled: bool = coalesce(color_enabled, _is_color_enabled())
         logging.basicConfig(**logging_kwargs)
         for handler in logging.getLogger().handlers:
-            handler.setFormatter(ColoredFormatter(_show_log_time, _show_log_level))
+            handler.setFormatter(ColoredFormatter(_show_log_time, _show_log_level, _color_enabled))
 
     log_level: str = os.environ.get('NUCLEAR_LOG_LEVEL', 'debug')
     level = _get_logging_level(log_level)
@@ -164,10 +168,11 @@ def add_context(context_name: str, log: bool = False, **ctx):
 
 
 class ColoredFormatter(logging.Formatter):
-    def __init__(self, log_time_show: bool, log_level_show: bool):
+    def __init__(self, log_time_show: bool, log_level_show: bool, color_enabled: bool):
         logging.Formatter.__init__(self)
         self.log_level_show: bool = log_level_show
         self.log_time_show: bool = log_time_show
+        self.color_enabled: bool = color_enabled
 
     log_level_templates = {
         'CRITICAL': f'{Style.BRIGHT + Fore.RED}CRIT {Style.RESET_ALL}',
@@ -188,7 +193,7 @@ class ColoredFormatter(logging.Formatter):
         log_message: str = record.getMessage()
         parts.append(log_message)
         line = ' '.join(parts)
-        if not sys.stdout.isatty():
+        if not self.color_enabled:
             line = strip_ansi_colors(line)
         return line
     
@@ -248,3 +253,10 @@ def _display_context_var(var: str, val: str) -> str:
         return f'{Fore.GREEN}{var}="{Style.BRIGHT}{val}{Style.RESET_ALL}{Fore.GREEN}"{Style.RESET_ALL}'
     else:
         return f'{Fore.GREEN}{var}={Style.BRIGHT}{val}{Style.RESET_ALL}'
+
+
+def _is_color_enabled() -> bool:
+    env_val: str = os.environ.get('NUCLEAR_COLOR', '').lower()
+    if env_val:
+        return env_val in {'true', 't', 'yes', 'y', '1'}
+    return sys.stdout.isatty()
