@@ -5,11 +5,9 @@ OUTPUT_README = README.md
 SHELL = bash
 
 venv:
-	python3 -m venv venv &&\
+	uv venv venv &&\
 	. venv/bin/activate &&\
-	pip install --upgrade pip setuptools &&\
-	pip install -r requirements.txt -r requirements-dev.txt &&\
-	python -m pip install -e .
+	uv pip install -r requirements.txt -r requirements-dev.txt -e .
 
 setup-test-unit:
 	python3 -m venv venv &&\
