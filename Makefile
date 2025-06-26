@@ -7,7 +7,8 @@ SHELL = bash
 venv:
 	uv venv venv &&\
 	. venv/bin/activate &&\
-	uv pip install -r requirements.txt -r requirements-dev.txt -e .
+	uv pip install -r requirements.txt -r requirements-dev.txt
+	uv pip install -e .
 
 setup-test-unit:
 	python3 -m venv venv &&\
