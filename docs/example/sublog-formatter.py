@@ -2,8 +2,7 @@
 import logging
 import sys
 
-from colorama import Fore, Style
-from nuclear.sublog import logger, init_logs
+from nuclear.sublog import logger, init_logs, RESET, STYLE_BRIGHT_RED, STYLE_YELLOW, STYLE_BLUE, STYLE_GREEN
 from nuclear.utils.strings import strip_ansi_colors
 
 
@@ -25,11 +24,11 @@ class SimpleFormatter(logging.Formatter):
         self.plain_formatter = logging.Formatter(fmt='%(levelname)s %(message)s')
 
     log_level_templates = {
-        'CRITICAL': f'{Style.BRIGHT + Fore.RED}CRIT {Style.RESET_ALL}',
-        'ERROR': f'{Style.BRIGHT + Fore.RED}ERROR{Style.RESET_ALL}',
-        'WARNING': f'{Fore.YELLOW}WARN {Style.RESET_ALL}',
-        'INFO': f'{Fore.BLUE}INFO {Style.RESET_ALL}',
-        'DEBUG': f'{Fore.GREEN}DEBUG{Style.RESET_ALL}',
+        'CRITICAL': f'{STYLE_BRIGHT_RED}CRIT {RESET}',
+        'ERROR': f'{STYLE_BRIGHT_RED}ERROR{RESET}',
+        'WARNING': f'{STYLE_YELLOW}WARN {RESET}',
+        'INFO': f'{STYLE_BLUE}INFO {RESET}',
+        'DEBUG': f'{STYLE_GREEN}DEBUG{RESET}',
     }
 
     def format(self, record: logging.LogRecord) -> str:

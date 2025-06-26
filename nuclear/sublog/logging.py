@@ -8,15 +8,28 @@ import threading
 import time
 from typing import Dict, Any, Callable, List, Optional
 
-from colorama import init, Fore, Style
-
 from nuclear.sublog.context_error import ContextError
 from nuclear.sublog.exception import extended_exception_details
 from nuclear.utils.collections import coalesce
 from nuclear.utils.env import is_env_flag_enabled
 from nuclear.utils.strings import strip_ansi_colors
 
-LOG_FORMAT = f'{Style.DIM}[%(asctime)s]{Style.RESET_ALL} %(levelname)s %(message)s'
+RESET = '\033[0m'
+STYLE_BRIGHT = '\033[1m'
+STYLE_DIM = '\033[2m'
+STYLE_RED = '\033[0;31m'
+STYLE_BRIGHT_RED = '\033[1;31m'
+STYLE_GREEN = '\033[0;32m'
+STYLE_BRIGHT_GREEN = '\033[1;32m'
+STYLE_YELLOW = '\033[0;33m'
+STYLE_BRIGHT_YELLOW = '\033[1;33m'
+STYLE_BLUE = '\033[0;34m'
+STYLE_BRIGHT_BLUE = '\033[1;34m'
+STYLE_MAGENTA = '\033[0;35m'
+STYLE_CYAN = '\033[0;36m'
+STYLE_GRAY = '\033[2;37m'
+
+LOG_FORMAT = f'{STYLE_DIM}[%(asctime)s]{RESET} %(levelname)s %(message)s'
 LOG_DATE_FORMAT = r'%Y-%m-%d %H:%M:%S'
 LOG_DATE_FORMAT_UTC = r'%Y-%m-%d %H:%M:%SZ'
 ISO_DATE_FORMAT = r'%Y-%m-%dT%H:%M:%S.%fZ'
@@ -110,7 +123,6 @@ class ContextLogger:
 
     def _print_log(self, message: str, ctx: Dict[str, Any], logger_func: Callable):
         if self.first_use and not _log_state['init']:
-            init()
             init_logs()
             self.first_use = False
 
@@ -175,11 +187,11 @@ class ColoredFormatter(logging.Formatter):
         self.color_enabled: bool = color_enabled
 
     log_level_templates = {
-        'CRITICAL': f'{Style.BRIGHT + Fore.RED}CRIT {Style.RESET_ALL}',
-        'ERROR': f'{Style.BRIGHT + Fore.RED}ERROR{Style.RESET_ALL}',
-        'WARNING': f'{Fore.YELLOW}WARN {Style.RESET_ALL}',
-        'INFO': f'{Fore.BLUE}INFO {Style.RESET_ALL}',
-        'DEBUG': f'{Fore.GREEN}DEBUG{Style.RESET_ALL}',
+        'CRITICAL': f'{STYLE_BRIGHT_RED}CRIT {RESET}',
+        'ERROR': f'{STYLE_BRIGHT_RED}ERROR{RESET}',
+        'WARNING': f'{STYLE_YELLOW}WARN {RESET}',
+        'INFO': f'{STYLE_BLUE}INFO {RESET}',
+        'DEBUG': f'{STYLE_GREEN}DEBUG{RESET}',
     }
 
     def format(self, record: logging.LogRecord) -> str:
@@ -205,7 +217,7 @@ class ColoredFormatter(logging.Formatter):
             time_formatted = now_tz.strftime(LOG_DATE_FORMAT_UTC)
         else:
             time_formatted = now_tz.strftime(LOG_DATE_FORMAT)
-        return f'{Style.DIM}[{time_formatted}]{Style.RESET_ALL}'
+        return f'{STYLE_DIM}[{time_formatted}]{RESET}'
 
 
 class StructuredFormatter(logging.Formatter):
@@ -250,9 +262,9 @@ def _display_context(ctx: Dict[str, Any]) -> str:
 def _display_context_var(var: str, val: str) -> str:
     val = str(val)
     if ' ' in val:
-        return f'{Fore.GREEN}{var}="{Style.BRIGHT}{val}{Style.RESET_ALL}{Fore.GREEN}"{Style.RESET_ALL}'
+        return f'{STYLE_GREEN}{var}="{STYLE_BRIGHT}{val}{RESET}{STYLE_GREEN}"{RESET}'
     else:
-        return f'{Fore.GREEN}{var}={Style.BRIGHT}{val}{Style.RESET_ALL}'
+        return f'{STYLE_GREEN}{var}={STYLE_BRIGHT}{val}{RESET}'
 
 
 def _is_color_enabled() -> bool:
