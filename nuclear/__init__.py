@@ -7,6 +7,7 @@ from .sublog.catch import error_handler
 from .sublog.logging import logger, log, log_exception, add_context, get_logger, init_logs
 from .sublog.exception import exception_details, unwrap
 from .sublog.context_error import ContextError
+from . import nuke
 
 from .version import __version__
 
@@ -21,4 +22,5 @@ __all__ = [
     'logger', 'log', 'log_exception', 'add_context', 'get_logger', 'init_logs',
     'exception_details', 'unwrap',
     'ContextError',
+    'nuke',
 ]
