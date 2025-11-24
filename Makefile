@@ -5,7 +5,7 @@ OUTPUT_README = README.md
 SHELL = bash
 
 venv:
-	uv venv venv &&\
+	uv venv venv --python 3.12 &&\
 	. venv/bin/activate &&\
 	uv pip install -r requirements.txt -r requirements-dev.txt &&\
 	python setup.py develop
