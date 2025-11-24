@@ -17,6 +17,6 @@ def test_load_config():
         'bluey_offset': 100,
     }
     config: Config = load_config_from_dict(Config, dic)
-    assert config.dry == False
+    assert not config.dry
     assert config.bluey_sources == ['abc']
     assert config.bluey_offset == 100

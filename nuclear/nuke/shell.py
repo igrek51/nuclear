@@ -12,9 +12,13 @@ class ShellRunner:
         return self.copy(**shell_kwargs).run(cmd)
     
     def run(self, cmd: str) -> str:
-        if self._shell_kwargs.get('dry', False):
-            logger.info(f'Dry command: {cmd}')
-            return ''
+        dry = self._shell_kwargs.get('dry')
+        if dry is not None:
+            del self._shell_kwargs['dry']
+            if dry:
+                logger.info(f'Dry command: {cmd}')
+                return ''
+
         return shell(cmd, **self._shell_kwargs)
     
     def copy(self, **shell_kwargs) -> 'ShellRunner':
@@ -33,6 +37,7 @@ class ShellRunner:
 
 def sh(
     raw_output: bool = False,
+    print_log: bool = False,
     dry: bool = False,
 ) -> ShellRunner:
     return ShellRunner(raw_output=raw_output, dry=dry)
