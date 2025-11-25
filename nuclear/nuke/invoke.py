@@ -1,4 +1,5 @@
 import inspect
+import re
 import sys
 from typing import Any
 
@@ -39,7 +40,27 @@ def parse_cli_args(args: list[str]) -> tuple[list[str], dict[str, str]]:
     The rest that stays at the end, are the positional arguments.
     Return tuple of positional arguments and the dict of extracted parameters / flags.
     """
-    return [], {}
+    positional_args: list[str] = []
+    overrides: dict[str, str] = {}
+
+    remaining_args = list(args)
+    i = 0
+    while i < len(remaining_args):
+        arg = remaining_args[i]
+        if arg.startswith('--'):
+            match = re.fullmatch(r'--([a-zA-Z0-9_-]+)(?:=(.*))?', arg)
+            if match:
+                key = match.group(1).replace('-', '_')
+                value = match.group(2)
+                if value is None: # flag
+                    overrides[key] = '1'
+                else: # key-value pair
+                    overrides[key] = value.strip('\'"') # remove surrounding quotes
+                remaining_args.pop(i)
+                continue
+        positional_args.append(arg)
+        i += 1
+    return positional_args, overrides
 
 
 def _get_config_object() -> Any:
