@@ -35,4 +35,4 @@ See [demo.py](https://github.com/igrek51/nuclear/blob/master/docs/demo/demo-deco
 python3 -m pip install --upgrade nuclear
 ```
 
-You need Python 3.8 or newer.
+You need Python 3.9 or newer.
