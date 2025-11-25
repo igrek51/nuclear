@@ -3,13 +3,14 @@ from datetime import datetime, timezone
 from dateutil import parser as dt_parser
 from pathlib import Path
 from typing import Any, Type, TypeVar, Union, get_origin, get_args
-import types
 
 import yaml
 
 from nuclear import logger
 
 T = TypeVar('T')
+UnionType = type(str | None)
+NoneType = type(None)
 
 
 def load_config(clazz: Type[T]) -> T:
@@ -59,14 +60,14 @@ def parse_typed_object(obj: Any, clazz: Type[T]):
             dataclass_kwargs[key] = parse_typed_object(value, field_types[key])
         return clazz(**dataclass_kwargs)
     
-    elif get_origin(clazz) in {Union, types.UnionType}:  # Union or Optional type
+    elif get_origin(clazz) in {Union, UnionType}:  # Union or Optional type
         union_types = get_args(clazz)
         left_types = []
         for union_type in union_types:
             if dataclasses.is_dataclass(union_type):
                 if obj is not None:
                     return parse_typed_object(obj, union_type)
-            elif union_type is types.NoneType:
+            elif union_type is NoneType:
                 if obj is None:
                     return None
             else:
