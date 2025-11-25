@@ -4,6 +4,7 @@ import sys
 from typing import Any
 
 from nuclear.sublog import logger, error_handler
+from nuclear.nuke.config import apply_overrides
 
 
 def run():
@@ -15,16 +16,15 @@ def _run_with_args(args: list[str]):
     if not args:
         return _show_available_targets()
 
-    positional, overrides = parse_cli_args(args)
-
-    config = _get_config_object()
+    positionals, overrides = parse_cli_args(args)
+    _apply_cli_overrides_to_config(overrides)
 
     function_names: list[str] = _list_target_names()
-    for arg in args:
+    for arg in positionals:
         assert arg in function_names, f'unknown target function: {arg}'
     
     main_module = sys.modules['__main__']
-    for arg in args:
+    for arg in positionals:
         function = getattr(main_module, arg)
         logger.info(f'Calling function: {arg}')
         function()
@@ -63,12 +63,21 @@ def parse_cli_args(args: list[str]) -> tuple[list[str], dict[str, str]]:
     return positional_args, overrides
 
 
-def _get_config_object() -> Any:
+def _apply_cli_overrides_to_config(overrides: dict[str, str]):
     main_module = sys.modules['__main__']
     if not hasattr(main_module, 'config'):
-        logger.warn("Can't find config object in the main module")
-        return {}
-    return getattr(main_module, 'config')
+        if overrides:
+            logger.warn("Can't find \"config\" object in the main module")
+        return
+
+    config = getattr(main_module, 'config')
+
+    apply_cli_overrides(config, overrides)
+
+
+def apply_cli_overrides(config: Any, overrides: dict[str, str]):
+    Config = type(config)
+    apply_overrides(config, Config, overrides)
 
 
 def _show_available_targets():

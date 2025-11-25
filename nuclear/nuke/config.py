@@ -29,10 +29,10 @@ def load_config(clazz: Type[T]) -> T:
 
 
 def load_config_from_dict(clazz: Type[T], config_dict: dict[str, Any]) -> T:
-    return _apply_overrides(clazz(), clazz, config_dict)
+    return apply_overrides(clazz(), clazz, config_dict)
 
 
-def _apply_overrides(obj: T, clazz: Type[T], overrides: dict[str, Any]) -> T:
+def apply_overrides(obj: T, clazz: Type[T], overrides: dict[str, Any]) -> T:
     field_types: dict[str, Type] = clazz.__annotations__
     for key, value in overrides.items():
         if key not in field_types:
