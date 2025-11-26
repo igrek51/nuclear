@@ -1,7 +1,6 @@
 import dataclasses
 import json
 from datetime import datetime, timezone
-from dateutil import parser as dt_parser
 from pathlib import Path
 import sys
 from typing import Any, Type, TypeVar, Union, get_origin, get_args
@@ -57,7 +56,7 @@ def parse_typed_object(obj: Any, clazz: Type[T]):
 
     if type(obj) is str:
         if clazz is datetime:
-            return dt_parser.parse(obj).replace(tzinfo=timezone.utc)
+            return datetime.fromisoformat(obj).replace(tzinfo=timezone.utc)
         elif get_origin(clazz) is list and get_args(clazz)[0] is str:
             return json.loads(obj)
         elif clazz is bool:
