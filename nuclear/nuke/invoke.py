@@ -1,10 +1,8 @@
 import inspect
 import re
 import sys
-from typing import Any
 
 from nuclear.sublog import logger, error_handler
-from nuclear.nuke.config import apply_overrides
 
 
 def run():
@@ -16,8 +14,7 @@ def _run_with_args(args: list[str]):
     if not args:
         return _show_available_targets()
 
-    positionals, overrides = parse_cli_args(args)
-    _apply_cli_overrides_to_config(overrides)
+    positionals, _ = parse_cli_args(args)
 
     function_names: list[str] = _list_target_names()
     for arg in positionals:
@@ -61,23 +58,6 @@ def parse_cli_args(args: list[str]) -> tuple[list[str], dict[str, str]]:
         positional_args.append(arg)
         i += 1
     return positional_args, overrides
-
-
-def _apply_cli_overrides_to_config(overrides: dict[str, str]):
-    main_module = sys.modules['__main__']
-    if not hasattr(main_module, 'config'):
-        if overrides:
-            logger.warn("Can't find \"config\" object in the main module")
-        return
-
-    config = getattr(main_module, 'config')
-
-    apply_cli_overrides(config, overrides)
-
-
-def apply_cli_overrides(config: Any, overrides: dict[str, str]):
-    Config = type(config)
-    apply_overrides(config, Config, overrides)
 
 
 def _show_available_targets():

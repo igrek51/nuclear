@@ -40,4 +40,8 @@ def sh(
     print_log: bool = False,
     dry: bool = False,
 ) -> ShellRunner:
-    return ShellRunner(raw_output=raw_output, dry=dry)
+    return ShellRunner(
+        raw_output=raw_output,
+        print_log=print_log,
+        dry=dry,
+    )

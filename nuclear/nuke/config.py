@@ -3,11 +3,13 @@ import json
 from datetime import datetime, timezone
 from dateutil import parser as dt_parser
 from pathlib import Path
+import sys
 from typing import Any, Type, TypeVar, Union, get_origin, get_args
 
 import yaml
 
-from nuclear import logger
+from nuclear import logger, ContextError
+from nuclear.nuke.invoke import parse_cli_args
 
 T = TypeVar('T')
 UnionType = type(str | None)
@@ -15,22 +17,28 @@ NoneType = type(None)
 
 
 def load_config(clazz: Type[T]) -> T:
+    try:
+        local_overrides = _load_local_overrides()
+        _, cli_overrides = parse_cli_args(sys.argv[1:])
+        if cli_overrides:
+            logger.debug('Applying CLI overrides to config', cli_overrides=cli_overrides)
+
+        overrides: dict[str, Any] = local_overrides | cli_overrides
+        return apply_overrides(clazz(), clazz, overrides)
+
+    except Exception as e:
+        raise ContextError('loading config failed', e)
+
+
+def _load_local_overrides() -> dict[str, Any]:
     path = Path('.config.yaml')
     if not path.is_file():
-        return clazz()
+        return {}
 
-    try:
-        with path.open() as file:
-            config_dict: dict[str, Any] = yaml.load(file, Loader=yaml.FullLoader)
-            config = load_config_from_dict(clazz, config_dict)
-            logger.info(f'local config loaded from {path}: {config_dict}')
-            return config
-    except Exception as e:
-        raise RuntimeError('loading local config failed') from e
-
-
-def load_config_from_dict(clazz: Type[T], config_dict: dict[str, Any]) -> T:
-    return apply_overrides(clazz(), clazz, config_dict)
+    yaml_content = path.read_text()
+    yaml_dict: dict[str, Any] = yaml.safe_load(yaml_content)
+    logger.info('local config loaded', config_path=path)
+    return yaml_dict
 
 
 def apply_overrides(obj: T, clazz: Type[T], overrides: dict[str, Any]) -> T:
@@ -47,7 +55,6 @@ def parse_typed_object(obj: Any, clazz: Type[T]):
     if obj is None:
         return None
 
-    # automatic type conversion
     if type(obj) is str:
         if clazz is datetime:
             return dt_parser.parse(obj).replace(tzinfo=timezone.utc)

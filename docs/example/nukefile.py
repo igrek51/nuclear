@@ -23,7 +23,7 @@ class Config:
 
 
 config: Config = nuke.load_config(Config)  # loads .config.yaml or default
-sh = nuke.sh(raw_output=True, print_log=False, dry=config.dry)  # generates logger.debug or shell(raw_output=True) caller based on --dry
+sh = nuke.sh(raw_output=True, print_log=True, dry=config.dry)  # generates logger.debug or shell(raw_output=True) caller based on --dry
 
 
 def push():
