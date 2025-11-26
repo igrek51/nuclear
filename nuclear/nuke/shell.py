@@ -1,4 +1,5 @@
 from typing import Any
+from pathlib import Path
 
 from nuclear.shell.shell_utils import shell
 from nuclear.sublog.logging import logger
@@ -36,12 +37,18 @@ class ShellRunner:
 
 
 def sh(
-    raw_output: bool = False,
+    workdir: Path | None = None,
+    print_stdout: bool = False,
     print_log: bool = False,
+    raw_output: bool = False,
+    independent: bool = False,
     dry: bool = False,
 ) -> ShellRunner:
     return ShellRunner(
-        raw_output=raw_output,
+        workdir=workdir,
+        print_stdout=print_stdout,
         print_log=print_log,
+        raw_output=raw_output,
+        independent=independent,
         dry=dry,
     )
