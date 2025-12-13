@@ -15,6 +15,7 @@ def _run_with_args(args: list[str]):
         return _show_available_targets()
 
     positionals, _ = parse_cli_args(args)
+    positionals = [arg.replace('-', '_') for arg in positionals]
 
     function_names: list[str] = _list_target_names()
     for arg in positionals:
