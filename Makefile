@@ -1,4 +1,4 @@
-.PHONY: venv test clean build dist
+.PHONY: venv venv-test-unit test clean build dist readme release mkdocs-local mkdocs-push
 
 PYTHON_INTERPRETER ?= python3
 OUTPUT_README = README.md
@@ -9,10 +9,10 @@ venv:
 	. venv/bin/activate &&\
 	uv pip install -e ".[dev]"
 
-setup-test-unit:
-	python3 -m venv venv &&\
+venv-test-unit:
+	uv venv venv &&\
 	. venv/bin/activate &&\
-	pip install -e ".[dev]"
+	uv pip install -e ".[dev]"
 
 test:
 	$(PYTHON_INTERPRETER) -m coverage run --source nuclear -m pytest -vv --tb=short -ra --color=yes $(test)
