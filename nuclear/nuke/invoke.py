@@ -5,12 +5,33 @@ import sys
 from nuclear.sublog import logger, error_handler
 
 
+# Track executed targets to avoid running them multiple times
+_executed_targets: set[str] = set()
+
+
+def depends(*target_names: str):
+    """
+    Decorator to mark target dependencies.
+
+    Usage:
+        @depends('build')
+        def test():
+            ...
+    """
+    def decorator(func):
+        func.__depends__ = target_names
+        return func
+    return decorator
+
+
 def run():
     with error_handler():
         _run_with_args(sys.argv[1:])
 
 
 def _run_with_args(args: list[str]):
+    _executed_targets.clear()
+
     if not args:
         return _show_available_targets()
 
@@ -20,12 +41,28 @@ def _run_with_args(args: list[str]):
     function_names: list[str] = _list_target_names()
     for arg in positionals:
         assert arg in function_names, f'unknown target function: {arg}'
-    
+
     main_module = sys.modules['__main__']
     for arg in positionals:
-        function = getattr(main_module, arg)
-        logger.info(f'Calling function: {arg}')
-        function()
+        _execute_target(main_module, arg)
+
+
+def _execute_target(main_module, target_name: str):
+    """Execute a target and its dependencies, ensuring each runs only once."""
+    if target_name in _executed_targets:
+        return
+
+    function = getattr(main_module, target_name)
+
+    # Execute dependencies first
+    if hasattr(function, '__depends__'):
+        for dep in function.__depends__:
+            dep_normalized = dep.replace('-', '_')
+            _execute_target(main_module, dep_normalized)
+
+    logger.info(f'Calling function: {target_name}')
+    function()
+    _executed_targets.add(target_name)
 
 
 def parse_cli_args(args: list[str]) -> tuple[list[str], dict[str, str]]:
