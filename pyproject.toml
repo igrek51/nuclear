@@ -41,6 +41,9 @@ dev = [
     "types-PyYAML==6.0.12.20240311",
 ]
 
+[project.scripts]
+nuke = "nuclear.nuke.cli:main"
+
 [project.urls]
 Homepage = "https://github.com/igrek51/nuclear"
 Repository = "https://github.com/igrek51/nuclear.git"
