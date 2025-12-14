@@ -1,0 +1,7 @@
+recursive-exclude tests *
+recursive-exclude .github *
+recursive-exclude docs *
+exclude .readthedocs.yml
+exclude mkdocs.yml
+exclude requirements-dev.txt
+exclude nuclear.egg-info

@@ -7,14 +7,12 @@ SHELL = bash
 venv:
 	uv venv venv --python 3.12 &&\
 	. venv/bin/activate &&\
-	uv pip install -r requirements.txt -r requirements-dev.txt &&\
-	python setup.py develop
+	uv pip install -e ".[dev]"
 
 setup-test-unit:
 	python3 -m venv venv &&\
 	. venv/bin/activate &&\
-	pip install -r requirements.txt -r requirements-dev.txt &&\
-	python -m pip install -e .
+	pip install -e ".[dev]"
 
 test:
 	$(PYTHON_INTERPRETER) -m coverage run --source nuclear -m pytest -vv --tb=short -ra --color=yes $(test)
@@ -48,7 +46,7 @@ clean:
 	rm -rf ./*.egg-info
 
 build:
-	python setup.py sdist bdist_wheel
+	python3 -m build --sdist --wheel
 
 release: clean readme build
 	python -m twine upload -u __token__ dist/*

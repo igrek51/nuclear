@@ -1,0 +1,80 @@
+[build-system]
+requires = ["setuptools>=61.0", "wheel"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "nuclear"
+dynamic = ["version"]
+description = "Declarative parser for command line interfaces"
+readme = "README.md"
+requires-python = ">=3.10.0"
+authors = [
+    { name = "igrek51", email = "igrek51.dev@gmail.com" },
+]
+license = { text = "MIT" }
+classifiers = [
+    "Programming Language :: Python :: 3",
+    "Programming Language :: Python :: 3.10",
+    "Programming Language :: Python :: 3.11",
+    "Programming Language :: Python :: 3.12",
+    "License :: OSI Approved :: MIT License",
+    "Operating System :: OS Independent",
+]
+dependencies = [
+    "PyYAML>=6.0",
+]
+
+[project.optional-dependencies]
+dev = [
+    "pytest==8.2.2",
+    "mock==4.0.3",
+    "coverage==6.3.2",
+    "setuptools==70.0.0",
+    "twine==4.0.0",
+    "wheel==0.38.4",
+    "mkdocs==1.4.0",
+    "mkdocs-material==8.5.6",
+    "backoff==2.0.1",
+    "pydantic==2.4.0",
+    "mypy==1.10.1",
+    "types-PyYAML==6.0.12.20240311",
+]
+
+[project.urls]
+Homepage = "https://github.com/igrek51/nuclear"
+Repository = "https://github.com/igrek51/nuclear.git"
+Documentation = "https://igrek51.github.io/nuclear"
+"Read the Docs" = "https://nuclear-py.readthedocs.io"
+
+[tool.setuptools]
+packages.find.where = ["."]
+packages.find.exclude = ["tests*"]
+
+[tool.setuptools.dynamic]
+version = { attr = "nuclear.version.__version__" }
+
+[tool.setuptools.package-data]
+nuclear = ["py.typed"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+addopts = "-vv --tb=short -ra --color=yes"
+
+[tool.coverage.run]
+source = ["nuclear"]
+branch = true
+
+[tool.coverage.report]
+exclude_lines = [
+    "pragma: no cover",
+    "def __repr__",
+    "raise AssertionError",
+    "raise NotImplementedError",
+    "if __name__ == .__main__.:",
+]
+
+[tool.mypy]
+python_version = "3.10"
+warn_return_any = true
+warn_unused_configs = true
+disallow_untyped_defs = false
