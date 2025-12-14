@@ -76,4 +76,14 @@ def _list_target_names() -> list[str]:
     main_module = sys.modules['__main__']
     attrs: list[str] = dir(main_module)
     public_attrs = [a for a in attrs if not a.startswith('_')]
-    return [a for a in public_attrs if inspect.isfunction(getattr(main_module, a))]
+
+    # Filter to include only functions defined in this module, not imported ones
+    target_functions = []
+    for attr_name in public_attrs:
+        attr = getattr(main_module, attr_name)
+        if inspect.isfunction(attr):
+            # Check if the function is defined in the main module, not imported
+            if attr.__module__ == main_module.__name__:
+                target_functions.append(attr_name)
+
+    return target_functions

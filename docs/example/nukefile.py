@@ -9,7 +9,7 @@
 # ///
 from pathlib import Path
 
-from nuclear import nuke, logger
+from nuclear import nuke, logger, shell
 
 
 class Config:
