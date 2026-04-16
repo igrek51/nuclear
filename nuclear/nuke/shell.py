@@ -13,14 +13,15 @@ class ShellRunner:
         return self.copy(**shell_kwargs).run(cmd)
     
     def run(self, cmd: str) -> str:
-        dry = self._shell_kwargs.get('dry')
+        shell_kwargs = self._shell_kwargs.copy()
+        dry = shell_kwargs.get('dry')
         if dry is not None:
-            del self._shell_kwargs['dry']
+            del shell_kwargs['dry']
             if dry:
                 logger.info(f'Dry command: {cmd}')
                 return ''
 
-        return shell(cmd, **self._shell_kwargs)
+        return shell(cmd, **shell_kwargs)
     
     def copy(self, **shell_kwargs) -> 'ShellRunner':
         new_shell_kwargs = self._shell_kwargs.copy()
