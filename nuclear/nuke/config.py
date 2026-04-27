@@ -15,6 +15,17 @@ UnionType = type(str | None)
 NoneType = type(None)
 
 
+class NukeConfig:
+    """Default configuration for nuke tasks.
+    
+    Extend this class to add custom configuration fields:
+        class Config(NukeConfig):
+            limit: int = 0
+            output_dir: str = 'dist'
+    """
+    dry: bool = False
+
+
 def load_config(clazz: Type[T]) -> T:
     try:
         local_overrides = _load_local_overrides()
