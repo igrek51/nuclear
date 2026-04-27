@@ -18,4 +18,4 @@
 - [Nuclear vs argparse](https://nuclear-py.readthedocs.io/en/latest/vs-argparse)
 - [Installation](https://nuclear-py.readthedocs.io/en/latest/installation)
 - [CLI Rules cheatsheet](https://nuclear-py.readthedocs.io/en/latest/cheatsheet)
-
+- [Nuke - Task Runner](https://nuclear-py.readthedocs.io/en/latest/nuke) - simple task automation

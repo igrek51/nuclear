@@ -38,6 +38,8 @@ readme:
 	# echo -en '\n\n' >> $(OUTPUT_README)
 	cat docs/sublog.md >> $(OUTPUT_README)
 	echo -en '\n\n' >> $(OUTPUT_README)
+	cat docs/nuke-short.md >> $(OUTPUT_README)
+	echo -en '\n\n' >> $(OUTPUT_README)
 	cat docs/shell.md >> $(OUTPUT_README)
 
 clean:

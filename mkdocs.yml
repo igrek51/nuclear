@@ -52,5 +52,6 @@ nav:
     - Errors handling: errors.md
   - WAT Inspector: inspect.md
   - Sublog: sublog.md
+  - Nuke: nuke.md
   - Shell: shell.md
   - Installation: installation.md
