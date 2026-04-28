@@ -1,7 +1,7 @@
 import sys
-from unittest.mock import MagicMock
+from unittest.mock import MagicMock, patch
 
-from nuclear.nuke.invoke import parse_cli_args, depends, _execute_target, _executed_targets
+from nuclear.nuke.invoke import parse_cli_args, depends, _execute_target, _executed_targets, _list_target_names
 
 
 def test_depends_decorator():
@@ -125,3 +125,74 @@ def test_parse_cli_args_only_positional():
     positional, overrides = parse_cli_args(['pos1', 'pos2'])
     assert positional == ['pos1', 'pos2']
     assert overrides == {}
+
+
+def test_list_target_names_excludes_imported_functions():
+    """Test that imported functions (e.g. Unidecode) are not listed as targets."""
+    def local_action():
+        pass
+    local_action.__module__ = 'nukefile'
+
+    def imported_func():
+        pass
+    imported_func.__module__ = 'unidecode'  # simulates: from unidecode import unidecode
+
+    mock_module = MagicMock()
+    mock_module.__name__ = 'nukefile'
+    mock_module.__dir__ = lambda self: ['local_action', 'imported_func']
+    mock_module.local_action = local_action
+    mock_module.imported_func = imported_func
+
+    with patch.dict(sys.modules, {'__main__': mock_module}):
+        targets = _list_target_names()
+
+    assert 'local_action' in targets
+    assert 'imported_func' not in targets
+
+
+def test_list_target_names_excludes_private_functions():
+    """Test that private functions (starting with _) are not listed as targets."""
+    def public_action():
+        pass
+    public_action.__module__ = 'nukefile'
+
+    def _private_action():
+        pass
+    _private_action.__module__ = 'nukefile'
+
+    mock_module = MagicMock()
+    mock_module.__name__ = 'nukefile'
+    mock_module.__dir__ = lambda self: ['public_action', '_private_action']
+    mock_module.public_action = public_action
+    mock_module._private_action = _private_action
+
+    with patch.dict(sys.modules, {'__main__': mock_module}):
+        targets = _list_target_names()
+
+    assert 'public_action' in targets
+    assert '_private_action' not in targets
+
+
+def test_list_target_names_excludes_non_function_callables():
+    """Test that callable classes imported from other modules are not listed as targets."""
+    def local_action():
+        pass
+    local_action.__module__ = 'nukefile'
+
+    class CallableClass:
+        def __call__(self):
+            pass
+
+    imported_callable = CallableClass()
+
+    mock_module = MagicMock()
+    mock_module.__name__ = 'nukefile'
+    mock_module.__dir__ = lambda self: ['local_action', 'imported_callable']
+    mock_module.local_action = local_action
+    mock_module.imported_callable = imported_callable
+
+    with patch.dict(sys.modules, {'__main__': mock_module}):
+        targets = _list_target_names()
+
+    assert 'local_action' in targets
+    assert 'imported_callable' not in targets
