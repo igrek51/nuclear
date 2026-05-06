@@ -1,6 +1,6 @@
 import inspect
 from collections.abc import Iterable
-from typing import List, Any, Optional
+from typing import List, Any, Optional, get_origin, Union
 
 from nuclear.cli.builder.rule import ValueRule
 from nuclear.cli.builder.typedef import TypeOrParser
@@ -17,13 +17,12 @@ def parse_typed_value(_type: TypeOrParser, arg: str) -> Any:
         return arg
     if _type == bool:
         return boolean(arg)
-    _type_name = str(_type)
-    if _type_name.startswith('typing.Union['):
+    if get_origin(_type) is Union:
         try:
             return _parse_union_value(_type, arg)
         except _TypeNotMatched:
             raise CliSyntaxError(f"variable '{arg}' didn't match Union type: {_type}")
-    elif _type_name.startswith('typing.'):
+    elif type(_type).__module__ == "typing":
         return arg
     # invoke custom parser or cast to custom type
     return _type(arg)
