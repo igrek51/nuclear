@@ -10,8 +10,8 @@ T = TypeVar('T')
 
 def init(
     config_class: Optional[Type[T]] = None,
-    print_log: bool = False,
-    raw_output: bool = False,
+    print_log: bool = True,
+    raw_output: bool = True,
     **sh_options,
 ) -> tuple[T, ShellRunner]:
     """Initialize config and shell runner in one call.
