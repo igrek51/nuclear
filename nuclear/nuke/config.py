@@ -29,7 +29,8 @@ class NukeConfig:
 def load_config(clazz: Type[T]) -> T:
     try:
         local_overrides = _load_local_overrides()
-        _, cli_overrides = parse_cli_args(sys.argv[1:])
+        cli_args = sys.argv[1:]
+        _, cli_overrides = parse_cli_args(cli_args, config_class=clazz)
         if cli_overrides:
             logger.debug('Applying CLI overrides to config', cli_overrides=cli_overrides)
 

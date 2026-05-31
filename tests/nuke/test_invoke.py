@@ -196,3 +196,98 @@ def test_list_target_names_excludes_non_function_callables():
 
     assert 'local_action' in targets
     assert 'imported_callable' not in targets
+
+
+def test_parse_cli_args_space_separated_parameter():
+    """Test parsing parameters in --name value format with config_class."""
+    class Config:
+        name: str = 'default'
+    
+    positional, overrides = parse_cli_args(['--name', 'value', 'pos1'], config_class=Config)
+    assert positional == ['pos1']
+    assert overrides == {'name': 'value'}
+
+
+def test_parse_cli_args_space_separated_multiple_params():
+    """Test parsing multiple space-separated parameters with config_class."""
+    class Config:
+        name: str = 'default'
+        count: int = 0
+    
+    positional, overrides = parse_cli_args(['--name', 'value', '--count', '42', 'pos1', 'pos2'], config_class=Config)
+    assert positional == ['pos1', 'pos2']
+    assert overrides == {'name': 'value', 'count': '42'}
+
+
+def test_parse_cli_args_mixed_formats():
+    """Test parsing both --name=value and --name value formats with config_class."""
+    class Config:
+        name: str = 'default'
+        count: int = 0
+    
+    positional, overrides = parse_cli_args(['--name=value', '--count', '42', 'pos1'], config_class=Config)
+    assert positional == ['pos1']
+    assert overrides == {'name': 'value', 'count': '42'}
+
+
+def test_parse_cli_args_boolean_flag_standalone():
+    """Test parsing standalone boolean flags with config_class."""
+    class Config:
+        dry: bool = False
+    
+    positional, overrides = parse_cli_args(['--dry', 'build'], config_class=Config)
+    assert positional == ['build']
+    assert overrides == {'dry': '1'}
+
+
+def test_parse_cli_args_boolean_flag_with_explicit_value():
+    """Test that --dry=true is parsed correctly."""
+    class Config:
+        dry: bool = False
+    
+    positional, overrides = parse_cli_args(['--dry=true', 'build'], config_class=Config)
+    assert positional == ['build']
+    assert overrides == {'dry': 'true'}
+
+
+def test_parse_cli_args_params_before_and_after_positional():
+    """Test parameters can appear before and after positional arguments with config_class."""
+    class Config:
+        name: str = 'default'
+        count: int = 0
+    
+    positional, overrides = parse_cli_args(['--name', 'value', 'pos1', '--count', '42'], config_class=Config)
+    assert positional == ['pos1']
+    assert overrides == {'name': 'value', 'count': '42'}
+
+
+def test_parse_cli_args_quoted_values():
+    """Test parsing quoted parameter values with config_class."""
+    class Config:
+        path: str = '/default'
+        name: str = 'default'
+    
+    positional, overrides = parse_cli_args(['--path', '"/home/user/path"', '--name=\'quoted value\''], config_class=Config)
+    assert positional == []
+    assert overrides == {'path': '/home/user/path', 'name': 'quoted value'}
+
+
+def test_parse_cli_args_kebab_case_with_space():
+    """Test parsing kebab-case parameters with space-separated values with config_class."""
+    class Config:
+        output_dir: str = '/default'
+    
+    positional, overrides = parse_cli_args(['--output-dir', '/tmp/build', 'compile'], config_class=Config)
+    assert positional == ['compile']
+    assert overrides == {'output_dir': '/tmp/build'}
+
+
+def test_parse_cli_args_flag_before_flag():
+    """Test consecutive flags are treated as standalone."""
+    class Config:
+        dry: bool = False
+        verbose: bool = False
+    
+    positional, overrides = parse_cli_args(['--dry', '--verbose', 'build'], config_class=Config)
+    assert positional == ['build']
+    assert overrides == {'dry': '1', 'verbose': '1'}
