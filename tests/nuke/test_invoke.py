@@ -291,3 +291,81 @@ def test_parse_cli_args_flag_before_flag():
     positional, overrides = parse_cli_args(['--dry', '--verbose', 'build'], config_class=Config)
     assert positional == ['build']
     assert overrides == {'dry': '1', 'verbose': '1'}
+
+
+def test_parse_cli_args_dotted_param():
+    """Test parsing dotted parameters --level1.level2.param=value."""
+    class Config:
+        dry: bool = False
+    
+    positional, overrides = parse_cli_args(['--sub.host=example.com', '--sub.port=443', 'deploy'])
+    assert positional == ['deploy']
+    assert overrides == {'sub.host': 'example.com', 'sub.port': '443'}
+
+
+def test_parse_cli_args_dotted_kebab_case():
+    """Test parsing dotted kebab-case parameters."""
+    class Config:
+        dry: bool = False
+    
+    positional, overrides = parse_cli_args(['--server-config.host-name=example.com'])
+    assert positional == []
+    assert overrides == {'server_config.host_name': 'example.com'}
+
+
+def test_parse_cli_args_dotted_space_separated():
+    """Test parsing dotted parameters with space-separated values."""
+    class SubSettings:
+        host: str = 'localhost'
+        port: int = 8080
+        verbose: bool = False
+    
+    class Config:
+        sub: SubSettings = SubSettings()
+    
+    positional, overrides = parse_cli_args(['--sub.host', 'example.com', '--sub.port', '443', 'deploy'], config_class=Config)
+    assert positional == ['deploy']
+    assert overrides == {'sub.host': 'example.com', 'sub.port': '443'}
+
+
+def test_parse_cli_args_dotted_bool_flag():
+    """Test dotted boolean flags are treated as standalone."""
+    class SubSettings:
+        verbose: bool = False
+        debug: bool = True
+    
+    class Config:
+        sub: SubSettings = SubSettings()
+    
+    positional, overrides = parse_cli_args(['--sub.verbose', 'deploy'], config_class=Config)
+    assert positional == ['deploy']
+    assert overrides == {'sub.verbose': '1'}
+
+
+def test_parse_cli_args_dotted_bool_flag_with_explicit_value():
+    """Test dotted boolean flag with explicit value."""
+    class SubSettings:
+        verbose: bool = False
+    
+    class Config:
+        sub: SubSettings = SubSettings()
+    
+    positional, overrides = parse_cli_args(['--sub.verbose=true', 'deploy'], config_class=Config)
+    assert positional == ['deploy']
+    assert overrides == {'sub.verbose': 'true'}
+
+
+def test_parse_cli_args_dotted_deeply_nested():
+    """Test parsing deeply nested dotted parameters."""
+    class InnerConfig:
+        value: str = 'default'
+    
+    class OuterConfig:
+        inner: InnerConfig = InnerConfig()
+    
+    class Config:
+        outer: OuterConfig = OuterConfig()
+    
+    positional, overrides = parse_cli_args(['--outer.inner.value=custom'], config_class=Config)
+    assert positional == []
+    assert overrides == {'outer.inner.value': 'custom'}

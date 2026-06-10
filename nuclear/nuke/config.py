@@ -55,10 +55,29 @@ def _load_local_overrides() -> dict[str, Any]:
 def apply_overrides(obj: T, clazz: Type[T], overrides: dict[str, Any]) -> T:
     field_types: dict[str, Type] = clazz.__annotations__
     for key, value in overrides.items():
-        if key not in field_types:
-            raise KeyError(f'unexpected field "{key}" provided for type {clazz}')
-        converted_value = parse_typed_object(value, field_types[key])
-        setattr(obj, key, converted_value)
+        if '.' in key:
+            # Dotted key traverses nested objects: --level1.level2.param=value
+            parts = key.split('.')
+            current_obj = obj
+            current_field_types = field_types
+            for part in parts[:-1]:
+                part_clean = part.replace('-', '_')
+                if part_clean not in current_field_types:
+                    raise KeyError(f'unexpected field "{part}" in path "{key}" for type {type(current_obj).__name__}')
+                current_obj = getattr(current_obj, part_clean)
+                next_clazz = current_field_types[part_clean]
+                current_field_types = getattr(next_clazz, '__annotations__', {})
+            final_key = parts[-1].replace('-', '_')
+            if final_key not in current_field_types:
+                raise KeyError(f'unexpected field "{final_key}" in path "{key}"')
+            converted_value = parse_typed_object(value, current_field_types[final_key])
+            setattr(current_obj, final_key, converted_value)
+        else:
+            key_clean = key.replace('-', '_')
+            if key_clean not in field_types:
+                raise KeyError(f'unexpected field "{key_clean}" provided for type {clazz.__name__}')
+            converted_value = parse_typed_object(value, field_types[key_clean])
+            setattr(obj, key_clean, converted_value)
     return obj
 
 
@@ -85,6 +104,16 @@ def parse_typed_object(obj: Any, clazz: Type[T]):
                 raise KeyError(f'unexpected field "{key}" provided to type {clazz}')
             dataclass_kwargs[key] = parse_typed_object(value, field_types[key])
         return clazz(**dataclass_kwargs)
+    
+    elif isinstance(clazz, type) and hasattr(clazz, '__annotations__') and clazz.__annotations__:
+        assert isinstance(obj, dict), f'expected dict type to parse into {clazz.__name__}, got {type(obj)}'
+        instance = clazz()
+        field_types = clazz.__annotations__
+        for key, value in obj.items():
+            if key not in field_types:
+                raise KeyError(f'unexpected field "{key}" provided to type {clazz.__name__}')
+            setattr(instance, key, parse_typed_object(value, field_types[key]))
+        return instance
     
     elif get_origin(clazz) in {Union, UnionType}:  # Union or Optional type
         union_types = get_args(clazz)

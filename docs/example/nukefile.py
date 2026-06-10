@@ -26,6 +26,8 @@ sh = nuke.sh(raw_output=True, print_log=True, dry=config.dry)  # generates logge
 # or shorter:
 # config, sh = nuke.init(Config)
 
+def show_config():
+    logger.info("config", config=vars(config))
 
 def push():
     sh << f"echo 'hello world, offset={config.bluey_offset}'"

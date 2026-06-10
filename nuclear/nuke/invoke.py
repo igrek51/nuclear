@@ -43,7 +43,8 @@ def _run_with_args(args: list[str]):
             return _show_help(config_class)
         return _show_help()
 
-    positionals, _ = parse_cli_args(args)
+    config_class = getattr(main_module, 'Config', None)
+    positionals, _ = parse_cli_args(args, config_class=config_class)
     positionals = [arg.replace('-', '_') for arg in positionals]
 
     function_names: list[str] = _list_target_names()
@@ -72,6 +73,27 @@ def _execute_target(main_module, target_name: str):
     _executed_targets.add(target_name)
 
 
+def _is_nested_config_type(field_type: Type[Any]) -> bool:
+    return (
+        isinstance(field_type, type)
+        and hasattr(field_type, '__annotations__')
+        and bool(field_type.__annotations__)
+    )
+
+
+def _collect_bool_flags(clazz: Type[Any], prefix: str, result: set[str]):
+    field_types = getattr(clazz, '__annotations__', {})
+    for field_name, field_type in field_types.items():
+        if field_type is bool:
+            default_value = getattr(clazz, field_name, None)
+            if default_value is False:
+                result.add(f'{prefix}{field_name}')
+        elif _is_nested_config_type(field_type):
+            default_value = getattr(clazz, field_name, None)
+            if default_value is not None:
+                _collect_bool_flags(field_type, f'{prefix}{field_name}.', result)
+
+
 def parse_cli_args(args: list[str], config_class: Optional[Type[Any]] = None) -> tuple[list[str], dict[str, str]]:
     """
     Extract CLI parameters in CLI format:
@@ -95,16 +117,11 @@ def parse_cli_args(args: list[str], config_class: Optional[Type[Any]] = None) ->
     positional_args: list[str] = []
     overrides: dict[str, str] = {}
     
-    # flags - boolean fields with default False
+    # flags - boolean fields with default False (recursive for nested config types)
     bool_flags: set[str] = set()
     has_config = config_class is not None
     if has_config:
-        field_types = getattr(config_class, '__annotations__', {})
-        for field_name, field_type in field_types.items():
-            if field_type is bool:
-                default_value = getattr(config_class, field_name, None)
-                if default_value is False:
-                    bool_flags.add(field_name)
+        _collect_bool_flags(config_class, '', bool_flags)
 
     remaining_args = list(args)
     i = 0
@@ -114,7 +131,7 @@ def parse_cli_args(args: list[str], config_class: Optional[Type[Any]] = None) ->
            remaining_args.pop(i)
            continue
         if arg.startswith('--'):
-            match = re.fullmatch(r'--([a-zA-Z0-9_-]+)(?:=(.*))?', arg)
+            match = re.fullmatch(r'--([a-zA-Z0-9_.-]+)(?:=(.*))?', arg)
             if match:
                 key = match.group(1).replace('-', '_')
                 value = match.group(2)
@@ -160,6 +177,26 @@ def _show_available_targets():
             print(f'  {name}')
 
 
+def _print_config_params(clazz: Type[Any], prefix: str):
+    annotations = getattr(clazz, '__annotations__', {})
+    for param_name, param_type in annotations.items():
+        if param_name.startswith('_'):
+            continue
+        default_value = getattr(clazz, param_name, None)
+        full_name = f'{prefix}{param_name.replace("_", "-")}'
+        if _is_nested_config_type(param_type):
+            inner = getattr(clazz, param_name, None)
+            if inner is not None:
+                _print_config_params(param_type, f'{full_name}.')
+        else:
+            type_name = param_type.__name__ if hasattr(param_type, '__name__') else str(param_type)
+            is_bool_flag = param_type is bool and default_value is False
+            if is_bool_flag:
+                print(f'  --{full_name:<24} Boolean flag (default: {default_value})')
+            else:
+                print(f'  --{full_name:<24} {type_name} (default: {default_value})')
+
+
 def _show_help(config_class: Optional[Type[Any]] = None):
     """Show global help."""
     main_module = sys.modules['__main__']
@@ -181,16 +218,7 @@ def _show_help(config_class: Optional[Type[Any]] = None):
 
     if config_class:
         print('\nConfiguration parameters (can be set via CLI or .config.yaml):\n')
-        annotations = getattr(config_class, '__annotations__', {})
-        for param_name, param_type in annotations.items():
-            default_value = getattr(config_class, param_name, None)
-            type_name = param_type.__name__ if hasattr(param_type, '__name__') else str(param_type)
-            cli_name = param_name.replace('_', '-')
-            is_bool_flag = param_type is bool and default_value is False
-            if is_bool_flag:
-                print(f'  --{cli_name:<18} Boolean flag (default: {default_value})')
-            else:
-                print(f'  --{cli_name:<18} {type_name} (default: {default_value})')
+        _print_config_params(config_class, '')
 
     print()
 
