@@ -21,10 +21,11 @@ class Config:
     ]
     bluey_offset: int = 200
 
-config: Config = nuke.load_config(Config)  # loads .config.yaml or default
-sh = nuke.sh(raw_output=True, print_log=True, dry=config.dry)  # generates logger.debug or shell(raw_output=True) caller based on --dry
-# or shorter:
-# config, sh = nuke.init(Config)
+# Auto-discovers Config, registers run() at exit
+config, sh = nuke.init()
+# Alternatively:
+# config: Config = nuke.load_config(Config)  # loads .config.yaml or default
+# sh = nuke.sh(raw_output=True, print_log=True, dry=config.dry)  # generates logger.debug or shell(raw_output=True) caller based on --dry
 
 def show_config():
     logger.info("config", config=vars(config))
@@ -54,6 +55,3 @@ def bluey():
             f' "{target}"'
         )
 
-
-if __name__ == '__main__':
-    nuke.run()

@@ -26,16 +26,13 @@ class Config:
     dst_path: str = '/media/user/DRIVE/'
     dry: bool = False
 
-config, sh = nuke.init(Config)
+config, sh = nuke.init()
 
 def push():
-    sh(f"rsync -avh --delete --size-only --info=progress2 '{src_path}/' '{dst_path}'")
+    sh(f"rsync -avh --delete --size-only --info=progress2 '{config.src_path}/' '{config.dst_path}'")
 
 def convert():
-    sh(f'ffmpeg -i "{src_path}/input.mp4" "{dst_path}/audio.mp3"')
-
-if __name__ == '__main__':
-    nuke.run()
+    sh(f'ffmpeg -i "{config.src_path}/input.mp4" "{config.dst_path}/audio.mp3"')
 ```
 
 Run tasks from command line:
@@ -70,25 +67,23 @@ config, sh = nuke.init()
 
 def build():
     sh<<"gcc build.c"
-
-if __name__ == '__main__':
-    nuke.run()
 ```
 
 ### Custom Configuration
 
-Extend `nuke.NukeConfig` to add custom configuration fields:
+You can define a `Config` class to add custom configuration fields:
 
 ```python
 from nuclear import nuke
 from pathlib import Path
 
-class Config(nuke.NukeConfig):
+class Config:
     output_dir: str = 'dist'
     num_workers: int = 4
     api_url: str = 'https://api.example.com'
+    dry: bool = False
 
-config, sh = nuke.init(Config, raw_output=True, print_log=True)
+config, sh = nuke.init()
 
 def build():
     """Build project with custom output directory"""
@@ -111,10 +106,15 @@ dry: false
 ```
 
 CLI arguments override file configuration:
-
 ```bash
 ./nukefile.py --output-dir=/tmp/build --num-workers=16 build
 ```
+
+You can also override nested configuration parameters using dot notation:
+```bash
+./nukefile.py --sub.host=production.example.com --sub.port=443 build
+```
+
 
 ## Shell Runner
 
@@ -197,9 +197,6 @@ def test():
 def deploy():
     test()
     sh / "rsync -avh dist/ /srv/www/"
-
-if __name__ == '__main__':
-    nuke.run()
 ```
 
 When you run `python nukefile.py deploy`, it will automatically run:
@@ -218,13 +215,13 @@ Use `nuke.validate_sources()` to validate and convert file paths:
 from pathlib import Path
 from nuclear import nuke
 
-class Config(nuke.NukeConfig):
+class Config:
     sources: list[str] = [
         '/path/to/file1.txt',
         '/path/to/file2.txt',
     ]
 
-config, sh = nuke.init(Config)
+config, sh = nuke.init()
 
 def process():
     """Process source files"""
@@ -290,14 +287,15 @@ from pathlib import Path
 from nuclear import nuke, logger, CommandError
 from unidecode import unidecode
 
-class Config(nuke.NukeConfig):
+class Config:
     source_files: list[str] = [
         '/opt/dump/movies-series/Bluey/S01/S01E22.mkv',
     ]
     output_offset: int = 200
     output_dir: str = 'output'
+    dry: bool = False
 
-config, sh = nuke.init(Config, raw_output=True, print_log=True)
+config, sh = nuke.init(raw_output=True, print_log=True)
 
 def clean():
     """Remove output directory"""
@@ -346,9 +344,6 @@ def format_drive():
         logger.info('Drive formatted and sorted')
     except CommandError as e:
         logger.error('Format failed', error=str(e))
-
-if __name__ == '__main__':
-    nuke.run()
 ```
 
 Usage:
@@ -430,11 +425,11 @@ logger.info('Python version', version=version.strip())
 Use configuration values in your tasks:
 
 ```python
-class Config(nuke.NukeConfig):
+class Config:
     build_dir: str = 'dist'
     parallel_jobs: int = 4
 
-config, sh = nuke.init(Config)
+config, sh = nuke.init()
 
 def test():
     """Run parallel tests"""
