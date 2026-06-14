@@ -15,9 +15,9 @@ venv-test-unit:
 	uv pip install -e ".[dev]"
 
 test:
-	$(PYTHON_INTERPRETER) -m coverage run --source nuclear -m pytest -vv --tb=short -ra --color=yes $(test)
+	NUKE_TESTING=1 $(PYTHON_INTERPRETER) -m coverage run --source nuclear -m pytest -vv --tb=short -ra --color=yes $(test)
 	# show code coverage info
-	$(PYTHON_INTERPRETER) -m coverage report --show-missing --skip-empty --skip-covered
+	NUKE_TESTING=1 $(PYTHON_INTERPRETER) -m coverage report --show-missing --skip-empty --skip-covered
 
 readme:
 	cat docs/about.md > $(OUTPUT_README)

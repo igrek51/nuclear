@@ -1,4 +1,5 @@
 import atexit
+import os
 import sys
 from typing import TypeVar, Type, Optional
 
@@ -54,7 +55,7 @@ def init(
     if auto_run:
         main_module = sys.modules.get('__main__')
         # Register atexit only if running as a script directly, not during imports or tests
-        if main_module is not None and getattr(main_module, '__spec__', None) is None and 'pytest' not in sys.modules:
+        if main_module is not None and getattr(main_module, '__spec__', None) is None and os.environ.get('NUKE_TESTING') != '1':
             atexit.register(run)
             
     return config, sh(print_log=print_log, raw_output=raw_output, **sh_options)
