@@ -34,7 +34,7 @@ dev = [
     "twine==4.0.0",
     "wheel==0.38.4",
     "mkdocs==1.6.1",
-    "mkdocs-material==9.7.6",
+    "mkdocs-material==9.7.7",
     "pymdown-extensions==10.21.2",
     "backoff==2.0.1",
     "pydantic==2.4.0",
